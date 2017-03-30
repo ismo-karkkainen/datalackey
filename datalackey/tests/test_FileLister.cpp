@@ -7,14 +7,15 @@
 //
 
 #include "FileLister.hpp"
-#include <iostream>
+#include "StdOutErr.hpp"
 
 int main(int argc, char** argv) {
-    FileLister lister(argv[1], std::cerr, std::cerr);
+    StdOutErr out;
+    FileLister lister(argv[1], out);
     std::pair<std::string, std::string> path_name;
     while (bool(lister)) {
         lister >> path_name;
-        std::cout << path_name.first << " " << path_name.second << "\n";
+        out << Normal << path_name.first << " " << path_name.second << "\n";
     }
     return 0;
 }

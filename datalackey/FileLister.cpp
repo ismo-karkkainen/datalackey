@@ -27,54 +27,61 @@ bool FileLister::process_directory() {
             case bfs::regular_file:
                 filenames.push(current.path());
                 break;
-            /*case bfs::symlink_file: {
+            case bfs::symlink_file: {
                     bfs::path c = bfs::canonical(current.path());
                     if (bfs::is_directory(c))
                         directories.push(c.native());
                     else if (bfs::is_regular(c))
                         filenames.push(c);
                     else
-                        warn << "Unhandled file type: " << c.native() << "\n";
+                        out << Warning <<
+                            "Unhandled file type: " << c.native() << "\n";
                 }
-                break;*/
+                break;
             default:
-                warn << "Unhandled file type: " << current.path().native() << "\n";
+                out << Warning <<
+                    "Unhandled file type: " << current.path().native() << "\n";
                 break;
             }
             iter++;
         }
     }
     catch (const bfs::filesystem_error& ex) {
-        err << ex.what();
+        out << Error << ex.what();
         return false;
     }
     return true;
 }
 
-FileLister::FileLister(const std::string& root,
-    std::ostream& stderr, std::ostream& warning)
-    : err(stderr), warn(warning)
+bool FileLister::get_more_files() {
+    while (filenames.empty())
+        if (!process_directory())
+            return false;
+    return true;
+}
+
+FileLister::FileLister(const std::string& root, MessageOutput& Out)
+    : out(Out)
 {
     if (bfs::exists(root) && bfs::is_directory(root)) {
         directories.push(root);
     } else {
-        err << "Not a directory: " << root << "\n";
+        out << Error << "Not a directory: " << root << "\n";
     }
 }
 
 FileLister& FileLister::operator>>(std::pair<std::string, std::string>& path_name)
 {
-    while (filenames.empty()) {
-        if (!process_directory()) {
-            return *this;
-        }
-    }
+    if (filenames.empty() && !get_more_files())
+        return *this;
     path_name.first = filenames.front().parent_path().native();
     path_name.second = filenames.front().filename().native();
     filenames.pop();
     return *this;
 }
 
-FileLister::operator bool() const {
-    return !filenames.empty() || !directories.empty();
+FileLister::operator bool() {
+    if (!filenames.empty())
+        return true;
+    return get_more_files();
 }
