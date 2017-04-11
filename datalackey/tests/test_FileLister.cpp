@@ -8,6 +8,8 @@
 
 #include "FileLister.hpp"
 #include "StdOutErr.hpp"
+#include "Value_t.hpp"
+#include "Literal.hpp"
 
 int main(int argc, char** argv) {
     StdOutErr out;
@@ -15,7 +17,8 @@ int main(int argc, char** argv) {
     std::pair<std::string, std::string> path_name;
     while (bool(lister)) {
         lister >> path_name;
-        out << Normal << path_name.first << " " << path_name.second << "\n";
+        out << Message << ValueRef<std::string>(path_name.first) << Literal(" ") <<
+            ValueRef<std::string>(path_name.second) << End;
     }
     return 0;
 }

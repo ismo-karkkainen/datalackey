@@ -9,25 +9,35 @@
 #ifndef StdOutErr_hpp
 #define StdOutErr_hpp
 
-#include "MessageOutput.hpp"
+#include "Output.hpp"
+#include <vector>
+#include <stack>
 
-// Should look like a stream, but there are message type codes and the
-// rest. The rest should be accumulated to string (stringstream) and the
-// code and message pairs output or stored or something.
-// Let's presume that the output useful to a calling program is also
-// useful to user. Essentially the same output but different format
-// and transfer.
-class StdOutErr : public MessageOutput {
 
-    bool out;
+class StdOutErr : public Output {
+    // How about we gather values and when stack becomes empty, output?
+    // Or start output as soon as possible and others wait? When there is
+    // output for the one, it always prints as soon as possible.
+
+    struct StackBuffer {
+        std::stack<MessageType> open;
+        std::vector<std::string> buffer;
+    };
+
+    std::stack<bool> pair_first;
+    StackBuffer structured;
+    StackBuffer warnings;
+    StackBuffer messages;
+    StackBuffer errors; // Own stream but treat the same for simplicity.
+    std::stack<StackBuffer*> active;
+
+    std::string indent(size_t levels) const;
 public:
     ~StdOutErr();
 
-    StdOutErr& operator<<(const std::string& s);
-    StdOutErr& operator<<(const char* c);
+    StdOutErr& operator<<(const ValueReference& VR);
     StdOutErr& operator<<(MessageType type);
     StdOutErr& Flush();
 };
-
 
 #endif /* StdOutErr_hpp */

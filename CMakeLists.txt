@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.5)
 project (datalackey)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
 include_directories( /usr/local/include/ )
 include_directories( datalackey )
 link_directories( /usr/local/lib/ )
@@ -8,9 +10,9 @@ link_libraries( boost_system boost_filesystem )
 
 enable_testing()
 set(Sources datalackey/main.cpp datalackey/FileLister.cpp)
-list(APPEND Sources datalackey/MessageOutput.cpp datalackey/StdOutErr.cpp)
+list(APPEND Sources datalackey/Output.cpp datalackey/StdOutErr.cpp datalackey/Literal.cpp)
 
-add_executable( test_FileLister datalackey/MessageOutput.cpp datalackey/StdOutErr.cpp datalackey/FileLister.cpp datalackey/tests/test_FileLister.cpp )
+add_executable( test_FileLister datalackey/Output.cpp datalackey/Literal.cpp datalackey/StdOutErr.cpp datalackey/FileLister.cpp datalackey/tests/test_FileLister.cpp )
 
 add_executable(test_FileLister.sh IMPORTED)
 set_property(TARGET test_FileLister.sh  PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_FileLister.sh)

@@ -11,7 +11,7 @@
 
 #include <string>
 #include <queue>
-#include "MessageOutput.hpp"
+#include "Output.hpp"
 #include <utility>
 #include <boost/filesystem.hpp>
 
@@ -22,9 +22,9 @@ private:
     bool process_directory();
     bool get_more_files();
 
-    MessageOutput& out;
+    Output& out;
 public:
-    FileLister(const std::string& root, MessageOutput& Out);
+    FileLister(const std::string& root, Output& Out);
     // Could offer path and file name for convenience?
     FileLister& operator>>(std::pair<std::string, std::string>& path_name);
     operator bool();
