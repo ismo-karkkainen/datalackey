@@ -9,85 +9,106 @@
 #ifndef Output_hpp
 #define Output_hpp
 
-// This is utility class that uses transfer and format as needed.
-// When intermediate storage of messages is needed, this handles it.
-// Or, the derived class handles it.
+
+#include "ValueReference.hpp"
+#include "Structure.hpp"
+#include "Encoder.hpp"
+#include "OutputChannel.hpp"
+
+// We should use an array of dictionaries with each having just one key.
+// That way any value output can be interleaved with others.
+// And consequently, should the output be organized so that each Output object
+// handles one key and they internally deal with taking turns at output?
+// One dictionary, one value, written as soon as possible.
+// The first to output can still write immediately. When the writer ends the
+// output, others can dump. Or have one waiting buffer that receives object
+// when non-writing output receives end?
+// Removes a need to deal with nested output properly.
+
+// Generalize to multiple output streams? A writer object that takes data in
+// via operator<< but only needs to accept unsigned char array. Internally can
+// deal with std::cout and std::cerr. A writer would be mapped to specific key
+// or a default writer is used for all other keys.
+// Hence program would have to map error output key to std::cerr writer or to
+// nothing.
+
+// We are meant to run a program. Everything in the output not recognized as
+// something to store is passed to caller. Can we specify multiple means of
+// communicating with program and deal with input from any channel regardless
+// of content? That way we only need to concern with output that can not be
+// recognized. 
+
+// Just deal with output keys so that one can specify channel. Maybe channel
+// name as extra parameter but if not recognized, use default channel. Or the
+// name to channel mapping has been done previously. That way error key would
+// be directed to stderr when available.
 
 
-
-// This has to be transfer and representation, not one class. Otherwise
-// simple as everything goes into one place except for standard input/output
-// case with text encoding where the error message type needs to go to stderr.
-// Hence something from encoding has to pass through along with result of the
-// encoding.
-// The encoding result could have some field that contains enough information
-// for stdio. So should the encoder hide transfer so that they can be married
-// for the special case pair? Encoder should know when to send onwards.
-// The encoder can be initialized with transfer and the text encoder requires
-// stdio transfer and no-one else knows about the transfer.
-// For other pairs, allow initialization using base transfer class and thus
-// get various combinations done.
-
-#include <string>
-
-enum MessageType {
-    Message = 1,
-    Warning,
-    Error,
-    Array, // Each value is a ValueReference or array/dictionary.
-    Dictionary, // Presumes key/value pairs in that order. One value each.
-    End // End of any of the previous.
-};
-
-// The Message to Error should be treated parallele to everything else and they
-// can have some default arrays to append to, but otherwise we must be able to
-// output dictionaries and maybe lists, in fact we should be able to output an
-// entire JSON-object or similar structured data. For normal stdout/stderr
-// output these are just formatting.
-// For other data we should construct structured data and on flush, "close" it
-// and send out.
-// Whether to output right away or until flushed is internal implementation.
-// Depends on the format. Hence no need to mock stream with JSON when all
-// output is sent at once.
+class Output;
 
 
-class ValueReference {
+// This receives the data that Item produces.
+class ItemBuffer {
+private:
+    bool side_channel;
+    bool ended;
+    OutputChannel* channel;
+    Output& master;
+    std::vector<char> buffer;
+
+    ItemBuffer(Output& Master, bool SideChannel);
+    ~ItemBuffer();
+    void SetChannel(OutputChannel* OC);
+
+    bool HasChannel() const { return channel != nullptr; }
+    bool HasData() const { return buffer.size() != 0; }
+    bool Ended() const { return ended; }
+
+    friend class Output;
+
 public:
-    virtual ~ValueReference();
-    // Methods that return information about the value reference.
-    // String covers needs of JSON, the rest should be enough for CBOR.
-
-    virtual size_t Size() const; // For simple types, sizeof.
-    virtual const char* Raw() const; // Pointer to simple type data as is.
-    virtual bool IsChar() const;
-    virtual bool IsString() const;
-    virtual bool IsInteger() const;
-    virtual bool IsSigned() const;
-    virtual bool IsNegative() const;
-    virtual unsigned long long Absolute() const;
-    virtual bool IsFloat() const;
-    virtual std::string String() const;
-
-    // How about intermediate class that stores the value reference and is
-    // a template? But then you'd need that class to handle some kind of
-    // union or list of known values and we are back at the beginning.
-    // So declare the alternatives directly?
-    // Or the template class would offer enough data about value for
-    // the encodings? So it could convert to string, or offer sizeof etc.
-    // Although with integers, it'd have to know the values in question.
-    // Is some preprocessor trickery possible, or handle only the limited
-    // number of integer types?
+    std::vector<char>* IntermediateBuffer();
+    ItemBuffer& operator<<(const std::vector<char>& Data);
+    void End(); // Indicates there will be no more data.
 };
 
+// User hands output to this and then deletes when not needed anymore.
+class Item {
+private:
+    Encoder* encoder;
+    std::vector<char> encoder_buffer;
+    ItemBuffer& buffer;
+
+    // Owns Encoder.
+    Item(Encoder* E, ItemBuffer& B);
+
+    friend class Output;
+public:
+    ~Item();
+    Item& operator<<(Structure S);
+    Item& operator<<(const ValueReference& VR);
+};
 
 class Output {
+private:
+    const Encoder& encoder;
+    std::vector<ItemBuffer*> buffers;
+    std::vector<OutputChannel*> mains, sides;
+
+    // When currently writing ends, then all finished ones are written.
+    // Make the next open buffer to write to the writing one? Handles leaked
+    // objects so that they do not block.
 
 public:
-    virtual ~Output();
+    Output(const Encoder& Format, OutputChannel& Main);
+    ~Output();
 
-    virtual Output& operator<<(MessageType type) = 0;
-    virtual Output& operator<<(const ValueReference& VR) = 0;
-    virtual Output& Flush() = 0;
+    void AddChannel(OutputChannel& OC, bool SideChannel);
+
+    Item* Writable(bool SideChannel = false);
+
+    // For communication from ItemBuffer objects.
+    void Ended(ItemBuffer& IB);
 };
 
 #endif /* Output_hpp */
