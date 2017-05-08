@@ -18,7 +18,7 @@ class History {
 public:
     History(); // Takes storage file name. Also storage object.
     ~History(); // Saves history.
-    // Return history given desired outcomes. All for none.
+    // Return history given desired outcomes. Full history if no outcome.
     // Some kind of way to restrict size? Prune old ones.
     // Add new command. With time-stamp?
 };

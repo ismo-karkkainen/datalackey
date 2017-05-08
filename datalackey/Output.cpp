@@ -37,6 +37,10 @@ ItemBuffer& ItemBuffer::operator<<(const std::vector<char>& Data) {
 }
 
 void ItemBuffer::End() {
+    if (channel != nullptr && !buffer.empty()) {
+        *channel << buffer;
+        buffer.resize(0);
+    }
     if (!ended)
         master.Ended(*this);
     ended = true;
@@ -81,6 +85,45 @@ Item& Item::operator<<(const ValueReference& VR) {
 }
 
 
+void Output::AllocateChannels(bool SideChannel,
+    std::vector<std::pair<OutputChannel*,ItemBuffer*> >& List)
+{
+    if (buffers.empty()) // Nothing to use the channel.
+        return;
+    // Find an available channel.
+    std::pair<OutputChannel*,ItemBuffer*>* available = nullptr;
+    for (size_t k = 0; k < List.size(); ++k)
+        if (List[k].second == nullptr) {
+            available = &List[k];
+            break;
+        }
+    if (available == nullptr)
+        return;
+    // Get ended buffers out of the way first.
+    for (size_t k = buffers.size(); k; --k) {
+        ItemBuffer* current = buffers[k - 1];
+        if (!current->Ended() || current->SideChannel() != SideChannel)
+            continue;
+        if (current->Size())
+            current->SetChannel(available->first); // Writes out all.
+        delete current;
+        buffers[k - 1] = buffers.back();
+        buffers.pop_back();
+    }
+    // Find buffer with most data.
+    ItemBuffer* largest = nullptr;
+    for (auto b : buffers) {
+        if (b->Channel() != nullptr)
+            continue;
+        if (largest == nullptr || largest->Size() < b->Size())
+            largest = b;
+    }
+    if (largest == nullptr)
+        return;
+    available->second = largest;
+    largest->SetChannel(available->first);
+}
+
 Output::Output(const Encoder& Format, OutputChannel& Main)
     : encoder(Format)
 {
@@ -88,6 +131,7 @@ Output::Output(const Encoder& Format, OutputChannel& Main)
 }
 
 Output::~Output() {
+    // Lock.
     // An opportunity to check for Items not yet done with.
     // Though we could be exiting on exception or something.
     // And where exactly are we going to report? This is the output.
@@ -98,25 +142,40 @@ Output::~Output() {
 }
 
 void Output::AddChannel(OutputChannel& OC, bool SideChannel) {
-    if (SideChannel)
-        sides.push_back(&OC);
-    else
-        mains.push_back(&OC);
+    // Lock.
+    if (SideChannel) {
+        sides.push_back(std::make_pair<OutputChannel*,ItemBuffer*>(&OC, nullptr));
+        AllocateChannels(true, sides);
+    } else {
+        mains.push_back(std::make_pair<OutputChannel*,ItemBuffer*>(&OC, nullptr));
+        AllocateChannels(false, mains);
+    }
 }
 
 Item* Output::Writable(bool SideChannel) {
+    // Lock.
     ItemBuffer* buffer = new ItemBuffer(*this, SideChannel);
     buffers.push_back(buffer);
+    AllocateChannels(SideChannel,
+        (SideChannel && !sides.empty()) ? sides : mains);
     return new Item(encoder->CreateSame(), *buffer);
 }
 
 void Output::Ended(ItemBuffer& IB) {
-    // Check if has channel and output pending.
-    // Has to give channel to specific ItemBuffer or mark as free.
-    // Marking as free allows for allocation to next one who needs but it
-    // requires information from ItemBuffer that something needs channel.
-    // Maybe allocate to ItemBuffer that has most pending output based on a
-    // guess that it will be most in need.
-    // What if nothing needs channel? Then new ItemBuffer should discover it.
-    // In the meanwhile, something could gain data and needs to write it.
+    // Lock.
+    // Should find and free if ended and zero-size even if no channel?
+    if (IB.Channel() == nullptr)
+        return;
+    for (size_t k = 0; k < mains.size(); ++k)
+        if (mains[k].second == &IB) {
+            mains[k].second = nullptr;
+            AllocateChannels(false, mains);
+            return;
+        }
+    for (size_t k = 0; k < sides.size(); ++k)
+        if (sides[k].second == &IB) {
+            sides[k].second = nullptr;
+            AllocateChannels(true, sides);
+            return;
+        }
 }

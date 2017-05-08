@@ -14,6 +14,8 @@
 #include "Structure.hpp"
 #include "Encoder.hpp"
 #include "OutputChannel.hpp"
+#include <vector>
+#include <utility>
 
 // We should use an array of dictionaries with each having just one key.
 // That way any value output can be interleaved with others.
@@ -60,8 +62,9 @@ private:
     ~ItemBuffer();
     void SetChannel(OutputChannel* OC);
 
-    bool HasChannel() const { return channel != nullptr; }
-    bool HasData() const { return buffer.size() != 0; }
+    bool Channel() const { return channel; }
+    bool SideChannel() const { return side_channel; }
+    size_t Size() const { return buffer.size(); }
     bool Ended() const { return ended; }
 
     friend class Output;
@@ -93,11 +96,10 @@ class Output {
 private:
     const Encoder& encoder;
     std::vector<ItemBuffer*> buffers;
-    std::vector<OutputChannel*> mains, sides;
+    std::vector<std::pair<OutputChannel*,ItemBuffer*> > mains, sides;
 
-    // When currently writing ends, then all finished ones are written.
-    // Make the next open buffer to write to the writing one? Handles leaked
-    // objects so that they do not block.
+    void AllocateChannels(bool SideChannel,
+        std::vector<std::pair<OutputChannel*,ItemBuffer*> >& List);
 
 public:
     Output(const Encoder& Format, OutputChannel& Main);
