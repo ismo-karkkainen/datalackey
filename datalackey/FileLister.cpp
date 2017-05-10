@@ -37,13 +37,13 @@ bool FileLister::process_directory() {
                     else if (bfs::is_regular(c))
                         filenames.push(c);
                     else
-                        out << Warning <<
+                        out << Array <<
                             Literal("Unhandled file type: ") <<
                             ValueRef<std::string>(c.native()) << End;
                 }
                 break;
             default:
-                out << Warning <<
+                out << Array <<
                     Literal("Unhandled file type: ") <<
                     ValueRef<std::string>(current.path().native()) << End;
                 break;
@@ -52,7 +52,7 @@ bool FileLister::process_directory() {
         }
     }
     catch (const bfs::filesystem_error& ex) {
-        out << Error << ValueRef<std::string>(ex.what()) << End;
+        out << Array << ValueRef<std::string>(ex.what()) << End;
         return false;
     }
     return true;
@@ -65,13 +65,13 @@ bool FileLister::get_more_files() {
     return true;
 }
 
-FileLister::FileLister(const std::string& root, Output& Out)
+FileLister::FileLister(const std::string& root, Item& Out)
     : out(Out)
 {
     if (bfs::exists(root) && bfs::is_directory(root)) {
         directories.push(root);
     } else {
-        out << Error << Literal("Not a directory: ") <<
+        out << Array << Literal("Not a directory: ") <<
             ValueRef<std::string>(root) << End;
     }
 }

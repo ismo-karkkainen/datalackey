@@ -62,7 +62,7 @@ private:
     ~ItemBuffer();
     void SetChannel(OutputChannel* OC);
 
-    bool Channel() const { return channel; }
+    OutputChannel* Channel() const { return channel; }
     bool SideChannel() const { return side_channel; }
     size_t Size() const { return buffer.size(); }
     bool Ended() const { return ended; }

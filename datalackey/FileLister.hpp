@@ -22,9 +22,9 @@ private:
     bool process_directory();
     bool get_more_files();
 
-    Output& out;
+    Item& out;
 public:
-    FileLister(const std::string& root, Output& Out);
+    FileLister(const std::string& root, Item& Out);
     // Could offer path and file name for convenience?
     FileLister& operator>>(std::pair<std::string, std::string>& path_name);
     operator bool();

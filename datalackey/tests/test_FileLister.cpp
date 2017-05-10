@@ -7,18 +7,26 @@
 //
 
 #include "FileLister.hpp"
-#include "StdOutErr.hpp"
+#include "StdOut.hpp"
 #include "Value_t.hpp"
 #include "Literal.hpp"
+#include "JSONEncoder.hpp"
 
 int main(int argc, char** argv) {
-    StdOutErr out;
-    FileLister lister(argv[1], out);
+    StdOut out;
+    JSONEncoder encoder;
+    Output results(encoder, out);
+    Item* writer = results.Writable();
+    Item* errors = results.Writable();
+    FileLister lister(argv[1], *errors);
     std::pair<std::string, std::string> path_name;
+    *writer << Array;
     while (bool(lister)) {
         lister >> path_name;
-        out << Message << ValueRef<std::string>(path_name.first) << Literal(" ") <<
-            ValueRef<std::string>(path_name.second) << End;
+        std::string line = path_name.first + " " + path_name.second;
+        *writer << ValueRef<std::string>(line);
     }
+    *writer << End;
+    delete writer;
     return 0;
 }

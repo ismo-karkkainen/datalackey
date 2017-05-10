@@ -34,6 +34,7 @@ ItemBuffer& ItemBuffer::operator<<(const std::vector<char>& Data) {
         *channel << Data;
     else
         buffer.insert(buffer.end(), Data.cbegin(), Data.cend());
+    return *this;
 }
 
 void ItemBuffer::End() {
@@ -63,9 +64,9 @@ Item& Item::operator<<(Structure S) {
         encoder->Encode(*buf, S);
         return *this;
     }
-    if (encoder->Encode(encode_buffer, S)) {
-        buffer << encode_buffer;
-        encode_buffer.resize(0);
+    if (encoder->Encode(encoder_buffer, S)) {
+        buffer << encoder_buffer;
+        encoder_buffer.resize(0);
     }
     return *this;
 }
@@ -77,9 +78,9 @@ Item& Item::operator<<(const ValueReference& VR) {
         encoder->Encode(*buf, VR);
         return *this;
     }
-    if (encoder->Encode(encode_buffer, VR)) {
-        buffer << encode_buffer;
-        encode_buffer.resize(0);
+    if (encoder->Encode(encoder_buffer, VR)) {
+        buffer << encoder_buffer;
+        encoder_buffer.resize(0);
     }
     return *this;
 }
@@ -127,7 +128,7 @@ void Output::AllocateChannels(bool SideChannel,
 Output::Output(const Encoder& Format, OutputChannel& Main)
     : encoder(Format)
 {
-    mains.push_back(&Main);
+    mains.push_back(std::make_pair<OutputChannel*,ItemBuffer*>(&Main, nullptr));
 }
 
 Output::~Output() {
@@ -158,7 +159,7 @@ Item* Output::Writable(bool SideChannel) {
     buffers.push_back(buffer);
     AllocateChannels(SideChannel,
         (SideChannel && !sides.empty()) ? sides : mains);
-    return new Item(encoder->CreateSame(), *buffer);
+    return new Item(encoder.CreateSame(), *buffer);
 }
 
 void Output::Ended(ItemBuffer& IB) {

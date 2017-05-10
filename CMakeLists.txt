@@ -10,9 +10,9 @@ link_libraries( boost_system boost_filesystem )
 
 enable_testing()
 set(Sources datalackey/main.cpp datalackey/FileLister.cpp)
-list(APPEND Sources datalackey/Output.cpp datalackey/StdOutErr.cpp datalackey/Literal.cpp)
+list(APPEND Sources datalackey/Output.cpp datalackey/StdOut.cpp datalackey/Literal.cpp )
 
-add_executable( test_FileLister datalackey/Output.cpp datalackey/Literal.cpp datalackey/StdOutErr.cpp datalackey/FileLister.cpp datalackey/tests/test_FileLister.cpp )
+add_executable( test_FileLister datalackey/Encoder.cpp datalackey/JSONEncoder.cpp datalackey/OutputChannel.cpp datalackey/Output.cpp datalackey/Literal.cpp datalackey/StdOut.cpp datalackey/ValueReference.cpp datalackey/Literal.cpp datalackey/FileLister.cpp datalackey/tests/test_FileLister.cpp )
 
 add_executable(test_FileLister.sh IMPORTED)
 set_property(TARGET test_FileLister.sh  PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_FileLister.sh)
