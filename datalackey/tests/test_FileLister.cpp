@@ -16,8 +16,8 @@ int main(int argc, char** argv) {
     StdOut out;
     JSONEncoder encoder;
     Output results(encoder, out);
-    Item* writer = results.Writable();
-    Item* errors = results.Writable();
+    OutputItem* writer = results.Writable();
+    OutputItem* errors = results.Writable();
     FileLister lister(argv[1], *errors);
     std::pair<std::string, std::string> path_name;
     *writer << Array;

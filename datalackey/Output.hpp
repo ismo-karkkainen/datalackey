@@ -49,8 +49,8 @@
 class Output;
 
 
-// This receives the data that Item produces.
-class ItemBuffer {
+// This receives the data that OutputItem produces.
+class OutputItemBuffer {
 private:
     bool side_channel;
     bool ended;
@@ -58,8 +58,8 @@ private:
     Output& master;
     std::vector<char> buffer;
 
-    ItemBuffer(Output& Master, bool SideChannel);
-    ~ItemBuffer();
+    OutputItemBuffer(Output& Master, bool SideChannel);
+    ~OutputItemBuffer();
     void SetChannel(OutputChannel* OC);
 
     OutputChannel* Channel() const { return channel; }
@@ -71,35 +71,35 @@ private:
 
 public:
     std::vector<char>* IntermediateBuffer();
-    ItemBuffer& operator<<(const std::vector<char>& Data);
+    OutputItemBuffer& operator<<(const std::vector<char>& Data);
     void End(); // Indicates there will be no more data.
 };
 
 // User hands output to this and then deletes when not needed anymore.
-class Item {
+class OutputItem {
 private:
     Encoder* encoder;
     std::vector<char> encoder_buffer;
-    ItemBuffer& buffer;
+    OutputItemBuffer& buffer;
 
     // Owns Encoder.
-    Item(Encoder* E, ItemBuffer& B);
+    OutputItem(Encoder* E, OutputItemBuffer& B);
 
     friend class Output;
 public:
-    ~Item();
-    Item& operator<<(Structure S);
-    Item& operator<<(const ValueReference& VR);
+    ~OutputItem();
+    OutputItem& operator<<(Structure S);
+    OutputItem& operator<<(const ValueReference& VR);
 };
 
 class Output {
 private:
     const Encoder& encoder;
-    std::vector<ItemBuffer*> buffers;
-    std::vector<std::pair<OutputChannel*,ItemBuffer*> > mains, sides;
+    std::vector<OutputItemBuffer*> buffers;
+    std::vector<std::pair<OutputChannel*,OutputItemBuffer*> > mains, sides;
 
     void AllocateChannels(bool SideChannel,
-        std::vector<std::pair<OutputChannel*,ItemBuffer*> >& List);
+        std::vector<std::pair<OutputChannel*,OutputItemBuffer*> >& List);
 
 public:
     Output(const Encoder& Format, OutputChannel& Main);
@@ -107,10 +107,10 @@ public:
 
     void AddChannel(OutputChannel& OC, bool SideChannel);
 
-    Item* Writable(bool SideChannel = false);
+    OutputItem* Writable(bool SideChannel = false);
 
-    // For communication from ItemBuffer objects.
-    void Ended(ItemBuffer& IB);
+    // For communication from OutputItemBuffer objects.
+    void Ended(OutputItemBuffer& IB);
 };
 
 #endif /* Output_hpp */

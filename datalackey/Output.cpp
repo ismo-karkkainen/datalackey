@@ -9,12 +9,12 @@
 #include "Output.hpp"
 
 
-ItemBuffer::ItemBuffer(Output& Master, bool SideChannel)
+OutputItemBuffer::OutputItemBuffer(Output& Master, bool SideChannel)
     : side_channel(SideChannel), ended(false), channel(nullptr),
     master(Master)
 { }
 
-void ItemBuffer::SetChannel(OutputChannel* OC) {
+void OutputItemBuffer::SetChannel(OutputChannel* OC) {
     channel = OC;
     if (buffer.size() != 0) {
         *channel << buffer;
@@ -22,14 +22,14 @@ void ItemBuffer::SetChannel(OutputChannel* OC) {
     }
 }
 
-ItemBuffer::~ItemBuffer() {
+OutputItemBuffer::~OutputItemBuffer() {
 }
 
-std::vector<char>* ItemBuffer::IntermediateBuffer() {
+std::vector<char>* OutputItemBuffer::IntermediateBuffer() {
     return ((channel != nullptr) || ended) ? nullptr : &buffer;
 }
 
-ItemBuffer& ItemBuffer::operator<<(const std::vector<char>& Data) {
+OutputItemBuffer& OutputItemBuffer::operator<<(const std::vector<char>& Data) {
     if (channel != nullptr)
         *channel << Data;
     else
@@ -37,7 +37,7 @@ ItemBuffer& ItemBuffer::operator<<(const std::vector<char>& Data) {
     return *this;
 }
 
-void ItemBuffer::End() {
+void OutputItemBuffer::End() {
     if (channel != nullptr && !buffer.empty()) {
         *channel << buffer;
         buffer.resize(0);
@@ -48,16 +48,16 @@ void ItemBuffer::End() {
 }
 
 
-Item::Item(Encoder* E, ItemBuffer& B)
+OutputItem::OutputItem(Encoder* E, OutputItemBuffer& B)
     : encoder(E), buffer(B)
 { }
 
-Item::~Item() {
+OutputItem::~OutputItem() {
     buffer.End();
     delete encoder;
 }
 
-Item& Item::operator<<(Structure S) {
+OutputItem& OutputItem::operator<<(Structure S) {
     std::vector<char>* buf = buffer.IntermediateBuffer();
     if (encoder->EncodeOutputsDirectly() && buf != nullptr) {
         // Writing directly to output buffer.
@@ -71,7 +71,7 @@ Item& Item::operator<<(Structure S) {
     return *this;
 }
 
-Item& Item::operator<<(const ValueReference& VR) {
+OutputItem& OutputItem::operator<<(const ValueReference& VR) {
     std::vector<char>* buf = buffer.IntermediateBuffer();
     if (encoder->EncodeOutputsDirectly() && buf != nullptr) {
         // Writing directly to output buffer.
@@ -87,12 +87,12 @@ Item& Item::operator<<(const ValueReference& VR) {
 
 
 void Output::AllocateChannels(bool SideChannel,
-    std::vector<std::pair<OutputChannel*,ItemBuffer*> >& List)
+    std::vector<std::pair<OutputChannel*,OutputItemBuffer*> >& List)
 {
     if (buffers.empty()) // Nothing to use the channel.
         return;
     // Find an available channel.
-    std::pair<OutputChannel*,ItemBuffer*>* available = nullptr;
+    std::pair<OutputChannel*,OutputItemBuffer*>* available = nullptr;
     for (size_t k = 0; k < List.size(); ++k)
         if (List[k].second == nullptr) {
             available = &List[k];
@@ -102,7 +102,7 @@ void Output::AllocateChannels(bool SideChannel,
         return;
     // Get ended buffers out of the way first.
     for (size_t k = buffers.size(); k; --k) {
-        ItemBuffer* current = buffers[k - 1];
+        OutputItemBuffer* current = buffers[k - 1];
         if (!current->Ended() || current->SideChannel() != SideChannel)
             continue;
         if (current->Size())
@@ -112,7 +112,7 @@ void Output::AllocateChannels(bool SideChannel,
         buffers.pop_back();
     }
     // Find buffer with most data.
-    ItemBuffer* largest = nullptr;
+    OutputItemBuffer* largest = nullptr;
     for (auto b : buffers) {
         if (b->Channel() != nullptr)
             continue;
@@ -128,12 +128,12 @@ void Output::AllocateChannels(bool SideChannel,
 Output::Output(const Encoder& Format, OutputChannel& Main)
     : encoder(Format)
 {
-    mains.push_back(std::make_pair<OutputChannel*,ItemBuffer*>(&Main, nullptr));
+    mains.push_back(std::make_pair<OutputChannel*,OutputItemBuffer*>(&Main, nullptr));
 }
 
 Output::~Output() {
     // Lock.
-    // An opportunity to check for Items not yet done with.
+    // An opportunity to check for OutputItems not yet done with.
     // Though we could be exiting on exception or something.
     // And where exactly are we going to report? This is the output.
     // Write to file in current directory maybe?
@@ -145,24 +145,24 @@ Output::~Output() {
 void Output::AddChannel(OutputChannel& OC, bool SideChannel) {
     // Lock.
     if (SideChannel) {
-        sides.push_back(std::make_pair<OutputChannel*,ItemBuffer*>(&OC, nullptr));
+        sides.push_back(std::make_pair<OutputChannel*,OutputItemBuffer*>(&OC, nullptr));
         AllocateChannels(true, sides);
     } else {
-        mains.push_back(std::make_pair<OutputChannel*,ItemBuffer*>(&OC, nullptr));
+        mains.push_back(std::make_pair<OutputChannel*,OutputItemBuffer*>(&OC, nullptr));
         AllocateChannels(false, mains);
     }
 }
 
-Item* Output::Writable(bool SideChannel) {
+OutputItem* Output::Writable(bool SideChannel) {
     // Lock.
-    ItemBuffer* buffer = new ItemBuffer(*this, SideChannel);
+    OutputItemBuffer* buffer = new OutputItemBuffer(*this, SideChannel);
     buffers.push_back(buffer);
     AllocateChannels(SideChannel,
         (SideChannel && !sides.empty()) ? sides : mains);
-    return new Item(encoder.CreateSame(), *buffer);
+    return new OutputItem(encoder.CreateSame(), *buffer);
 }
 
-void Output::Ended(ItemBuffer& IB) {
+void Output::Ended(OutputItemBuffer& IB) {
     // Lock.
     // Should find and free if ended and zero-size even if no channel?
     if (IB.Channel() == nullptr)
