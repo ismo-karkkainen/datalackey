@@ -29,6 +29,8 @@ public:
     virtual Encoder* CreateSame() const = 0;
     // Return true if Encode always produces output (returns true).
     virtual bool EncodeOutputsDirectly() const = 0;
+
+    virtual const char *const Format() const = 0;
 };
 
 

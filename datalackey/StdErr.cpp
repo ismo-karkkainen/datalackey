@@ -16,6 +16,11 @@ OutputChannel& StdErr::operator<<(const std::vector<char>& Buffer) {
     return *this;
 }
 
+void StdErr::Write(InputScanner::Iterator& Start, InputScanner::Iterator& End) {
+    while (Start != End)
+        std::cerr << *Start++;
+}
+
 void StdErr::Flush() {
     std::cerr.flush();
 }

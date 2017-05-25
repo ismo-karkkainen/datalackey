@@ -110,7 +110,7 @@ public:
     InputScanner(InputChannel& IC, MessageHandler& MH, StorageFront& SF);
     virtual ~InputScanner();
 
-    virtual const char* const Format() = 0;
+    virtual const char* const Format() const = 0;
 
     bool Ended() const { return channel.Ended(); }
     void Scan(); // Starts scanning thread that runs until channel ends.

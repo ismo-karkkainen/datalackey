@@ -37,6 +37,15 @@ OutputItemBuffer& OutputItemBuffer::operator<<(const std::vector<char>& Data) {
     return *this;
 }
 
+void OutputItemBuffer::Write(
+    InputScanner::Iterator& Start, InputScanner::Iterator& End)
+{
+    if (channel != nullptr)
+        channel->Write(Start, End);
+    else
+        buffer.insert(buffer.end(), Start, End);
+}
+
 void OutputItemBuffer::End() {
     if (channel != nullptr && !buffer.empty()) {
         *channel << buffer;
@@ -85,6 +94,12 @@ OutputItem& OutputItem::operator<<(const ValueReference& VR) {
     return *this;
 }
 
+void OutputItem::Write(
+    InputScanner::Iterator& Start, InputScanner::Iterator& End)
+{
+    buffer.Write(Start, End);
+}
+
 
 void Output::AllocateChannels(bool SideChannel,
     std::vector<std::pair<OutputChannel*,OutputItemBuffer*> >& List)
@@ -125,8 +140,8 @@ void Output::AllocateChannels(bool SideChannel,
     largest->SetChannel(available->first);
 }
 
-Output::Output(const Encoder& Format, OutputChannel& Main)
-    : encoder(Format)
+Output::Output(const Encoder& E, OutputChannel& Main)
+    : encoder(E)
 {
     mains.push_back(std::make_pair<OutputChannel*,OutputItemBuffer*>(&Main, nullptr));
 }

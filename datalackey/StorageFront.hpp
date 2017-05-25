@@ -17,7 +17,7 @@
 class StorageFront {
 public:
     virtual ~StorageFront();
-    virtual const char *const Format() = 0;
+    virtual const char *const Format() const = 0;
     // Pass a data dictionary using this.
     virtual void Input(InputScanner::Iterator& Start, InputScanner::Iterator& End) = 0;
     virtual void End() = 0;

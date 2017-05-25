@@ -16,7 +16,7 @@
 class MessageHandler {
 public:
     virtual ~MessageHandler();
-    virtual const char *const Format() = 0;
+    virtual const char *const Format() const = 0;
     // Pass message array using this.
     virtual void Input(InputScanner::Iterator& Start, InputScanner::Iterator& End) = 0;
     virtual void End() = 0;

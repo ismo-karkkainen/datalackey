@@ -14,6 +14,7 @@
 #include "Structure.hpp"
 #include "Encoder.hpp"
 #include "OutputChannel.hpp"
+#include "InputScanner.hpp"
 #include <vector>
 #include <utility>
 
@@ -71,7 +72,10 @@ private:
 
 public:
     std::vector<char>* IntermediateBuffer();
+    // Normal output.
     OutputItemBuffer& operator<<(const std::vector<char>& Data);
+    // Pass-through from input.
+    void Write(InputScanner::Iterator& Start, InputScanner::Iterator& End);
     void End(); // Indicates there will be no more data.
 };
 
@@ -90,6 +94,7 @@ public:
     ~OutputItem();
     OutputItem& operator<<(Structure S);
     OutputItem& operator<<(const ValueReference& VR);
+    void Write(InputScanner::Iterator& Start, InputScanner::Iterator& End);
 };
 
 class Output {
@@ -102,8 +107,10 @@ private:
         std::vector<std::pair<OutputChannel*,OutputItemBuffer*> >& List);
 
 public:
-    Output(const Encoder& Format, OutputChannel& Main);
+    Output(const Encoder& E, OutputChannel& Main);
     ~Output();
+
+    const char *const Format() const { return encoder.Format(); }
 
     void AddChannel(OutputChannel& OC, bool SideChannel);
 

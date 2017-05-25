@@ -74,7 +74,7 @@ InputScanner::InputScanner(InputChannel& IC, MessageHandler& MH, StorageFront& S
     : channel(IC), message_sink(MH), data_sink(SF), worker(nullptr)
 {
     assert(strcmp(Format(), IC.Format()) == 0);
-    assert(strcmp(Format(), MH.Format()) == 0);
+    assert(MH.Format() == nullptr || strcmp(Format(), MH.Format()) == 0);
     assert(strcmp(Format(), SF.Format()) == 0);
 }
 

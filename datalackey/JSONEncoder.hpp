@@ -28,6 +28,7 @@ public:
     Encoder* CreateSame() const;
     // Return true if Encode always produces output (returns true).
     bool EncodeOutputsDirectly() const;
+    const char *const Format() const;
 };
 
 

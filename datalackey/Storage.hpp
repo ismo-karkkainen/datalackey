@@ -38,4 +38,17 @@ public:
  - Onko varastolla joku konfiguraatio jonka luonti vaaditaan jos oikeasti tehdään jotain?
  - Se olisi sopiva paikka lukitsemiselle.
 
+ - Syötteen lukeminen vaatii varaston ja jos ei olla alustettu varastoa niiin
+   se ei voi varastoida mitään.
+ - Eli varaston olisi oltava jotain jolle osoitetaan paikka minne tallentaa
+   tiedostot. Siihen asti varastoidaan muistiin.
+ - Koska käynnistetään aliprosessina niin voisiko silti olettaa nykyisen
+   hakemiston alta löytyvän varaton ellei toisin osoiteta. Ja voiko vaihtaa
+   kesken kaiken tai ennen kuin dataan on koskettu?
+ - Olisiko varaston haku aina eksplisiittinen käsky? Eli käytetään muistia
+   kunnes toisin käsketään? Sen jälkeen voi käyttää levyä.
+ - Tällöin levy olisi vain muistin jatke. Eli jos joku raja täyttyy niin
+   käytetään levyä jotta saadaan muistia vapautettua.
+ - Voisi olla ehdotus suorittaa lataus etukäteen.
+
  */
