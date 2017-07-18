@@ -15,7 +15,7 @@
 class StdIn : public InputChannel {
 public:
     ~StdIn();
-    streamsize Read(std::vector<char>& Buffer);
+    std::streamsize Read(std::vector<char>& Buffer);
     bool Ended();
 };
 

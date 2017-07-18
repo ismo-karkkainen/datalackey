@@ -12,10 +12,9 @@
 
 
 void input_scanner(InputScanner* IS) {
-    InputScanner::Recipient previous = Discard;
+    InputScanner::Recipient previous = InputScanner::Discard;
     while (!IS->Ended()) {
         // Check channel.
-        size_t scanned = IS->buffer.size(); // Everything always scanned.
         if (!IS->channel.Read(IS->buffer)) { // Nothing new?
             struct timespec ts;
             ts.tv_sec = 0;
@@ -23,49 +22,43 @@ void input_scanner(InputScanner* IS) {
             nanosleep(&ts, nullptr);
             continue;
         }
-        // Skip scanned old part.
-        InputScanner::Iterator first = IS->buffer.begin() + scanned;
-        bool waiting = false;
+        // Use all data piece by piece and keep track of used part.
+        Iterator begin = IS->buffer.begin();
+        Iterator end = begin;
         do {
             InputScanner::Recipient recipient;
-            InputScanner::Iterator begin;
-            InputScanner::Iterator end;
             std::tie(recipient, begin, end) =
-                IS->scan_input(first, IS->buffer.end());
-            if (recipient != previous) {
-                switch (previous) {
-                case Data:
-                    IS->data_sink.End();
-                    break;
-                case Message:
-                    IS->message_sink.End();
-                    break;
-                }
-                previous = recipient;
-            }
+                IS->scan_input(previous, begin, IS->buffer.end());
             switch (recipient) {
-            case Discard:
-                first = end;
+            case InputScanner::Discard:
                 break;
-            case More:
-                waiting = true;
+            case InputScanner::DiscardRetroactively:
+                if (previous == InputScanner::Data) {
+                    IS->data_sink.Discard(begin, end);
+                } else if (previous == InputScanner::Message) {
+                    IS->message_sink.Discard(begin, end);
+                }
+                end = IS->buffer.end();
                 break;
-            case Data:
-                first = IS->data_sink.Input(begin, end);
-                waiting = first != end;
+            case InputScanner::Data:
+                IS->data_sink.Input(begin, end);
                 break;
-            case Message:
-                first = IS->message_sink.Input(begin, end);
-                waiting = first != end;
+            case InputScanner::DataEnd:
+                IS->data_sink.Input(begin, end);
+                IS->data_sink.End();
+                break;
+            case InputScanner::Message:
+                IS->message_sink.Input(begin, end);
+                break;
+            case InputScanner::MessageEnd:
+                IS->message_sink.Input(begin, end);
+                IS->message_sink.End();
                 break;
             }
-        } while (first != IS->buffer.end() || !waiting);
-        // This avoids having to store partial items in sinks.
-        if (first != IS->buffer.end()) {
-            IS->buffer.erase(IS->buffer.begin(), first);
-        } else {
-            IS->buffer.resize(0);
-        }
+            begin = end;
+            previous = recipient;
+        } while (end != IS->buffer.end());
+        IS->buffer.resize(0);
     }
 }
 
@@ -73,9 +66,6 @@ void input_scanner(InputScanner* IS) {
 InputScanner::InputScanner(InputChannel& IC, MessageHandler& MH, StorageFront& SF)
     : channel(IC), message_sink(MH), data_sink(SF), worker(nullptr)
 {
-    assert(strcmp(Format(), IC.Format()) == 0);
-    assert(MH.Format() == nullptr || strcmp(Format(), MH.Format()) == 0);
-    assert(strcmp(Format(), SF.Format()) == 0);
 }
 
 InputScanner::~InputScanner() {

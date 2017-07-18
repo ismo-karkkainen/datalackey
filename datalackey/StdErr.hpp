@@ -17,7 +17,7 @@ public:
     ~StdErr();
 
     OutputChannel& operator<<(const std::vector<char>& Buffer);
-    void Write(InputScanner::Iterator& Start, InputScanner::Iterator& End);
+    void Write(Iterator& Start, Iterator& End);
     void Flush();
 };
 

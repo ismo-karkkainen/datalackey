@@ -15,12 +15,13 @@ const size_t ReadBlockSize = 65536;
 StdIn::~StdIn() {
 }
 
-streamsize StdIn::Read(std::vector<char>& Buffer) {
-    streamsize total = 0;
+std::streamsize StdIn::Read(std::vector<char>& Buffer) {
+    std::streamsize total = 0;
     while (true) {
         size_t orig = Buffer.size();
         Buffer.resize(orig + ReadBlockSize);
-        streamsize count = std::cin.readsome(&(Buffer[orig]), ReadBlockSize);
+        std::cin.read(&(Buffer[orig]), ReadBlockSize);
+        std::streamsize count = std::cin.gcount();
         total += count;
         if (count < ReadBlockSize) {
             Buffer.resize(orig + count);
@@ -31,5 +32,5 @@ streamsize StdIn::Read(std::vector<char>& Buffer) {
 }
 
 bool StdIn::Ended() {
-    return !std::cin::good();
+    return !std::cin.good() || std::cin.eof();
 }

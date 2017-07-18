@@ -65,7 +65,7 @@ bool FileLister::get_more_files() {
     return true;
 }
 
-FileLister::FileLister(const std::string& root, Item& Out)
+FileLister::FileLister(const std::string& root, OutputItem& Out)
     : out(Out)
 {
     if (bfs::exists(root) && bfs::is_directory(root)) {

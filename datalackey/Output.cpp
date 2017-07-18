@@ -37,8 +37,7 @@ OutputItemBuffer& OutputItemBuffer::operator<<(const std::vector<char>& Data) {
     return *this;
 }
 
-void OutputItemBuffer::Write(
-    InputScanner::Iterator& Start, InputScanner::Iterator& End)
+void OutputItemBuffer::Write(Iterator& Start, Iterator& End)
 {
     if (channel != nullptr)
         channel->Write(Start, End);
@@ -94,8 +93,7 @@ OutputItem& OutputItem::operator<<(const ValueReference& VR) {
     return *this;
 }
 
-void OutputItem::Write(
-    InputScanner::Iterator& Start, InputScanner::Iterator& End)
+void OutputItem::Write(Iterator& Start, Iterator& End)
 {
     buffer.Write(Start, End);
 }

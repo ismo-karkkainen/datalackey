@@ -9,7 +9,7 @@
 #ifndef Literal_hpp
 #define Literal_hpp
 
-#include "Output.hpp"
+#include "ValueReference.hpp"
 
 
 class Literal : public ValueReference {

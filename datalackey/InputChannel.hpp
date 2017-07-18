@@ -9,6 +9,7 @@
 #ifndef InputChannel_hpp
 #define InputChannel_hpp
 
+#include <ios>
 #include <vector>
 
 
@@ -17,7 +18,7 @@ class InputChannel {
 public:
     virtual ~InputChannel();
     // Append any data there may be. Nothing if no data available.
-    virtual streamsize Read(std::vector<char>& Buffer) = 0;
+    virtual std::streamsize Read(std::vector<char>& Buffer) = 0;
     // Return true if the channel has closed.
     virtual bool Ended() = 0;
 };

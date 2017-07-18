@@ -14,6 +14,7 @@
 #include "Structure.hpp"
 #include "Encoder.hpp"
 #include "OutputChannel.hpp"
+#include "Iterator.hpp"
 #include "InputScanner.hpp"
 #include <vector>
 #include <utility>
@@ -75,7 +76,7 @@ public:
     // Normal output.
     OutputItemBuffer& operator<<(const std::vector<char>& Data);
     // Pass-through from input.
-    void Write(InputScanner::Iterator& Start, InputScanner::Iterator& End);
+    void Write(Iterator& Start, Iterator& End);
     void End(); // Indicates there will be no more data.
 };
 
@@ -94,7 +95,7 @@ public:
     ~OutputItem();
     OutputItem& operator<<(Structure S);
     OutputItem& operator<<(const ValueReference& VR);
-    void Write(InputScanner::Iterator& Start, InputScanner::Iterator& End);
+    void Write(Iterator& Start, Iterator& End);
 };
 
 class Output {

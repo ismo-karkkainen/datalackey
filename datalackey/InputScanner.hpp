@@ -10,6 +10,7 @@
 #define InputScanner_hpp
 
 
+#include "Iterator.hpp"
 #include "InputChannel.hpp"
 #include "StorageFront.hpp"
 #include "MessageHandler.hpp"
@@ -31,10 +32,6 @@
 // "Top"-level array from parent is command with parameters and nothing else.
 // Decode as appropriate and act. When data is set, there may be data block
 // that should not be decoded but treated as data item.
-
-// Array at top level may be a message or item container. That has to be
-// determined before figuring out what to do. First item in array determines
-// what it is. If not dictionary and not array, then a message.
 
 // Only commands are something that needs to be understood. Otherwise just
 // handle dictionary and keys and actual values are just data blocks.
@@ -76,8 +73,6 @@
 // but ever used? Complicates setting up communication. Retain possibility of
 // supporting it in the future.
 
-void input_scanner(InputScanner* IS);
-
 
 // Base class with derived classes overriding pure virtual members.
 // Runs a thread that polls InputChannel so that it is as simple as possible.
@@ -88,21 +83,21 @@ protected:
     MessageHandler& message_sink;
     StorageFront& data_sink;
     std::thread* worker;
-    std::vector<char> buffer; // Given to channel and scanned.
+    InputBuffer buffer; // Given to channel and scanned.
 
 public:
-    typedef decltype (buffer.begin()) Iterator;
-
     enum Recipient {
         Discard = 0,
-        More,
+        DiscardRetroactively,
         Data,
-        Message
+        DataEnd,
+        Message,
+        MessageEnd
     };
 
 protected:
-    virtual std::tuple<Recipient, Iterator, Iterator>
-        scan_input(Iterator RangeBegin, Iterator RangeEnd) = 0;
+    virtual std::tuple<Recipient, Iterator, Iterator> scan_input(
+        Recipient Previous, Iterator RangeBegin, Iterator RangeEnd) = 0;
 
     friend void input_scanner(InputScanner* IS);
 
@@ -115,6 +110,9 @@ public:
     bool Ended() const { return channel.Ended(); }
     void Scan(); // Starts scanning thread that runs until channel ends.
 };
+
+
+extern void input_scanner(InputScanner* IS);
 
 
 #endif /* InputScanner_hpp */

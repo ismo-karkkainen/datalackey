@@ -21,8 +21,7 @@ const char *const MessagePassThrough::Format() const {
     return nullptr;
 }
 
-void MessagePassThrough::Input(
-    InputScanner::Iterator& Start, InputScanner::Iterator& End)
+void MessagePassThrough::Input(Iterator& Start, Iterator& End)
 {
     if (writer == nullptr)
         writer = out.Writable(true);
@@ -32,4 +31,11 @@ void MessagePassThrough::Input(
 void MessagePassThrough::End() {
     delete writer;
     writer = nullptr;
+}
+
+void MessagePassThrough::Discard(Iterator& Start, Iterator& End)
+{
+    if (writer != nullptr && Start != End)
+        writer->Write(Start, End);
+    this->End();
 }

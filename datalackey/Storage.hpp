@@ -9,7 +9,6 @@
 #ifndef Storage_hpp
 #define Storage_hpp
 
-#include "History.hpp"
 
 class Storage {
     // Make id number.

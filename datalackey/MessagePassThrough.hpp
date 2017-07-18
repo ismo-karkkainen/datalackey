@@ -9,12 +9,13 @@
 #ifndef MessagePassThrough_hpp
 #define MessagePassThrough_hpp
 
+#include "Iterator.hpp"
 #include "MessageHandler.hpp"
 #include "Output.hpp"
 
 
-// Base class for input channels.
-class MessagePassThrough {
+// For passing message input to Output without conversion.
+class MessagePassThrough : public MessageHandler {
 private:
     Output& out;
     OutputItem* writer;
@@ -23,9 +24,9 @@ public:
     MessagePassThrough(Output& Out);
     ~MessagePassThrough();
     const char *const Format() const;
-    // Pass message array using this.
-    void Input(InputScanner::Iterator& Start, InputScanner::Iterator& End);
+    void Input(Iterator& Start, Iterator& End);
     void End();
+    void Discard(Iterator& Start, Iterator& End);
 };
 
 

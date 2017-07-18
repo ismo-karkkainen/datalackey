@@ -20,6 +20,7 @@ private:
     void add_separator(std::vector<char>& Buffer);
 
 public:
+    JSONEncoder();
     ~JSONEncoder();
     // If outputs directly, only appending to Buffer is allowed.
     bool Encode(std::vector<char>& Buffer, Structure S);

@@ -30,6 +30,9 @@ void JSONEncoder::add_separator(std::vector<char>& Buffer) {
     }
 }
 
+JSONEncoder::JSONEncoder() {
+}
+
 JSONEncoder::~JSONEncoder() {
 }
 
@@ -86,4 +89,8 @@ Encoder* JSONEncoder::CreateSame() const {
 
 bool JSONEncoder::EncodeOutputsDirectly() const {
     return true;
+}
+
+const char *const JSONEncoder::Format() const {
+    return "JSON";
 }
