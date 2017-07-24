@@ -14,7 +14,7 @@
 #include "Structure.hpp"
 #include "Encoder.hpp"
 #include "OutputChannel.hpp"
-#include "Iterator.hpp"
+#include "RawData.hpp"
 #include "InputScanner.hpp"
 #include <vector>
 #include <utility>
@@ -58,7 +58,7 @@ private:
     bool ended;
     OutputChannel* channel;
     Output& master;
-    std::vector<char> buffer;
+    RawData buffer;
 
     OutputItemBuffer(Output& Master, bool SideChannel);
     ~OutputItemBuffer();
@@ -66,17 +66,17 @@ private:
 
     OutputChannel* Channel() const { return channel; }
     bool SideChannel() const { return side_channel; }
-    size_t Size() const { return buffer.size(); }
+    size_t Size() const { return buffer.Size(); }
     bool Ended() const { return ended; }
 
     friend class Output;
 
 public:
-    std::vector<char>* IntermediateBuffer();
+    RawData* IntermediateBuffer();
     // Normal output.
-    OutputItemBuffer& operator<<(const std::vector<char>& Data);
+    OutputItemBuffer& operator<<(const RawData& Data);
     // Pass-through from input.
-    void Write(Iterator& Start, Iterator& End);
+    void Write(RawData::Iterator& Start, RawData::Iterator& End);
     void End(); // Indicates there will be no more data.
 };
 
@@ -84,7 +84,7 @@ public:
 class OutputItem {
 private:
     Encoder* encoder;
-    std::vector<char> encoder_buffer;
+    RawData encoder_buffer;
     OutputItemBuffer& buffer;
 
     // Owns Encoder.
@@ -95,7 +95,7 @@ public:
     ~OutputItem();
     OutputItem& operator<<(Structure S);
     OutputItem& operator<<(const ValueReference& VR);
-    void Write(Iterator& Start, Iterator& End);
+    void Write(RawData::Iterator& Start, RawData::Iterator& End);
 };
 
 class Output {

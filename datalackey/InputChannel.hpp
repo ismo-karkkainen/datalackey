@@ -10,7 +10,7 @@
 #define InputChannel_hpp
 
 #include <ios>
-#include <vector>
+#include "RawData.hpp"
 
 
 // Base class for input channels.
@@ -18,7 +18,7 @@ class InputChannel {
 public:
     virtual ~InputChannel();
     // Append any data there may be. Nothing if no data available.
-    virtual std::streamsize Read(std::vector<char>& Buffer) = 0;
+    virtual std::streamsize Read(RawData& Buffer) = 0;
     // Return true if the channel has closed.
     virtual bool Ended() = 0;
 };

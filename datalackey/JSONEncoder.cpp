@@ -9,21 +9,21 @@
 #include "JSONEncoder.hpp"
 
 
-void JSONEncoder::add_separator(std::vector<char>& Buffer) {
+void JSONEncoder::add_separator(RawData& Buffer) {
     if (open.empty())
         return;
     if (open.top() == Array) {
         if (comma.top())
-            Buffer.push_back(',');
+            Buffer.Append(',');
         else {
             comma.pop();
             comma.push(true);
         }
     } else {
         if (comma.top())
-            Buffer.push_back(',');
+            Buffer.Append(',');
         else
-            Buffer.push_back(':');
+            Buffer.Append(':');
         bool old = comma.top();
         comma.pop();
         comma.push(!old);
@@ -36,26 +36,26 @@ JSONEncoder::JSONEncoder() {
 JSONEncoder::~JSONEncoder() {
 }
 
-bool JSONEncoder::Encode(std::vector<char>& Buffer, Structure S) {
+bool JSONEncoder::Encode(RawData& Buffer, Structure S) {
     switch (S) {
     case Array:
         add_separator(Buffer);
-        Buffer.push_back('[');
+        Buffer.Append('[');
         open.push(S);
         comma.push(false);
         break;
     case Dictionary:
         add_separator(Buffer);
-        Buffer.push_back('{');
+        Buffer.Append('{');
         open.push(S);
         comma.push(false);
         break;
     case End:
         if (open.top() == Array)
-            Buffer.push_back(']');
+            Buffer.Append(']');
         else if (open.top() == Dictionary) {
             //if (!comma.top()) // Would be an error. Exception? What?
-            Buffer.push_back('}');
+            Buffer.Append('}');
         }
         open.pop();
         comma.pop();
@@ -64,21 +64,21 @@ bool JSONEncoder::Encode(std::vector<char>& Buffer, Structure S) {
     return true;
 }
 
-bool JSONEncoder::Encode(std::vector<char>& Buffer, const ValueReference& VR) {
+bool JSONEncoder::Encode(RawData& Buffer, const ValueReference& VR) {
     add_separator(Buffer);
     if (VR.IsChar() || VR.IsString()) {
-        Buffer.push_back('"');
+        Buffer.Append('"');
         std::string s = VR.String();
         for (auto c: s) {
             if (c == '"' || c == '\\')
-                Buffer.push_back('\\');
-            Buffer.push_back(c);
+                Buffer.Append('\\');
+            Buffer.Append(c);
         }
-        Buffer.push_back('"');
+        Buffer.Append('"');
     } else {
         std::string s = VR.String();
         for (auto c: s)
-            Buffer.push_back(c);
+            Buffer.Append(c);
     }
     return true;
 }

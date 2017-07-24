@@ -9,7 +9,7 @@
 #ifndef MessagePassThrough_hpp
 #define MessagePassThrough_hpp
 
-#include "Iterator.hpp"
+#include "RawData.hpp"
 #include "MessageHandler.hpp"
 #include "Output.hpp"
 
@@ -24,9 +24,9 @@ public:
     MessagePassThrough(Output& Out);
     ~MessagePassThrough();
     const char *const Format() const;
-    void Input(Iterator& Start, Iterator& End);
+    void Input(RawData::Iterator& Start, RawData::Iterator& End);
     void End();
-    void Discard(Iterator& Start, Iterator& End);
+    void Discard(RawData::Iterator& Start, RawData::Iterator& End);
 };
 
 

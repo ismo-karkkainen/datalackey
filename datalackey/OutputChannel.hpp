@@ -9,7 +9,7 @@
 #ifndef OutputChannel_hpp
 #define OutputChannel_hpp
 
-#include "Iterator.hpp"
+#include "RawData.hpp"
 #include <vector>
 
 
@@ -17,8 +17,8 @@
 class OutputChannel {
 public:
     virtual ~OutputChannel();
-    virtual OutputChannel& operator<<(const std::vector<char>& Buffer) = 0;
-    virtual void Write(Iterator& Start, Iterator& End) = 0;
+    virtual OutputChannel& operator<<(const RawData& Buffer) = 0;
+    virtual void Write(RawData::Iterator& Start, RawData::Iterator& End) = 0;
     virtual void Flush() = 0;
 };
 

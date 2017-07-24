@@ -11,12 +11,12 @@
 
 StdErr::~StdErr() { }
 
-OutputChannel& StdErr::operator<<(const std::vector<char>& Buffer) {
-    std::cerr.write(&(Buffer[0]), Buffer.size());
+OutputChannel& StdErr::operator<<(const RawData& Buffer) {
+    std::cerr.write(Buffer.Raw(), Buffer.Size());
     return *this;
 }
 
-void StdErr::Write(Iterator& Start, Iterator& End) {
+void StdErr::Write(RawData::Iterator& Start, RawData::Iterator& End) {
     while (Start != End)
         std::cerr << *Start++;
 }

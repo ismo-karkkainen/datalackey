@@ -1,28 +1,28 @@
 //
-//  StorageFront.hpp
+//  StorageDataSink.hpp
 //  datalackey
 //
 //  Created by Ismo Kärkkäinen on 16.5.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#ifndef StorageFront_hpp
-#define StorageFront_hpp
+#ifndef StorageDataSink_hpp
+#define StorageDataSink_hpp
 
-#include "Iterator.hpp"
+#include "RawData.hpp"
 
 
 // Base class for passing data to storage.
-class StorageFront {
+class StorageDataSink {
 public:
-    virtual ~StorageFront();
+    virtual ~StorageDataSink();
     virtual const char *const Format() const = 0;
     // Pass a data dictionary using this.
-    virtual void Input(Iterator& Start, Iterator& End) = 0;
+    virtual void Input(RawData::Iterator& Start, RawData::Iterator& End) = 0;
     virtual void End() = 0;
     // Error in data, throw away. Range may contain closing data.
-    virtual void Discard(Iterator& Start, Iterator& End) = 0;
+    virtual void Discard(RawData::Iterator& Start, RawData::Iterator& End) = 0;
 };
 
 
-#endif /* StorageFront_hpp */
+#endif /* StorageDataSink_hpp */

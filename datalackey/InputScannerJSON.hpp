@@ -25,11 +25,12 @@ private:
     bool bad_stream;
 
 public:
-    std::tuple<Recipient, Iterator, Iterator>
-        scan_input(InputScanner::Recipient Previous, Iterator RangeBegin, Iterator RangeEnd);
+    std::tuple<Recipient, RawData::Iterator, RawData::Iterator>
+        scan_input(InputScanner::Recipient Previous,
+            RawData::Iterator RangeBegin, RawData::Iterator RangeEnd);
 
 public:
-    InputScannerJSON(InputChannel& IC, MessageHandler& MH, StorageFront& SF);
+    InputScannerJSON(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS);
     ~InputScannerJSON();
 
     const char* const Format() const;

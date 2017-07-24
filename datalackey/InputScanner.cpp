@@ -23,12 +23,12 @@ void input_scanner(InputScanner* IS) {
             continue;
         }
         // Use all data piece by piece and keep track of used part.
-        Iterator begin = IS->buffer.begin();
-        Iterator end = begin;
+        RawData::Iterator begin = IS->buffer.Begin();
+        RawData::Iterator end = begin;
         do {
             InputScanner::Recipient recipient;
             std::tie(recipient, begin, end) =
-                IS->scan_input(previous, begin, IS->buffer.end());
+                IS->scan_input(previous, begin, IS->buffer.End());
             switch (recipient) {
             case InputScanner::Discard:
                 break;
@@ -38,7 +38,7 @@ void input_scanner(InputScanner* IS) {
                 } else if (previous == InputScanner::Message) {
                     IS->message_sink.Discard(begin, end);
                 }
-                end = IS->buffer.end();
+                end = IS->buffer.End();
                 break;
             case InputScanner::Data:
                 IS->data_sink.Input(begin, end);
@@ -57,14 +57,14 @@ void input_scanner(InputScanner* IS) {
             }
             begin = end;
             previous = recipient;
-        } while (end != IS->buffer.end());
+        } while (end != IS->buffer.End());
         IS->buffer.resize(0);
     }
 }
 
 
-InputScanner::InputScanner(InputChannel& IC, MessageHandler& MH, StorageFront& SF)
-    : channel(IC), message_sink(MH), data_sink(SF), worker(nullptr)
+InputScanner::InputScanner(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS)
+    : channel(IC), message_sink(MH), data_sink(SDS), worker(nullptr)
 {
 }
 

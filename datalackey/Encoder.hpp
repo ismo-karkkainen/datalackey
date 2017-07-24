@@ -11,6 +11,7 @@
 
 #include "ValueReference.hpp"
 #include "Structure.hpp"
+#include "RawData.hpp"
 #include <vector>
 
 // Base class that takes ValueReference and returns representation of it
@@ -23,8 +24,8 @@ class Encoder {
 public:
     virtual ~Encoder();
     // If outputs directly, only appending to Buffer is allowed.
-    virtual bool Encode(std::vector<char>& Buffer, Structure S) = 0;
-    virtual bool Encode(std::vector<char>& Buffer, const ValueReference& VR) = 0;
+    virtual bool Encode(RawData& Buffer, Structure S) = 0;
+    virtual bool Encode(RawData& Buffer, const ValueReference& VR) = 0;
     // Return an instance of the same class.
     virtual Encoder* CreateSame() const = 0;
     // Return true if Encode always produces output (returns true).

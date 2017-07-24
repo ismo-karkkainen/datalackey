@@ -11,12 +11,12 @@
 
 StdOut::~StdOut() { }
 
-OutputChannel& StdOut::operator<<(const std::vector<char>& Buffer) {
-    std::cout.write(&(Buffer[0]), Buffer.size());
+OutputChannel& StdOut::operator<<(const RawData& Buffer) {
+    std::cout.write(Buffer.Raw(), Buffer.Size());
     return *this;
 }
 
-void StdOut::Write(Iterator& Start, Iterator& End) {
+void StdOut::Write(RawData::Iterator& Start, RawData::Iterator& End) {
     while (Start != End)
         std::cout << *Start++;
 }

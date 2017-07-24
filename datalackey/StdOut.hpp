@@ -16,8 +16,8 @@ class StdOut : public OutputChannel {
 public:
     ~StdOut();
 
-    OutputChannel& operator<<(const std::vector<char>& Buffer);
-    void Write(Iterator& Start, Iterator& End);
+    OutputChannel& operator<<(const RawData& Buffer);
+    void Write(RawData::Iterator& Start, RawData::Iterator& End);
     void Flush();
 };
 

@@ -10,9 +10,9 @@
 #define InputScanner_hpp
 
 
-#include "Iterator.hpp"
+#include "RawData.hpp"
 #include "InputChannel.hpp"
-#include "StorageFront.hpp"
+#include "StorageDataSink.hpp"
 #include "MessageHandler.hpp"
 #include <vector>
 #include <thread>
@@ -81,9 +81,9 @@ class InputScanner {
 protected:
     InputChannel& channel;
     MessageHandler& message_sink;
-    StorageFront& data_sink;
+    StorageDataSink& data_sink;
     std::thread* worker;
-    InputBuffer buffer; // Given to channel and scanned.
+    RawData buffer; // Given to channel and scanned.
 
 public:
     enum Recipient {
@@ -96,13 +96,14 @@ public:
     };
 
 protected:
-    virtual std::tuple<Recipient, Iterator, Iterator> scan_input(
-        Recipient Previous, Iterator RangeBegin, Iterator RangeEnd) = 0;
+    virtual std::tuple<Recipient, RawData::Iterator, RawData::Iterator>
+        scan_input(Recipient Previous,
+            RawData::Iterator RangeBegin, RawData::Iterator RangeEnd) = 0;
 
     friend void input_scanner(InputScanner* IS);
 
 public:
-    InputScanner(InputChannel& IC, MessageHandler& MH, StorageFront& SF);
+    InputScanner(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS);
     virtual ~InputScanner();
 
     virtual const char* const Format() const = 0;

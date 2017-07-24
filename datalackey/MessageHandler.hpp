@@ -9,7 +9,7 @@
 #ifndef MessageHandler_hpp
 #define MessageHandler_hpp
 
-#include "Iterator.hpp"
+#include "RawData.hpp"
 
 
 // Base class for input channels.
@@ -18,11 +18,11 @@ public:
     virtual ~MessageHandler();
     virtual const char *const Format() const = 0;
     // Pass message array using this.
-    virtual void Input(Iterator& Start, Iterator& End) = 0;
+    virtual void Input(RawData::Iterator& Start, RawData::Iterator& End) = 0;
     // Indicate end of message item with this.
     virtual void End() = 0;
     // Error in message, throw away. Possible closing part passed.
-    virtual void Discard(Iterator& Start, Iterator& End) = 0;
+    virtual void Discard(RawData::Iterator& Start, RawData::Iterator& End) = 0;
 };
 
 

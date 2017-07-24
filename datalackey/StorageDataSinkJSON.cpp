@@ -1,36 +1,36 @@
 //
-//  StorageFrontJSON.cpp
+//  StorageDataSinkJSON.cpp
 //  datalackey
 //
 //  Created by Ismo Kärkkäinen on 26.5.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#include "StorageFrontJSON.hpp"
+#include "StorageDataSinkJSON.hpp"
 
 
-StorageFrontJSON::StorageFrontJSON(Storage& S)
+StorageDataSinkJSON::StorageDataSinkJSON(Storage& S)
     : storage(S)
 { }
 
-StorageFrontJSON::~StorageFrontJSON() {
+StorageDataSinkJSON::~StorageDataSinkJSON() {
 }
 
-const char *const StorageFrontJSON::Format() const {
+const char *const StorageDataSinkJSON::Format() const {
     return "JSON";
 }
 
-void StorageFrontJSON::Input(Iterator& Start, Iterator& End)
+void StorageDataSinkJSON::Input(RawData::Iterator& Start, RawData::Iterator& End)
 {
     // Split to key, value pairs and pass each pair to storage as soon as value
     // has been fully stored locally.
 }
 
-void StorageFrontJSON::End() {
+void StorageDataSinkJSON::End() {
     // Re-set things needed to keep track of keys and values.
 }
 
-void StorageFrontJSON::Discard(Iterator& Start, Iterator& End)
+void StorageDataSinkJSON::Discard(RawData::Iterator& Start, RawData::Iterator& End)
 {
     // Whatever we have, dump and free memory and act as if End called.
 }

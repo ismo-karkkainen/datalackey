@@ -16,39 +16,39 @@ OutputItemBuffer::OutputItemBuffer(Output& Master, bool SideChannel)
 
 void OutputItemBuffer::SetChannel(OutputChannel* OC) {
     channel = OC;
-    if (buffer.size() != 0) {
+    if (buffer.Size() != 0) {
         *channel << buffer;
-        buffer = std::vector<char>();
+        buffer.Clear(true);
     }
 }
 
 OutputItemBuffer::~OutputItemBuffer() {
 }
 
-std::vector<char>* OutputItemBuffer::IntermediateBuffer() {
+RawData* OutputItemBuffer::IntermediateBuffer() {
     return ((channel != nullptr) || ended) ? nullptr : &buffer;
 }
 
-OutputItemBuffer& OutputItemBuffer::operator<<(const std::vector<char>& Data) {
+OutputItemBuffer& OutputItemBuffer::operator<<(const RawData& Data) {
     if (channel != nullptr)
         *channel << Data;
     else
-        buffer.insert(buffer.end(), Data.cbegin(), Data.cend());
+        buffer.Append(Data.CBegin(), Data.CEnd());
     return *this;
 }
 
-void OutputItemBuffer::Write(Iterator& Start, Iterator& End)
+void OutputItemBuffer::Write(RawData::Iterator& Start, RawData::Iterator& End)
 {
     if (channel != nullptr)
         channel->Write(Start, End);
     else
-        buffer.insert(buffer.end(), Start, End);
+        buffer.Append(Start, End);
 }
 
 void OutputItemBuffer::End() {
-    if (channel != nullptr && !buffer.empty()) {
+    if (channel != nullptr && !buffer.Empty()) {
         *channel << buffer;
-        buffer.resize(0);
+        buffer.Clear(true);
     }
     if (!ended)
         master.Ended(*this);
@@ -66,7 +66,7 @@ OutputItem::~OutputItem() {
 }
 
 OutputItem& OutputItem::operator<<(Structure S) {
-    std::vector<char>* buf = buffer.IntermediateBuffer();
+    RawData* buf = buffer.IntermediateBuffer();
     if (encoder->EncodeOutputsDirectly() && buf != nullptr) {
         // Writing directly to output buffer.
         encoder->Encode(*buf, S);
@@ -74,13 +74,13 @@ OutputItem& OutputItem::operator<<(Structure S) {
     }
     if (encoder->Encode(encoder_buffer, S)) {
         buffer << encoder_buffer;
-        encoder_buffer.resize(0);
+        encoder_buffer.Clear();
     }
     return *this;
 }
 
 OutputItem& OutputItem::operator<<(const ValueReference& VR) {
-    std::vector<char>* buf = buffer.IntermediateBuffer();
+    RawData* buf = buffer.IntermediateBuffer();
     if (encoder->EncodeOutputsDirectly() && buf != nullptr) {
         // Writing directly to output buffer.
         encoder->Encode(*buf, VR);
@@ -88,12 +88,12 @@ OutputItem& OutputItem::operator<<(const ValueReference& VR) {
     }
     if (encoder->Encode(encoder_buffer, VR)) {
         buffer << encoder_buffer;
-        encoder_buffer.resize(0);
+        encoder_buffer.Clear();
     }
     return *this;
 }
 
-void OutputItem::Write(Iterator& Start, Iterator& End)
+void OutputItem::Write(RawData::Iterator& Start, RawData::Iterator& End)
 {
     buffer.Write(Start, End);
 }
