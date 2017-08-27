@@ -58,7 +58,7 @@ void input_scanner(InputScanner* IS) {
             begin = end;
             previous = recipient;
         } while (end != IS->buffer.End());
-        IS->buffer.resize(0);
+        IS->buffer.Clear();
     }
 }
 

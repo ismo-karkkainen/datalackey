@@ -10,6 +10,7 @@
 #define StdIn_hpp
 
 #include "InputChannel.hpp"
+#include "RawData.hpp"
 
 
 class StdIn : public InputChannel {

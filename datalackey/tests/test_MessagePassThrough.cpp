@@ -12,7 +12,7 @@
 #include "StdIn.hpp"
 #include "MessagePassThrough.hpp"
 #include "Storage.hpp"
-#include "StorageFrontJSON.hpp"
+#include "StorageDataSinkJSON.hpp"
 #include "InputScannerJSON.hpp"
 #include <cstring>
 #include <ctime>
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     StdIn in_channel;
     MessagePassThrough mpt(out);
     Storage storage;
-    StorageFrontJSON front(storage);
+    StorageDataSinkJSON front(storage);
     InputScannerJSON scanner(in_channel, mpt, front);
     scanner.Scan();
     while (!scanner.Ended()) {

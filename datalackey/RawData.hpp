@@ -6,8 +6,8 @@
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#ifndef RawData.hpp
-#define RawData.hpp
+#ifndef RawData_hpp
+#define RawData_hpp
 
 #include <vector>
 
@@ -17,6 +17,7 @@ private:
     std::vector<char> buffer;
     // Keep track of how much we have used previously for smarter clearing.
 public:
+    typedef decltype (buffer) Buffer;
     typedef decltype (buffer.begin()) Iterator;
     typedef decltype (buffer.cbegin()) ConstIterator;
 

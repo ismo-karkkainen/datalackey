@@ -10,12 +10,17 @@
 
 
 void RawData::Clear(bool LikelyUnused) {
-    std::vector<char> empty;
-    buffer.swap(empty);
+    if (LikelyUnused) {
+        std::vector<char> empty;
+        buffer.swap(empty);
+    } else
+        buffer.resize(0);
 }
 
 char* RawData::Buffer(size_t Required) {
-    buffer.resize(buffer.size() + Required);
+    size_t sz = buffer.size();
+    buffer.resize(sz + Required);
+    return &(buffer[sz]);
 }
 
 void RawData::Discard(size_t Unused) {

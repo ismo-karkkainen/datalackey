@@ -11,24 +11,27 @@ link_libraries( boost_system boost_filesystem )
 enable_testing()
 set(Sources datalackey/main.cpp)
 
-set(IOSources datalackey/Storage.cpp)
-list(APPEND IOSources datalackey/Literal.cpp datalackey/ValueReference.cpp)
+set(StoreSources datalackey/RawData.cpp datalackey/Storage.cpp)
+list(APPEND StoreSources datalackey/StorageDataSink.cpp datalackey/StorageDataSinkJSON.cpp)
+
+set(IOSources datalackey/Literal.cpp datalackey/ValueReference.cpp)
 list(APPEND IOSources datalackey/Encoder.cpp datalackey/JSONEncoder.cpp)
 list(APPEND IOSources datalackey/OutputChannel.cpp datalackey/Output.cpp)
 list(APPEND IOSources datalackey/StdOut.cpp datalackey/StdErr.cpp)
 list(APPEND IOSources datalackey/MessageHandler.cpp datalackey/MessagePassThrough.cpp)
-list(APPEND IOSources datalackey/StorageFront.cpp datalackey/StorageFrontJSON.cpp)
+list(APPEND IOSources datalackey/StorageDataSink.cpp datalackey/StorageDataSinkJSON.cpp)
 list(APPEND IOSources datalackey/InputChannel.cpp datalackey/InputScanner.cpp)
 list(APPEND IOSources datalackey/InputScannerJSON.cpp)
 list(APPEND IOSources datalackey/StdIn.cpp)
 
-add_executable( test_FileLister datalackey/Encoder.cpp datalackey/JSONEncoder.cpp datalackey/OutputChannel.cpp datalackey/Output.cpp datalackey/Literal.cpp datalackey/StdOut.cpp datalackey/ValueReference.cpp datalackey/Literal.cpp datalackey/FileLister.cpp datalackey/tests/test_FileLister.cpp )
 
-add_executable(test_FileLister.sh IMPORTED)
-set_property(TARGET test_FileLister.sh  PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_FileLister.sh)
-add_test(NAME FileLister_List COMMAND test_FileLister.sh $<TARGET_FILE:test_FileLister> )
+#add_executable( test_FileLister datalackey/Encoder.cpp datalackey/JSONEncoder.cpp datalackey/OutputChannel.cpp datalackey/Output.cpp datalackey/Literal.cpp datalackey/StdOut.cpp datalackey/ValueReference.cpp datalackey/Literal.cpp datalackey/FileLister.cpp datalackey/tests/test_FileLister.cpp )
 
-add_executable( test_MessagePassThrough ${IOSources} datalackey/tests/test_MessagePassThrough.cpp )
+#add_executable(test_FileLister.sh IMPORTED)
+#set_property(TARGET test_FileLister.sh  PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_FileLister.sh)
+#add_test(NAME FileLister_List COMMAND test_FileLister.sh $<TARGET_FILE:test_FileLister> )
+
+add_executable( test_MessagePassThrough ${StoreSources} ${IOSources} datalackey/tests/test_MessagePassThrough.cpp )
 
 # Add various components to source files list provided the list has not been
 # given from outside.

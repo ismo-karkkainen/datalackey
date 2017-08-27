@@ -8,6 +8,7 @@
 
 #include "InputScannerJSON.hpp"
 #include <tuple>
+#include <cassert>
 
 
 std::tuple<InputScanner::Recipient, RawData::Iterator, RawData::Iterator>
