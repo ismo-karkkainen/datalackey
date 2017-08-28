@@ -18,7 +18,7 @@ StdIn::~StdIn() {
 std::streamsize StdIn::Read(RawData& Buffer) {
     std::streamsize total = 0;
     while (true) {
-        char* buf = Buffer.Buffer(ReadBlockSize);
+        char* buf = Buffer.Get(ReadBlockSize);
         std::cin.read(buf, ReadBlockSize);
         std::streamsize count = std::cin.gcount();
         total += count;

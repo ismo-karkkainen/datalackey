@@ -13,6 +13,7 @@
 #include <memory>
 #include <queue>
 #include <mutex>
+#include <string>
 
 
 class ConversionResult {
@@ -27,29 +28,30 @@ public:
     std::mutex& Mutex() { return mutex; } // Lock using this before anything.
     void Start() { started = true; }
     bool Started() const { return started; }
-    void Set(RawData* Target) { target = Target; }
-    RawData* Result() { return target; }
+    void Set(RawData* Target) { target = Target; }
+    RawData* Result() { return target; }
 };
 
 
 class Converter {
 private:
     struct Task {
-        shared_ptr<const RawData> data;
-        std::string& source;
-        std::string& destination;
+        std::shared_ptr<const RawData> data;
+        std::string source;
+        std::string destination;
         std::shared_ptr<ConversionResult> result;
-        Task(shared_ptr<const RawData>& Data, const std::string& Source,
-            std::string& Destination, std::shared_ptr<ConversionResult> Result);
+        Task(std::shared_ptr<const RawData>& Data, const std::string& Source,
+            const std::string& Destination,
+            std::shared_ptr<ConversionResult> Result);
     };
     // Thread for doing conversion tasks.
 
     std::queue<Task*> tasks[2];
     std::mutex queue_mutexes[2];
 
-    void enqueue(shared_ptr<const RawData>& Data, const std::string& Source,
-        const char *const Destination, std::shared_ptr<ConversionResult> Result,
-        int Index);
+    void enqueue(std::shared_ptr<const RawData>& Data,
+        const std::string& Source, const char *const Destination,
+        std::shared_ptr<ConversionResult> Result, int Index);
     Task* dequeue();
 
     // Methods to call to perform the conversion, or external functions?
@@ -58,11 +60,11 @@ public:
     ~Converter();
 
     // Converts immediately.
-    RawData* Convert(shared_ptr<const RawData> Data, const std::string& Source,
-        const char *const Destination);
+    RawData* Convert(std::shared_ptr<const RawData> Data,
+        const std::string& Source, const char *const Destination);
     // Converts in thread. Urgent decides which queue. Converted is assigned
     // the output pointer once ready.
-    void Convert(shared_ptr<const RawData> Data, const std::string& Source,
+    void Convert(std::shared_ptr<const RawData> Data, const std::string& Source,
         const char *const Destination, std::shared_ptr<ConversionResult> Result,
         bool Urgent = false)
     {

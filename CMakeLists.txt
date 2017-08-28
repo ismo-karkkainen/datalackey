@@ -12,6 +12,7 @@ enable_testing()
 set(Sources datalackey/main.cpp)
 
 set(StoreSources datalackey/RawData.cpp datalackey/Storage.cpp)
+list(APPEND StoreSources datalackey/Converter.cpp datalackey/MemoryStorage.cpp)
 list(APPEND StoreSources datalackey/StorageDataSink.cpp datalackey/StorageDataSinkJSON.cpp)
 
 set(IOSources datalackey/Literal.cpp datalackey/ValueReference.cpp)

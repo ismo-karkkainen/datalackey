@@ -22,10 +22,10 @@ public:
     typedef decltype (buffer.cbegin()) ConstIterator;
 
     void Clear(bool LikelyUnused = false); // Clears the buffer.
-    size_t Size() const { return buffer.size(); }
+    size_t Size() const { return buffer.size(); }
     bool Empty() const { return buffer.empty(); }
     const char* Raw(size_t Start = 0) const { return &(buffer[Start]); }
-    char* Buffer(size_t Required); // Returns pointer to Required usable bytes.
+    char* Get(size_t Required); // Returns pointer to Required usable bytes.
     void Discard(size_t Unused); // Discard Unused bytes.
 
     ConstIterator CBegin() const { return buffer.cbegin(); }

@@ -11,7 +11,7 @@
 #include "Output.hpp"
 #include "StdIn.hpp"
 #include "MessagePassThrough.hpp"
-#include "Storage.hpp"
+#include "MemoryStorage.hpp"
 #include "StorageDataSinkJSON.hpp"
 #include "InputScannerJSON.hpp"
 #include <cstring>
@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     Output out(enc, out_channel);
     StdIn in_channel;
     MessagePassThrough mpt(out);
-    Storage storage;
+    MemoryStorage storage;
     StorageDataSinkJSON front(storage);
     InputScannerJSON scanner(in_channel, mpt, front);
     scanner.Scan();

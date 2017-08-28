@@ -16,7 +16,7 @@
 #include <string>
 #include <memory>
 #include <mutex>
-#include <utlity>
+#include <utility>
 
 
 class MemoryStorage : public Storage {
@@ -26,11 +26,10 @@ private:
         std::shared_ptr<const RawData> data;
         std::shared_ptr<ConversionResult> receiver;
 
-        FormatData(const std::string& Format,
-            std::shared_ptr<const RawData>& Data)
-            : format(Format), data(Data) { }
         FormatData(const std::string& Format)
             : format(Format) { }
+        FormatData(const std::string& Format, RawData& Data)
+            : format(Format), data(&Data) { }
 
         std::pair<std::shared_ptr<const RawData>,std::shared_ptr<ConversionResult>>
             CheckDataConversion();
@@ -38,30 +37,30 @@ private:
 
     class Values {
     private:
-        std::vector<shared_ptr<FormatData>> data;
+        std::vector<std::shared_ptr<FormatData>> data;
         std::mutex mutex;
     public:
-        Values();
+        Values(const std::string& Format, RawData& Data);
         ~Values();
-        std::mutex& Mutex() { return mutex; } // Lock this before anything.
+        std::mutex& Mutex() { return mutex; } // Lock this before anything.
         bool IsPresent(const std::string& Format);
         std::vector<std::string> AvailableFormats();
         // Returns the item or nullptr.
-        shared_ptr<const RawData> Get(const std::string& Format);
+        std::shared_ptr<const RawData> Get(const std::string& Format);
         // Creates the FormatData if not present. Returns nullptr if converted.
         // First indicates that the value was not present but is convertable.
-        std::pair<bool,std::shared_ptr<ConversionReceiver>> Receiver(
+        std::pair<bool,std::shared_ptr<ConversionResult>> Receiver(
             const std::string& Format);
     };
-    std::map<std::string,shared_ptr<Values>> label2data;
+    std::map<std::string,std::shared_ptr<Values>> label2data;
     std::mutex label2data_mutex;
 
     // Finds the most suitable source format and returns the data or nullptr.
-    shared_ptr<const RawData> find_source(shared_ptr<Values>& Value,
+    std::shared_ptr<const RawData> find_source(std::shared_ptr<Values>& Value,
         const std::string& Destination, std::string& SourceFormat);
 
     // Returns Values and lock to its mutex.
-    std::pair<shared_ptr<Values>,std::unique_lock<std::mutex>> get(
+    std::pair<std::shared_ptr<Values>,std::unique_lock<std::mutex>> get(
         const std::string& Label);
 
     Converter converter;
@@ -72,12 +71,15 @@ public:
 
     bool IsValid() const;
 
-    void Store(const std::string& Label, RawData& Data);
+    void Store(const std::string& Label, const std::string& Format,
+        RawData& Data);
     void Delete(const std::string& Label);
     void Clean();
 
     void Preload(const std::string& Label, const char *const Format);
     bool IsReady(const std::string& Label, const char *const Format);
-    shared_ptr<const RawData> Data(const std::string& Label,
+    std::shared_ptr<const RawData> Data(const std::string& Label,
         const char *const Format);
 };
+
+#endif

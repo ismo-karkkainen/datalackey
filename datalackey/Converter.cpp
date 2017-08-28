@@ -9,23 +9,21 @@
 #include "Converter.hpp"
 
 
-Converter::Task::Task(shared_ptr<const RawData>& Data,
-    const std::string& Source, std::string& Destination,
+Converter::Task::Task(std::shared_ptr<const RawData>& Data,
+    const std::string& Source, const std::string& Destination,
     std::shared_ptr<ConversionResult> Result)
     : data(Data), source(Source), destination(Destination), result(Result)
 { }
 
-void Converter::enqueue(shared_ptr<const RawData>& Data,
+void Converter::enqueue(std::shared_ptr<const RawData>& Data,
     const std::string& Source, const char *const Destination,
     std::shared_ptr<ConversionResult> Result, int Index)
 {
-    Converted = nullptr;
-    StartIndicator = false;
     std::lock_guard<std::mutex> lock(queue_mutexes[Index]);
     tasks[Index].push(new Task(Data, Source, std::string(Destination), Result));
 }
 
-Task* Converter::dequeue() {
+Converter::Task* Converter::dequeue() {
     for (int k = 0; k < 2; ++k) {
         std::lock_guard<std::mutex> lock(queue_mutexes[k]);
         if (!tasks[k].empty()) {
@@ -50,8 +48,8 @@ Converter::~Converter() {
         }
 }
 
-RawData* Converter::Convert(shared_ptr<const RawData> Data,
-    const std::string& Source, const char *const Destination);
+RawData* Converter::Convert(std::shared_ptr<const RawData> Data,
+    const std::string& Source, const char *const Destination)
 {
     // Call conversion method directly.
 }

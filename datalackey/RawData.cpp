@@ -17,7 +17,7 @@ void RawData::Clear(bool LikelyUnused) {
         buffer.resize(0);
 }
 
-char* RawData::Buffer(size_t Required) {
+char* RawData::Get(size_t Required) {
     size_t sz = buffer.size();
     buffer.resize(sz + Required);
     return &(buffer[sz]);

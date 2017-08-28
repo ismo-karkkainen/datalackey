@@ -11,6 +11,7 @@
 
 #include "RawData.hpp"
 #include <memory>
+#include <string>
 
 
 // Base class for Storage classes.
@@ -22,31 +23,26 @@ class Storage {
 
 public:
     Storage(); // Take directory. Find existing storage. Lock.
-    ~Storage(); // Save upon destruction. Unlock.
+    virtual ~Storage(); // Save upon destruction. Unlock.
 
     virtual bool IsValid() const = 0;
 
-    virtual void Store(const std::string& Label, RawData& Value) = 0;
+    virtual void Store(const std::string& Label, const std::string& Format,
+        RawData& Value) = 0;
     virtual void Delete(const std::string& Label) = 0;
     virtual void Clean() = 0;
 
     // Pre-load a value.
     virtual void Preload(const std::string& Label, const char *const Format) = 0;
-    void Preload(const std::string& Label, const std::string& Format) {
-        Preload(Label, Format.c_str());
-    }
+    void Preload(const std::string& Label, const std::string& Format);
 
-    virtual bool IsReady(const std::string& Label, const char *const Format);
-    bool IsReady(const std::string& Label, const std::string& Format)
-    {
-        return IsReady(Label, Format.c_str());
-    }
+    virtual bool IsReady(const std::string& Label, const char *const Format) = 0;
+    bool IsReady(const std::string& Label, const std::string& Format);
 
     // Return the value.
-    shared_ptr<const RawData> Data(const std::string& Label, const char *const Format) = 0;
-    shared_ptr<const RawData> Data(const std::string& Label, const std::string& Format) {
-        return Data(Label, Format.c_str());
-    }
+    virtual std::shared_ptr<const RawData> Data(const std::string& Label, const char *const Format) = 0;
+    std::shared_ptr<const RawData> Data(const std::string& Label,
+        const std::string& Format);
 };
 
 
