@@ -45,66 +45,65 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             else if (*curr == '"')
                 in_string = false; // Ending quote.
             else if (*curr == '\\')
-                escaping = true; // Next character is to be skipped.
-        } else {
-            switch (*curr) {
-            case '[':
-                if (open.empty() && next == InputScanner::Discard)
-                    return std::make_tuple(
-                        InputScanner::Discard, RangeBegin, curr);
-                    // curr will be first character next time around.
-                open.push(Array);
-                break;
-            case ']':
-                if (open.top() != Array) {
-                    bad_stream = true;
-                    // Ought to construct the closing array.
-                    return std::make_tuple(InputScanner::DiscardRetroactively,
-                        RangeBegin, RangeEnd);
-                }
-                open.pop();
-                if (open.empty() && next == InputScanner::Message)
-                    next = InputScanner::MessageEnd;
-                break;
-            case '{':
-                if (open.empty() && next == InputScanner::Discard)
-                    return std::make_tuple(
-                        InputScanner::Discard, RangeBegin, curr);
-                open.push(Dictionary);
-                continue;
-                break;
-            case '}':
-                if (open.top() != Dictionary) {
-                    bad_stream = true;
-                    return std::make_tuple(InputScanner::DiscardRetroactively,
-                        RangeBegin, RangeEnd);
-                }
-                open.pop();
-                if (open.empty() && next == Data)
-                    next = InputScanner::DataEnd;
-                break;
-            case '"':
-                if (open.empty()) {
-                    bad_stream = true;
-                    return std::make_tuple(InputScanner::DiscardRetroactively,
-                        RangeBegin, RangeEnd);
-                }
-                in_string = true;
-                break;
-            case ' ':
-            case '\t':
-            case '\n':
-            case '\r':
-                break; // Ignore whitespace always.
-            default:
-                if (open.empty()) {
-                    // Non-whitespace between items not allowed.
-                    bad_stream = true;
-                    return std::make_tuple(InputScanner::DiscardRetroactively,
-                        RangeBegin, RangeEnd);
-                }
-                break;
+                escaping = true; // Next character meaning ignored.
+            continue;
+        }
+        switch (*curr) {
+        case '[':
+            if (open.empty() && next == InputScanner::Discard)
+                return std::make_tuple(
+                    InputScanner::Discard, RangeBegin, curr);
+                // curr will be first character next time around.
+            open.push(Array);
+            break;
+        case ']':
+            if (open.top() != Array) {
+                bad_stream = true;
+                // Ought to construct the closing array.
+                return std::make_tuple(InputScanner::DiscardRetroactively,
+                    RangeBegin, RangeEnd);
             }
+            open.pop();
+            if (open.empty() && next == InputScanner::Message)
+                next = InputScanner::MessageEnd;
+            break;
+        case '{':
+            if (open.empty() && next == InputScanner::Discard)
+                return std::make_tuple(
+                    InputScanner::Discard, RangeBegin, curr);
+            open.push(Dictionary);
+            break;
+        case '}':
+            if (open.top() != Dictionary) {
+                bad_stream = true;
+                return std::make_tuple(InputScanner::DiscardRetroactively,
+                    RangeBegin, RangeEnd);
+            }
+            open.pop();
+            if (open.empty() && next == Data)
+                next = InputScanner::DataEnd;
+            break;
+        case '"':
+            if (open.empty()) {
+                bad_stream = true;
+                return std::make_tuple(InputScanner::DiscardRetroactively,
+                    RangeBegin, RangeEnd);
+            }
+            in_string = true;
+            break;
+        case ' ':
+        case '\t':
+        case '\n':
+        case '\r':
+            break; // Ignore whitespace always.
+        default:
+            if (open.empty()) {
+                // Non-whitespace between items not allowed.
+                bad_stream = true;
+                return std::make_tuple(InputScanner::DiscardRetroactively,
+                    RangeBegin, RangeEnd);
+            }
+            break;
         }
     }
     return std::tie(next, RangeBegin, RangeEnd); // Used all.

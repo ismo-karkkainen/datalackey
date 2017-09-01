@@ -15,6 +15,12 @@ Storage::Storage() {
 Storage::~Storage() {
 }
 
+void Storage::Store(const std::string& Label, const std::string& Format,
+    RawData& Value)
+{
+    Store(Label, Format.c_str(), Value);
+}
+
 void Preload(const std::string& Label, const std::string& Format) {
     Preload(Label, Format.c_str());
 }

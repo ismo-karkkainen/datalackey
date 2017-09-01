@@ -35,7 +35,8 @@ public:
 
     void Append(ConstIterator From, ConstIterator To);
     void Append(const char Item);
-    // Add stuff to get the buffer out without copy for storage.
+
+    void Swap(RawData& RD);
 };
 
 #endif /* RawData.hpp */

@@ -9,7 +9,7 @@
 #include "InputScanner.hpp"
 #include <cstring>
 #include <ctime>
-
+#include <cassert>
 
 void input_scanner(InputScanner* IS) {
     InputScanner::Recipient previous = InputScanner::Discard;
@@ -69,14 +69,17 @@ InputScanner::InputScanner(InputChannel& IC, MessageHandler& MH, StorageDataSink
 }
 
 InputScanner::~InputScanner() {
-    if (worker != nullptr) {
-        worker->join();
-        delete worker;
-    }
+    assert(worker == nullptr);
 }
 
 void InputScanner::Scan() {
     if (worker != nullptr)
         return;
     worker = new std::thread(&input_scanner, this);
+}
+
+void InputScanner::FinishScan() {
+    worker->join();
+    delete worker;
+    worker = nullptr;
 }

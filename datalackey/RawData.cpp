@@ -37,3 +37,7 @@ void RawData::Append(ConstIterator From, ConstIterator To) {
 void RawData::Append(const char Item) {
     buffer.push_back(Item);
 }
+
+void RawData::Swap(RawData& RD) {
+    buffer.swap(RD.buffer);
+}

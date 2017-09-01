@@ -26,10 +26,8 @@ private:
         std::shared_ptr<const RawData> data;
         std::shared_ptr<ConversionResult> receiver;
 
-        FormatData(const std::string& Format)
-            : format(Format) { }
-        FormatData(const std::string& Format, RawData& Data)
-            : format(Format), data(&Data) { }
+        FormatData(const char *const Format);
+        FormatData(const char *const Format, RawData& Data);
 
         std::pair<std::shared_ptr<const RawData>,std::shared_ptr<ConversionResult>>
             CheckDataConversion();
@@ -40,7 +38,7 @@ private:
         std::vector<std::shared_ptr<FormatData>> data;
         std::mutex mutex;
     public:
-        Values(const std::string& Format, RawData& Data);
+        Values(const char *const Format, RawData& Data);
         ~Values();
         std::mutex& Mutex() { return mutex; } // Lock this before anything.
         bool IsPresent(const std::string& Format);
@@ -71,7 +69,7 @@ public:
 
     bool IsValid() const;
 
-    void Store(const std::string& Label, const std::string& Format,
+    void Store(const std::string& Label, const char *const Format,
         RawData& Data);
     void Delete(const std::string& Label);
     void Clean();

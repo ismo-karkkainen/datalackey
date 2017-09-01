@@ -33,5 +33,6 @@ int main(int argc, char** argv) {
         ts.tv_nsec = 10000000;
         nanosleep(&ts, nullptr);
     }
+    scanner.FinishScan();
     return 0;
 }

@@ -110,6 +110,7 @@ public:
 
     bool Ended() const { return channel.Ended(); }
     void Scan(); // Starts scanning thread that runs until channel ends.
+    void FinishScan();
 };
 
 

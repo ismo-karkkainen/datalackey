@@ -27,8 +27,10 @@ public:
 
     virtual bool IsValid() const = 0;
 
-    virtual void Store(const std::string& Label, const std::string& Format,
+    virtual void Store(const std::string& Label, const char *const Format,
         RawData& Value) = 0;
+    void Store(const std::string& Label, const std::string& Format,
+        RawData& Value);
     virtual void Delete(const std::string& Label) = 0;
     virtual void Clean() = 0;
 

@@ -32,6 +32,17 @@ size_t MemoryStorage::id() {
 }
 */
 
+MemoryStorage::FormatData::FormatData(const char *const Format)
+    : format(Format), data(nullptr), receiver(new ConversionResult())
+{ }
+
+MemoryStorage::FormatData::FormatData(const char *const Format, RawData& Data)
+    : format(Format), data(nullptr), receiver(nullptr)
+{
+    RawData* rd = new RawData();
+    rd->Swap(Data);
+    data = std::shared_ptr<const RawData>(rd);
+}
 
 std::pair<std::shared_ptr<const RawData>,std::shared_ptr<ConversionResult>>
 MemoryStorage::FormatData::CheckDataConversion() {
@@ -52,7 +63,7 @@ MemoryStorage::FormatData::CheckDataConversion() {
 }
 
 
-MemoryStorage::Values::Values(const std::string& Format, RawData& Data) {
+MemoryStorage::Values::Values(const char *const Format, RawData& Data) {
     data.push_back(std::shared_ptr<FormatData>(new FormatData(Format, Data)));
 }
 
@@ -95,7 +106,7 @@ MemoryStorage::Values::Receiver(const std::string& Format) {
             return std::make_pair(false, dc.second);
         }
     // There was no matching format.
-    data.push_back(std::shared_ptr<FormatData>(new FormatData(Format)));
+    data.push_back(std::shared_ptr<FormatData>(new FormatData(Format.c_str())));
     return std::make_pair(true, data.back()->receiver);
 }
 
@@ -138,7 +149,7 @@ bool MemoryStorage::IsValid() const {
     return true;
 }
 
-void MemoryStorage::Store(const std::string& Label, const std::string& Format,
+void MemoryStorage::Store(const std::string& Label, const char *const Format,
     RawData& Data)
 {
     std::shared_ptr<MemoryStorage::Values> val(

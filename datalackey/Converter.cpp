@@ -9,6 +9,10 @@
 #include "Converter.hpp"
 
 
+ConversionResult::~ConversionResult() {
+    delete target;
+}
+
 Converter::Task::Task(std::shared_ptr<const RawData>& Data,
     const std::string& Source, const std::string& Destination,
     std::shared_ptr<ConversionResult> Result)
@@ -52,6 +56,7 @@ RawData* Converter::Convert(std::shared_ptr<const RawData> Data,
     const std::string& Source, const char *const Destination)
 {
     // Call conversion method directly.
+    return nullptr;
 }
 
 std::vector<std::string> Converter::PreferredConversionSourceFormats(
