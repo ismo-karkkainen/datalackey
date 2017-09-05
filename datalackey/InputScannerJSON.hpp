@@ -2,7 +2,7 @@
 //  InputScannerJSON.hpp
 //  datalackey
 //
-//  Created by Ismo Kärkkäinen on 30.5.17.
+//  Created by Ismo Kärkkäinen on 4.9.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
@@ -11,15 +11,12 @@
 
 
 #include "InputScanner.hpp"
-#include "Structure.hpp"
-#include <stack>
 
 
 class InputScannerJSON : public InputScanner {
 private:
-    // Stack for found structures. Individual values need not be identified
-    // but one has to know if inside string etc.
-    std::stack<Structure> open;
+    // Counter for open structures. One has to know if inside string etc.
+    int open_something;
     bool in_string;
     bool escaping;
     bool bad_stream;

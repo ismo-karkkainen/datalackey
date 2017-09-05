@@ -7,29 +7,45 @@
 //
 
 #include "StdIn.hpp"
-#include <iostream>
+#include <sys/select.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
+#include <cerrno>
 
 
-const size_t ReadBlockSize = 65536;
+StdIn::StdIn()
+    : eof(false)
+{ }
 
 StdIn::~StdIn() {
 }
 
-std::streamsize StdIn::Read(RawData& Buffer) {
-    std::streamsize total = 0;
-    while (true) {
-        char* buf = Buffer.Get(ReadBlockSize);
-        std::cin.read(buf, ReadBlockSize);
-        std::streamsize count = std::cin.gcount();
-        total += count;
-        if (count < ReadBlockSize) {
-            Buffer.Discard(ReadBlockSize - count);
-            break;
-        }
+int StdIn::Read(RawData& Buffer) {
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 0;
+    fd_set stdin;
+    FD_ZERO(&stdin);
+    FD_SET(0, &stdin);
+    errno = 0;
+    int avail = pselect(1, &stdin, nullptr, nullptr, &ts, nullptr);
+    if (avail <= 0) {
+        eof = avail < 0 && errno == EBADF;
+        return 0;
     }
+    char* buf = Buffer.Get(avail);
+    errno = 0;
+    int total = read(0, buf, avail);
+    if (total <= 0) {
+        eof = total == 0 || total < 0 && !(errno == EAGAIN || errno == EINTR);
+        total = 0;
+    }
+    if (total < avail)
+        Buffer.Discard(avail - total);
     return total;
 }
 
 bool StdIn::Ended() {
-    return !std::cin.good() || std::cin.eof();
+    return eof;
 }

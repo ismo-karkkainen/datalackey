@@ -180,6 +180,7 @@ void Output::Ended(OutputItemBuffer& IB) {
     // Should find and free if ended and zero-size even if no channel?
     if (IB.Channel() == nullptr)
         return;
+    IB.Channel()->Flush();
     for (size_t k = 0; k < mains.size(); ++k)
         if (mains[k].second == &IB) {
             mains[k].second = nullptr;

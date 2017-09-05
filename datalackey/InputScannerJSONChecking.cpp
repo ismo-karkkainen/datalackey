@@ -1,24 +1,24 @@
 //
-//  InputScannerJSON.cpp
+//  InputScannerJSONChecking.cpp
 //  datalackey
 //
-//  Created by Ismo Kärkkäinen on 4.9.17.
+//  Created by Ismo Kärkkäinen on 30.5.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#include "InputScannerJSON.hpp"
+#include "InputScannerJSONChecking.hpp"
 #include <tuple>
 #include <cassert>
 
 
 std::tuple<InputScanner::Recipient, RawData::Iterator, RawData::Iterator>
-InputScannerJSON::scan_input(InputScanner::Recipient Previous,
+InputScannerJSONChecking::scan_input(InputScanner::Recipient Previous,
     RawData::Iterator RangeBegin, RawData::Iterator RangeEnd)
 {
     if (bad_stream)
         return std::make_tuple(InputScanner::Discard, RangeBegin, RangeEnd);
     InputScanner::Recipient next = Previous;
-    if (open_something == 0) {
+    if (open.empty()) {
         // Start something new, possibly.
         switch (*RangeBegin) {
         case '[':
@@ -28,13 +28,13 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             next = InputScanner::Data;
             break;
         default:
-            next = InputScanner::Discard; // Top-level white-space. Or error.
+            next = InputScanner::Discard;
             break;
         }
     }
     // Could arrange this to first check for state and then loop inside it.
     for (RawData::Iterator curr = RangeBegin; curr != RangeEnd; ++curr) {
-        if (open_something == 0 && curr != RangeBegin && next != InputScanner::Discard)
+        if (open.empty() && curr != RangeBegin && next != InputScanner::Discard)
         {
             // Something ended and we just skipped its end.
             return std::make_tuple(next, RangeBegin, curr);
@@ -50,70 +50,77 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
         }
         switch (*curr) {
         case '[':
-        case '{':
-            if (open_something == 0 && next == InputScanner::Discard)
+            if (open.empty() && next == InputScanner::Discard)
                 return std::make_tuple(
                     InputScanner::Discard, RangeBegin, curr);
-                // Item starts, curr will be first character next time around.
-            ++open_something;
+                // curr will be first character next time around.
+            open.push(Array);
             break;
         case ']':
-            --open_something;
-            if (open_something == 0 && next == InputScanner::Message)
-                next = InputScanner::MessageEnd;
-            else if (open_something < 0) {
+            if (open.top() != Array) {
                 bad_stream = true;
+                // Ought to construct the closing array.
                 return std::make_tuple(InputScanner::DiscardRetroactively,
                     RangeBegin, RangeEnd);
             }
+            open.pop();
+            if (open.empty() && next == InputScanner::Message)
+                next = InputScanner::MessageEnd;
+            break;
+        case '{':
+            if (open.empty() && next == InputScanner::Discard)
+                return std::make_tuple(
+                    InputScanner::Discard, RangeBegin, curr);
+            open.push(Dictionary);
             break;
         case '}':
-            --open_something;
-            if (open_something == 0 && next == Data)
-                next = InputScanner::DataEnd;
-            else if (open_something < 0) {
+            if (open.top() != Dictionary) {
                 bad_stream = true;
                 return std::make_tuple(InputScanner::DiscardRetroactively,
                     RangeBegin, RangeEnd);
             }
+            open.pop();
+            if (open.empty() && next == Data)
+                next = InputScanner::DataEnd;
             break;
         case '"':
-            if (0 < open_something) {
-                in_string = true;
-                break;
+            if (open.empty()) {
+                bad_stream = true;
+                return std::make_tuple(InputScanner::DiscardRetroactively,
+                    RangeBegin, RangeEnd);
             }
-            bad_stream = true;
-            return std::make_tuple(InputScanner::DiscardRetroactively,
-                RangeBegin, RangeEnd);
+            in_string = true;
+            break;
         case ' ':
         case '\t':
         case '\n':
         case '\r':
             break; // Ignore whitespace always.
         default:
-            if (0 < open_something)
-                break;
-            // Non-whitespace between items not allowed.
-            bad_stream = true;
-            return std::make_tuple(InputScanner::DiscardRetroactively,
-                RangeBegin, RangeEnd);
+            if (open.empty()) {
+                // Non-whitespace between items not allowed.
+                bad_stream = true;
+                return std::make_tuple(InputScanner::DiscardRetroactively,
+                    RangeBegin, RangeEnd);
+            }
+            break;
         }
     }
     return std::tie(next, RangeBegin, RangeEnd); // Used all.
 }
 
-InputScannerJSON::InputScannerJSON(
+InputScannerJSONChecking::InputScannerJSONChecking(
     InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS)
-    : InputScanner(IC, MH, SDS), open_something(0),
-    in_string(false), escaping(false), bad_stream(false)
+    : InputScanner(IC, MH, SDS), in_string(false), escaping(false),
+    bad_stream(false)
 {
     assert(MH.Format() == nullptr || strcmp(Format(), MH.Format()) == 0);
     assert(strcmp(Format(), SDS.Format()) == 0);
 }
 
-InputScannerJSON::~InputScannerJSON() {
+InputScannerJSONChecking::~InputScannerJSONChecking() {
 }
 
-const char* const InputScannerJSON::Format() const {
+const char* const InputScannerJSONChecking::Format() const {
     return "JSON";
 }

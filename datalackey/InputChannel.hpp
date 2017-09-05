@@ -18,7 +18,7 @@ class InputChannel {
 public:
     virtual ~InputChannel();
     // Append any data there may be. Nothing if no data available.
-    virtual std::streamsize Read(RawData& Buffer) = 0;
+    virtual int Read(RawData& Buffer) = 0;
     // Return true if the channel has closed.
     virtual bool Ended() = 0;
 };

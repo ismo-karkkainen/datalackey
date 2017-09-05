@@ -16,6 +16,7 @@
 #include "InputScannerJSON.hpp"
 #include <cstring>
 #include <ctime>
+#include <iostream>
 
 int main(int argc, char** argv) {
     JSONEncoder enc;
