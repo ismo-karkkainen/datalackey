@@ -19,7 +19,6 @@ private:
     int open_something;
     bool in_string;
     bool escaping;
-    bool bad_stream;
 
 public:
     std::tuple<Recipient, RawData::Iterator, RawData::Iterator>

@@ -21,21 +21,24 @@ const char *const MessagePassThrough::Format() const {
     return nullptr;
 }
 
-void MessagePassThrough::Input(RawData::Iterator& Start, RawData::Iterator& End)
+bool MessagePassThrough::Input(RawData::Iterator& Start, RawData::Iterator& End)
 {
     if (writer == nullptr)
         writer = out.Writable(true);
     writer->Write(Start, End);
+    return true;
 }
 
-void MessagePassThrough::End() {
+bool MessagePassThrough::End() {
     delete writer;
     writer = nullptr;
+    return true;
 }
 
 void MessagePassThrough::Discard(
     RawData::Iterator& Start, RawData::Iterator& End)
 {
+    // If writing, the error is someone else's problem.
     if (writer != nullptr && Start != End)
         writer->Write(Start, End);
     this->End();

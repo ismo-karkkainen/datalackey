@@ -26,35 +26,39 @@ void input_scanner(InputScanner* IS) {
         RawData::Iterator begin = IS->buffer.Begin();
         RawData::Iterator end = begin;
         do {
+            bool bad = false;
             InputScanner::Recipient recipient;
             std::tie(recipient, begin, end) =
                 IS->scan_input(previous, begin, IS->buffer.End());
             switch (recipient) {
             case InputScanner::Discard:
-                break;
+                break; // Throw blank data away.
             case InputScanner::DiscardRetroactively:
-                if (previous == InputScanner::Data) {
+                // If passing data in, tell to discard it.
+                if (previous == InputScanner::Data)
                     IS->data_sink.Discard(begin, end);
-                } else if (previous == InputScanner::Message) {
+                else if (previous == InputScanner::Message)
                     IS->message_sink.Discard(begin, end);
-                }
-                end = IS->buffer.End();
                 break;
             case InputScanner::Data:
-                IS->data_sink.Input(begin, end);
+                bad = !IS->data_sink.Input(begin, end);
                 break;
             case InputScanner::DataEnd:
-                IS->data_sink.Input(begin, end);
-                IS->data_sink.End();
+                bad = !IS->data_sink.Input(begin, end);
+                bad = !IS->data_sink.End() || bad;
+                recipient = InputScanner::Discard;
                 break;
             case InputScanner::Message:
-                IS->message_sink.Input(begin, end);
+                bad = !IS->message_sink.Input(begin, end);
                 break;
             case InputScanner::MessageEnd:
-                IS->message_sink.Input(begin, end);
-                IS->message_sink.End();
+                bad = !IS->message_sink.Input(begin, end);
+                bad = !IS->message_sink.End() || bad;
+                recipient = InputScanner::Discard;
                 break;
             }
+            if (bad)
+                recipient = InputScanner::DiscardRetroactively;
             begin = end;
             previous = recipient;
         } while (end != IS->buffer.End());

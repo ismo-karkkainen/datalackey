@@ -27,7 +27,7 @@ const char *const StorageDataSinkJSON::Format() const {
     return "JSON";
 }
 
-void StorageDataSinkJSON::Input(
+bool StorageDataSinkJSON::Input(
     RawData::Iterator& Start, RawData::Iterator& End)
 {
     // Split to key, value pairs and pass each pair to storage as soon as value
@@ -43,7 +43,7 @@ void StorageDataSinkJSON::Input(
                 part = InKey;
             } else {
                 part = BadInput;
-                return;
+                return false;
             }
             break;
         case InKey:
@@ -74,7 +74,7 @@ void StorageDataSinkJSON::Input(
                 break;
             default:
                 part = BadInput;
-                return;
+                return false;
             }
             break;
         case InColon:
@@ -90,7 +90,7 @@ void StorageDataSinkJSON::Input(
                 break;
             default:
                 part = BadInput;
-                return;
+                return false;
             }
             break;
         case InValue:
@@ -150,25 +150,26 @@ void StorageDataSinkJSON::Input(
             break;
         case InEnd:
         case BadInput:
-            return; // Everything until End is called is suspect.
+            return false; // Everything until End is called is suspect.
         }
     }
+    return true;
 }
 
-void StorageDataSinkJSON::End() {
+bool StorageDataSinkJSON::End() {
     // Re-set things needed to keep track of keys and values.
     part = InHead;
     open_dicts = open_arrays = 0;
     in_string = escaping = false;
     key.clear();
     value.Clear();
+    return true;
 }
 
 void StorageDataSinkJSON::Discard(
     RawData::Iterator& Start, RawData::Iterator& End)
 {
-    // Whatever we have, dump and free memory. No valid input coming.
-    part = BadInput;
-    key.clear();
+    // Probably not getting any data.
     value.Clear(true);
+    this->End();
 }
