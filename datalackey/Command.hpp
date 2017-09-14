@@ -27,15 +27,9 @@ public:
     virtual ~Command();
     const std::string& Name() const { return name; }
 
-    // Perform command, take input in some format. Error message if no command.
+    // First item in the array equals Name().
     virtual void Perform(nlohmann::json& JSONCommand) = 0;
-    virtual void Help() = 0;
 };
 
-/*
-Incoming array from controller is treated as a command and will be handled by
-a derived class. The entire array is passed in and the first word is the
-command. An identifier in any case.
-*/
 
 #endif /* Command_hpp */

@@ -61,6 +61,3 @@ void ListCommand::Perform(nlohmann::json& JSONCommand) {
     *writer << End << End; // Close label dictionary and message array.
     delete writer;
 }
-
-void ListCommand::Help() {
-}

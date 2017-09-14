@@ -9,38 +9,13 @@
 #include <iostream>
 
 int main(int argc, const char * argv[]) {
-    // Create a mapping from command/module name to a singleton that creates the
-    // object as needed.
-    // Need factory function with suitable parameters.
-    // Maybe instead of object pointers, we get the singleton pointer and it
-    // will transparently access the actual value. Maybe like smart pointer.
-    // Looking like smart pointer could handle the case of something failing
-    // during construction. Or if passed around, an actual copyable smart pointer?
-
-    // Needed:
-    // Input handling.
-    // Command handling.
-    // History class? Quite simple operation.
-    // Helper class for finding all files under a given directory.
-    // Class to deal with output, errors, and warnings.
-    // Transfer class and derived classes.
-    // Format classes and then conversions between them.
-    
-    // Generally needs a way to pass values to an element. So config command
-    // with element name and all strings after that passed as they are? Works
-    // as a general piece.
-    // Element has to have a way to tell what it expects. For user help output.
-    // Maybe via normal message output. Call a help method in element.
-
     std::cout << "Hello, World!\n";
     return 0;
 }
 
 /*
  Komennot ja tarvittavat moduulit
- - Set, varasto, historia
  - Dump, varasto (nimeksi get?)
- - History, historia ja lokitietoja, vain datan luontikomennot.
  - Initialize, varasto
  - List, varasto
  - Delete, varasto (remove?)
@@ -79,42 +54,13 @@ int main(int argc, const char * argv[]) {
  - Moduulin nimi on kiinnitetty ylemmällä tasolla koska moduuleja on rajatusti.
  - Moduuli voi määrittää mitä se ottaa vapaasti.
  - Ainoa rajoitus on, että merkkijonoesitys.
- - Moduulin on osattava kertoa helppitekstissä mitä sisällön on oltava tai onko
-   sitä ollenkaan.
  - Kaikkia komentoja vastaa moduuli ja joillekin toiminnoille moduulin pitää
    tukea muita. Voisi avata oven esim. set-komennon syötteiden käsittelylle.
- - Jos komento on moduuli, niin sitten helpin on käsiteltävä myös käyttö.
- - Eli help command on oma helppinsä ja help config on sitten omansa. Help voisi
-   päteä vain komentoon ja jos halutaan config help niin se tulostaa kaikkien
-   moduulien konfiguraatioiden helpit.
- - Olisiko oltava spesifinen metodi jokaiselle helpille vai pitäisikö olla
-   geneerinen joka ottaa tunnisteen? Jälkimmäinen joustavampi.
- - Config komennon on sitten tunnettava kaikki modulit.
  - Moduulilla joko on komento tai ei. Sama pätee konfiguraatioon. Nämä voivat
    olla olemassa toisistaan riippumatta.
- - Kokoelma moduuleista on kätevä helpille ja configille. Muuten riittää antaa
-   suoraan kaikki tarvittavat.
  - Kokelman luo ohjelma ja se on kuvaus nimeltä objektille. Ohjelma hoitaa nimeämisen.
- - Jos config ei saa parametreja niin tulostetaan nykyinen konfiguraatio. Jos ei
-   ole moduulia niin käydään läpi kaikki.
  - Tulosteet siinä järjestyksessä kuin parametrit. Jos ei annettu, niin joku
    ohjelman sisäinen järjestys.
- - Helppien suhteen lokalisaation tuki jotenkin. Ainakin katsottava kuinka toteutetaan.
- - Moduuli ei lue konfiguraatiota tai muuta kuin vasta tarvittaessa.
  - Syötteiden käsittely vaatinee jonkin apuluokan.
- - Ohjelma käynnistettäessä serve-komento on erikoistapaus koska se alkaa lukemaan
-   muita komentoja ja sen läsnäolo määrittää mitä luokkaa käytetään viestien
-   välitykseen. Jos ei serve-komentoa niin stdout/stderr tulostusobjekti, muutoin
-   pitää tarkistaa formaatti ja siirtotapa.
- - Serve on sitten käsiteltävä eräänlaisena erikoistapauksena joka käynnistää
-   silmukan. Tosin jos ei ole serveä niin sitten annettu komentorivi olisi ainoa
-   syöte silmukalle.
- - Helppiteksti voisi olla jotain joka vaatii rajallisen alustuksen. Eli olisiko
-   parametrien luku oma luokka yhdessä objektin kanssa vai olisiko objektin
-   toimittava sisäisesti laiskasti jotta syötteet käsitellään sisäisesti mutta
-   helpin saa vaikka konfiguraatio rikki.
- - Jos konfiguraatio on laiskasti luettu niin se riittää siihen, että helppi
-   saadaan ulos tai syötteet prosessoitua ilman, että konfiguraatio rikkonaisuus
-   häiritsee.
 
 */

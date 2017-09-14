@@ -22,7 +22,6 @@ public:
     ~ListCommand();
 
     void Perform(nlohmann::json& JSONCommand);
-    void Help();
 };
 
 #endif /* ListCommand_hpp */
