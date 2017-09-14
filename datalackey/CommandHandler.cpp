@@ -7,6 +7,7 @@
 //
 
 #include "CommandHandler.hpp"
+#include "Value_t.hpp"
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -23,7 +24,8 @@ const char *const CommandHandler::Format() const {
     return "JSON";
 }
 
-bool CommandHandler::Input(RawData::Iterator& Start, RawData::Iterator& End)
+bool CommandHandler::Input(
+    RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     buffer.Append(Start, End);
     return true;
@@ -31,15 +33,20 @@ bool CommandHandler::Input(RawData::Iterator& Start, RawData::Iterator& End)
 
 bool CommandHandler::End() {
     if (buffer.Empty())
-        return; // Probably got discarded.
+        return true;
     json cmd;
     try {
         cmd = json::parse(buffer.CBegin(), buffer.CEnd());
+        buffer.Clear();
     }
     catch (const std::exception& e) {
-        std::string err("[ \"error\", \"command\", \"format\" ]");
+        buffer.Clear();
         OutputItem* writer = out.Writable();
-        *writer << ValueRef<std::string>(err) << End;
+        *writer << Structure::Array
+            << ValueRef<std::string>("error")
+            << ValueRef<std::string>("command")
+            << ValueRef<std::string>("format")
+            << Structure::End;
         delete writer;
         return false;
     }
@@ -47,21 +54,27 @@ bool CommandHandler::End() {
     std::string command = cmd[0];
     auto iter = handlers.find(command);
     if (iter == handlers.end()) {
-        std::string err("[ \"error\", \"command\", \"unknown\" ]");
         OutputItem* writer = out.Writable();
-        *writer << ValueRef<std::string>(err) << End;
+        *writer << Structure::Array
+            << ValueRef<std::string>("error")
+            << ValueRef<std::string>("command")
+            << ValueRef<std::string>("unknown")
+            << Structure::End;
         delete writer;
         return false;
     }
     iter->second->Perform(cmd);
+    return true;
 }
 
-void CommandHandler::Discard(RawData::Iterator& Start, RawData::Iterator& End) {
+void CommandHandler::Discard(
+    RawData::ConstIterator& Start, RawData::ConstIterator& End)
+{
     buffer.Clear();
 }
 
 void CommandHandler::AddCommand(Command* C) {
-    auto iter = handler.find(C->Name());
-    assert(iter == handler.end());
-    handler[C->Name()] = C;
+    auto iter = handlers.find(C->Name());
+    assert(iter == handlers.end());
+    handlers[C->Name()] = C;
 }

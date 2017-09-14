@@ -16,7 +16,7 @@ OutputChannel& StdOut::operator<<(const RawData& Buffer) {
     return *this;
 }
 
-void StdOut::Write(RawData::Iterator& Start, RawData::Iterator& End) {
+void StdOut::Write(RawData::ConstIterator& Start, RawData::ConstIterator& End) {
     while (Start != End)
         std::cout << *Start++;
 }

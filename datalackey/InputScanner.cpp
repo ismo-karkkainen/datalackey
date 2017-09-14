@@ -23,13 +23,13 @@ void input_scanner(InputScanner* IS) {
             continue;
         }
         // Use all data piece by piece and keep track of used part.
-        RawData::Iterator begin = IS->buffer.Begin();
-        RawData::Iterator end = begin;
+        RawData::ConstIterator begin = IS->buffer.CBegin();
+        RawData::ConstIterator end = begin;
         do {
             bool bad = false;
             InputScanner::Recipient recipient;
             std::tie(recipient, begin, end) =
-                IS->scan_input(previous, begin, IS->buffer.End());
+                IS->scan_input(previous, begin, IS->buffer.CEnd());
             switch (recipient) {
             case InputScanner::Discard:
                 break; // Throw blank data away.
@@ -61,7 +61,7 @@ void input_scanner(InputScanner* IS) {
                 recipient = InputScanner::DiscardRetroactively;
             begin = end;
             previous = recipient;
-        } while (end != IS->buffer.End());
+        } while (end != IS->buffer.CEnd());
         IS->buffer.Clear();
     }
 }

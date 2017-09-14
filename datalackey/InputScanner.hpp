@@ -96,9 +96,10 @@ public:
     };
 
 protected:
-    virtual std::tuple<Recipient, RawData::Iterator, RawData::Iterator>
-        scan_input(Recipient Previous,
-            RawData::Iterator RangeBegin, RawData::Iterator RangeEnd) = 0;
+    virtual
+        std::tuple<Recipient, RawData::ConstIterator, RawData::ConstIterator>
+        scan_input(Recipient Previous, RawData::ConstIterator RangeBegin,
+            RawData::ConstIterator RangeEnd) = 0;
 
     friend void input_scanner(InputScanner* IS);
 

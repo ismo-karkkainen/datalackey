@@ -35,6 +35,7 @@ public:
 
     void Append(ConstIterator From, ConstIterator To);
     void Append(const char Item);
+    void Append(const char *const Item);
 
     void Swap(RawData& RD);
 };

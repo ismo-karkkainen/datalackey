@@ -18,11 +18,13 @@ public:
     virtual ~MessageHandler();
     virtual const char *const Format() const = 0;
     // Pass message array using this.
-    virtual bool Input(RawData::Iterator& Start, RawData::Iterator& End) = 0;
+    virtual bool Input(
+        RawData::ConstIterator& Start, RawData::ConstIterator& End) = 0;
     // Indicate end of message item with this.
     virtual bool End() = 0;
     // Error in message, throw away. Possible closing part passed.
-    virtual void Discard(RawData::Iterator& Start, RawData::Iterator& End) = 0;
+    virtual void Discard(
+        RawData::ConstIterator& Start, RawData::ConstIterator& End) = 0;
 };
 
 

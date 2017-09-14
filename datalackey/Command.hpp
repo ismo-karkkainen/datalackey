@@ -16,18 +16,20 @@
 
 // Base class for command handlers.
 class Command {
-private:
+protected:
     Output& out;
+
+private:
     std::string name;
 
 public:
     Command(const char *const Name, Output& Out);
     virtual ~Command();
-    const std::string& Name() const { return name; }
+    const std::string& Name() const { return name; }
 
     // Perform command, take input in some format. Error message if no command.
-    virtual void Perform(nlohmann::json::json& JSONCommand);
-    virtual void Help();
+    virtual void Perform(nlohmann::json& JSONCommand) = 0;
+    virtual void Help() = 0;
 };
 
 /*

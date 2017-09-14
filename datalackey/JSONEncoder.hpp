@@ -15,7 +15,7 @@
 class JSONEncoder : public Encoder {
 private:
     std::stack<Structure> open;
-    std::stack<bool> comma;
+    std::stack<int> counter;
 
     void add_separator(RawData& Buffer);
 

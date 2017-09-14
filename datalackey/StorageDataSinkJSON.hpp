@@ -33,9 +33,9 @@ public:
     StorageDataSinkJSON(Storage& S);
     ~StorageDataSinkJSON();
     const char *const Format() const;
-    bool Input(RawData::Iterator& Start, RawData::Iterator& End);
+    bool Input(RawData::ConstIterator& Start, RawData::ConstIterator& End);
     bool End();
-    void Discard(RawData::Iterator& Start, RawData::Iterator& End);
+    void Discard(RawData::ConstIterator& Start, RawData::ConstIterator& End);
 };
 
 

@@ -21,7 +21,8 @@ const char *const MessagePassThrough::Format() const {
     return nullptr;
 }
 
-bool MessagePassThrough::Input(RawData::Iterator& Start, RawData::Iterator& End)
+bool MessagePassThrough::Input(
+    RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     if (writer == nullptr)
         writer = out.Writable(true);
@@ -36,7 +37,7 @@ bool MessagePassThrough::End() {
 }
 
 void MessagePassThrough::Discard(
-    RawData::Iterator& Start, RawData::Iterator& End)
+    RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     // If writing, the error is someone else's problem.
     if (writer != nullptr && Start != End)

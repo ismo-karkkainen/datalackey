@@ -37,7 +37,8 @@ OutputItemBuffer& OutputItemBuffer::operator<<(const RawData& Data) {
     return *this;
 }
 
-void OutputItemBuffer::Write(RawData::Iterator& Start, RawData::Iterator& End)
+void OutputItemBuffer::Write(
+    RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     if (channel != nullptr)
         channel->Write(Start, End);
@@ -93,7 +94,8 @@ OutputItem& OutputItem::operator<<(const ValueReference& VR) {
     return *this;
 }
 
-void OutputItem::Write(RawData::Iterator& Start, RawData::Iterator& End)
+void OutputItem::Write(
+    RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     buffer.Write(Start, End);
 }

@@ -38,6 +38,12 @@ void RawData::Append(const char Item) {
     buffer.push_back(Item);
 }
 
+void RawData::Append(const char *const Item) {
+    const char* c = const_cast<const char*>(Item);
+    while (*c)
+        buffer.push_back(*c++);
+}
+
 void RawData::Swap(RawData& RD) {
     buffer.swap(RD.buffer);
 }

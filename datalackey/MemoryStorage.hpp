@@ -36,22 +36,23 @@ private:
     class Values {
     private:
         std::vector<std::shared_ptr<FormatData>> data;
-        std::mutex mutex;
+        mutable std::mutex mutex;
     public:
         Values(const char *const Format, RawData& Data);
         ~Values();
-        std::mutex& Mutex() { return mutex; } // Lock this before anything.
+        std::mutex& Mutex() const { return mutex; } // Lock this before anything.
         bool IsPresent(const std::string& Format);
-        std::vector<std::string> AvailableFormats();
+        std::vector<std::string> AvailableFormats() const;
         // Returns the item or nullptr.
         std::shared_ptr<const RawData> Get(const std::string& Format);
+        std::shared_ptr<const RawData> Get(const std::string& Format) const;
         // Creates the FormatData if not present. Returns nullptr if converted.
         // First indicates that the value was not present but is convertable.
         std::pair<bool,std::shared_ptr<ConversionResult>> Receiver(
             const std::string& Format);
     };
     std::map<std::string,std::shared_ptr<Values>> label2data;
-    std::mutex label2data_mutex;
+    mutable std::mutex label2data_mutex;
 
     // Finds the most suitable source format and returns the data or nullptr.
     std::shared_ptr<const RawData> find_source(std::shared_ptr<Values>& Value,
@@ -68,6 +69,8 @@ public:
     ~MemoryStorage();
 
     bool IsValid() const;
+
+    std::vector<std::tuple<std::string,std::string,size_t>> List() const;
 
     void Store(const std::string& Label, const char *const Format,
         RawData& Data);

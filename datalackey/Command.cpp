@@ -11,9 +11,3 @@
 Command::Command(const char *const Name, Output& Out) : out(Out), name(Name) { }
 
 Command::~Command() { }
-
-void Command::Perform() {
-    out << Error << "Not a command: " << name << "\n";
-}
-
-void Command::Help() { }

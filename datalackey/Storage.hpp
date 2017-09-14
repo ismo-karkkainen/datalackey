@@ -12,6 +12,8 @@
 #include "RawData.hpp"
 #include <memory>
 #include <string>
+#include <vector>
+#include <tuple>
 
 
 // Base class for Storage classes.
@@ -26,6 +28,9 @@ public:
     virtual ~Storage(); // Save upon destruction. Unlock.
 
     virtual bool IsValid() const = 0;
+
+    // Should return label, format, size.
+    virtual std::vector<std::tuple<std::string,std::string,size_t>> List() const = 0;
 
     virtual void Store(const std::string& Label, const char *const Format,
         RawData& Value) = 0;

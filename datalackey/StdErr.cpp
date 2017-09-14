@@ -16,7 +16,7 @@ OutputChannel& StdErr::operator<<(const RawData& Buffer) {
     return *this;
 }
 
-void StdErr::Write(RawData::Iterator& Start, RawData::Iterator& End) {
+void StdErr::Write(RawData::ConstIterator& Start, RawData::ConstIterator& End) {
     while (Start != End)
         std::cerr << *Start++;
 }

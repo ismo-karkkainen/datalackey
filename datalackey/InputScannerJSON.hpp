@@ -21,9 +21,9 @@ private:
     bool escaping;
 
 public:
-    std::tuple<Recipient, RawData::Iterator, RawData::Iterator>
+    std::tuple<Recipient, RawData::ConstIterator, RawData::ConstIterator>
         scan_input(InputScanner::Recipient Previous,
-            RawData::Iterator RangeBegin, RawData::Iterator RangeEnd);
+            RawData::ConstIterator RangeBegin, RawData::ConstIterator RangeEnd);
 
 public:
     InputScannerJSON(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS);

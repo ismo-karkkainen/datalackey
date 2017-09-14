@@ -28,11 +28,11 @@ const char *const StorageDataSinkJSON::Format() const {
 }
 
 bool StorageDataSinkJSON::Input(
-    RawData::Iterator& Start, RawData::Iterator& End)
+    RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     // Split to key, value pairs and pass each pair to storage as soon as value
     // has been fully stored locally.
-    for (RawData::Iterator curr = Start; curr != End; ++curr) {
+    for (RawData::ConstIterator curr = Start; curr != End; ++curr) {
         switch (part) {
         case InHead:
             // No incoming leading white-space, only allow {.
@@ -167,7 +167,7 @@ bool StorageDataSinkJSON::End() {
 }
 
 void StorageDataSinkJSON::Discard(
-    RawData::Iterator& Start, RawData::Iterator& End)
+    RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     // Probably not getting any data.
     value.Clear(true);

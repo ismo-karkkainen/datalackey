@@ -13,20 +13,23 @@ void JSONEncoder::add_separator(RawData& Buffer) {
     if (open.empty())
         return;
     if (open.top() == Array) {
-        if (comma.top())
+        if (counter.top())
             Buffer.Append(',');
         else {
-            comma.pop();
-            comma.push(true);
+            counter.pop();
+            counter.push(1);
         }
     } else {
-        if (comma.top())
-            Buffer.Append(',');
-        else
+        if (counter.top() == 1) {
             Buffer.Append(':');
-        bool old = comma.top();
-        comma.pop();
-        comma.push(!old);
+            counter.pop();
+            counter.push(2);
+        } else {
+            if (counter.top() == 2)
+                Buffer.Append(',');
+            counter.pop();
+            counter.push(1);
+        }
     }
 }
 
@@ -42,23 +45,35 @@ bool JSONEncoder::Encode(RawData& Buffer, Structure S) {
         add_separator(Buffer);
         Buffer.Append('[');
         open.push(S);
-        comma.push(false);
+        counter.push(0);
         break;
     case Dictionary:
         add_separator(Buffer);
         Buffer.Append('{');
         open.push(S);
-        comma.push(false);
+        counter.push(0);
         break;
     case End:
         if (open.top() == Array)
             Buffer.Append(']');
         else if (open.top() == Dictionary) {
-            //if (!comma.top()) // Would be an error. Exception? What?
+            // An opportunity to check for missing value in key:value.
             Buffer.Append('}');
         }
         open.pop();
-        comma.pop();
+        counter.pop();
+        break;
+    case True:
+        add_separator(Buffer);
+        Buffer.Append("true");
+        break;
+    case False:
+        add_separator(Buffer);
+        Buffer.Append("false");
+        break;
+    case Null:
+        add_separator(Buffer);
+        Buffer.Append("null");
         break;
     }
     return true;
@@ -76,9 +91,7 @@ bool JSONEncoder::Encode(RawData& Buffer, const ValueReference& VR) {
         }
         Buffer.Append('"');
     } else {
-        std::string s = VR.String();
-        for (auto c: s)
-            Buffer.Append(c);
+        Buffer.Append(VR.String().c_str());
     }
     return true;
 }

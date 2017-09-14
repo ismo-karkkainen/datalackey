@@ -79,7 +79,7 @@ bool MemoryStorage::Values::IsPresent(const std::string& Format) {
     return false;
 }
 
-std::vector<std::string> MemoryStorage::Values::AvailableFormats() {
+std::vector<std::string> MemoryStorage::Values::AvailableFormats() const {
     std::vector<std::string> results;
     for (size_t k = 0; k < data.size(); ++k)
         if (data[k]->data) // Ignore data that is being converted.
@@ -95,6 +95,15 @@ std::shared_ptr<const RawData> MemoryStorage::Values::Get(
             auto dc = data[k]->CheckDataConversion();
             return dc.first;
         }
+    return nullptr;
+}
+
+std::shared_ptr<const RawData> MemoryStorage::Values::Get(
+    const std::string& Format) const
+{
+    for (size_t k = 0; k < data.size(); ++k)
+        if (data[k]->format == Format)
+            return data[k]->data;
     return nullptr;
 }
 
@@ -147,6 +156,22 @@ MemoryStorage::~MemoryStorage() {
 
 bool MemoryStorage::IsValid() const {
     return true;
+}
+
+std::vector<std::tuple<std::string,std::string,size_t>> MemoryStorage::List() const
+{
+    std::vector<std::tuple<std::string,std::string,size_t>> results;
+    std::lock_guard<std::mutex> lock(label2data_mutex);
+    for (auto iter : label2data) {
+        std::lock_guard<std::mutex> value_lock(iter.second->Mutex());
+        std::vector<std::string> avail = iter.second->AvailableFormats();
+        for (auto format : avail) {
+            std::shared_ptr<const RawData> data = iter.second->Get(format);
+            results.push_back(
+                std::make_tuple(iter.first, format, data->Size()));
+        }
+    }
+    return results;
 }
 
 void MemoryStorage::Store(const std::string& Label, const char *const Format,

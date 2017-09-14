@@ -76,7 +76,7 @@ public:
     // Normal output.
     OutputItemBuffer& operator<<(const RawData& Data);
     // Pass-through from input.
-    void Write(RawData::Iterator& Start, RawData::Iterator& End);
+    void Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
     void End(); // Indicates there will be no more data.
 };
 
@@ -95,7 +95,7 @@ public:
     ~OutputItem();
     OutputItem& operator<<(Structure S);
     OutputItem& operator<<(const ValueReference& VR);
-    void Write(RawData::Iterator& Start, RawData::Iterator& End);
+    void Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
 };
 
 class Output {

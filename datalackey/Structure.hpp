@@ -14,7 +14,10 @@
 enum Structure {
     Array = 2247, // Each value is a ValueReference or array/dictionary.
     Dictionary, // Presumes key/value pairs in that order. One value each.
-    End // End of any of the previous.
+    End, // End of any of the previous.
+    True,
+    False,
+    Null
 };
 
 #endif /* Structure_hpp */

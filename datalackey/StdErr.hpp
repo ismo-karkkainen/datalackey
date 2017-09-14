@@ -17,7 +17,7 @@ public:
     ~StdErr();
 
     OutputChannel& operator<<(const RawData& Buffer);
-    void Write(RawData::Iterator& Start, RawData::Iterator& End);
+    void Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
     void Flush();
 };
 

@@ -43,7 +43,7 @@ int StdIn::Read(RawData& Buffer) {
         errno = 0;
         int got = read(0, buf, ReadBlockSize);
         if (got <= 0) {
-            eof = got == 0 || got < 0 && !(errno == EAGAIN || errno == EINTR);
+            eof = got == 0 || (got < 0 && !(errno == EAGAIN || errno == EINTR));
             got = 0;
         }
         total += got;

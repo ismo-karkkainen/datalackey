@@ -11,13 +11,14 @@
 #include <cassert>
 
 
-std::tuple<InputScanner::Recipient, RawData::Iterator, RawData::Iterator>
+std::tuple<InputScanner::Recipient, RawData::ConstIterator, RawData::ConstIterator>
 InputScannerJSON::scan_input(InputScanner::Recipient Previous,
-    RawData::Iterator RangeBegin, RawData::Iterator RangeEnd)
+    RawData::ConstIterator RangeBegin, RawData::ConstIterator RangeEnd)
 {
     if (Previous == InputScanner::DiscardRetroactively) {
         // Allow zero byte in the stream to reset it.
-        for (RawData::Iterator curr = RangeBegin; curr != RangeEnd; ++curr) {
+        for (RawData::ConstIterator curr = RangeBegin; curr != RangeEnd; ++curr)
+        {
             if (*curr)
                 continue;
             in_string = escaping = false;
@@ -29,7 +30,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             InputScanner::DiscardRetroactively, RangeBegin, RangeEnd);
     }
     // Could arrange this to first check for state and then loop inside it.
-    for (RawData::Iterator curr = RangeBegin; curr != RangeEnd; ++curr) {
+    for (RawData::ConstIterator curr = RangeBegin; curr != RangeEnd; ++curr) {
         if (*curr == 0) {
             // A resetting zero byte interrupts everything we are doing.
             open_something = 0;
@@ -94,7 +95,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             return std::make_tuple(InputScanner::DiscardRetroactively,
                 RangeBegin, ++curr);
     }
-    return std::tie(Previous, RangeBegin, RangeEnd); // Used all.
+    return std::make_tuple(Previous, RangeBegin, RangeEnd); // Used all.
 }
 
 InputScannerJSON::InputScannerJSON(

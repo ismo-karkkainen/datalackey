@@ -18,10 +18,12 @@ public:
     virtual ~StorageDataSink();
     virtual const char *const Format() const = 0;
     // Pass a data dictionary using this.
-    virtual bool Input(RawData::Iterator& Start, RawData::Iterator& End) = 0;
+    virtual bool Input(
+        RawData::ConstIterator& Start, RawData::ConstIterator& End) = 0;
     virtual bool End() = 0;
     // Error in data, throw away. Range may contain closing data.
-    virtual void Discard(RawData::Iterator& Start, RawData::Iterator& End) = 0;
+    virtual void Discard(
+        RawData::ConstIterator& Start, RawData::ConstIterator& End) = 0;
 };
 
 
