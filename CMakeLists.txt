@@ -30,6 +30,7 @@ list(APPEND JSONIO datalackey/InputScannerJSON.cpp)
 set(Commands datalackey/Command.cpp datalackey/CommandHandler.cpp)
 list(APPEND Commands datalackey/ListCommand.cpp)
 
+set(CommandLine datalackey/Options.cpp)
 
 #add_executable( test_FileLister datalackey/Encoder.cpp datalackey/JSONEncoder.cpp datalackey/OutputChannel.cpp datalackey/Output.cpp datalackey/Literal.cpp datalackey/StdOut.cpp datalackey/ValueReference.cpp datalackey/Literal.cpp datalackey/FileLister.cpp datalackey/tests/test_FileLister.cpp )
 
@@ -40,7 +41,7 @@ list(APPEND Commands datalackey/ListCommand.cpp)
 add_executable( test_MessagePassThrough ${StoreSources} ${IOSources} ${JSONIO} datalackey/tests/test_MessagePassThrough.cpp )
 
 
-add_executable( test_command ${StoreSources} ${IOSources} ${JSONIO} ${Commands} datalackey/tests/test_command.cpp )
+add_executable( test_command ${StoreSources} ${IOSources} ${JSONIO} ${Commands} ${CommandLine} datalackey/tests/test_command.cpp )
 
 # Add various components to source files list provided the list has not been
 # given from outside.
