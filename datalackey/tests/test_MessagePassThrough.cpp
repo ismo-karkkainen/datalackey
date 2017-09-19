@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     Output out(enc, out_channel);
     StdIn in_channel;
     MessagePassThrough mpt(out);
-    MemoryStorage storage;
+    MemoryStorage storage(0, 0);
     StorageDataSinkJSON front(storage);
     InputScannerJSON scanner(in_channel, mpt, front);
     scanner.Scan();

@@ -148,8 +148,9 @@ MemoryStorage::get(const std::string& Label)
         std::unique_lock<std::mutex>());
 }
 
-MemoryStorage::MemoryStorage() {
-}
+MemoryStorage::MemoryStorage(size_t UsedMegabyteLimit, size_t FreeMegabyteLimit)
+    : used_limit(UsedMegabyteLimit), free_limit(FreeMegabyteLimit)
+{ }
 
 MemoryStorage::~MemoryStorage() {
 }

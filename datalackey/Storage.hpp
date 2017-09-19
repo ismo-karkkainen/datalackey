@@ -24,8 +24,8 @@ class Storage {
     // Save data when changed.
 
 public:
-    Storage(); // Take directory. Find existing storage. Lock.
-    virtual ~Storage(); // Save upon destruction. Unlock.
+    Storage();
+    virtual ~Storage();
 
     virtual bool IsValid() const = 0;
 

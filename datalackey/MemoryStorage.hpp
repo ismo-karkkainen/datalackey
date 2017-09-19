@@ -63,9 +63,10 @@ private:
         const std::string& Label);
 
     Converter converter;
+    size_t used_limit, free_limit;
 
 public:
-    MemoryStorage();
+    MemoryStorage(size_t UsedMegabyteLimit, size_t FreeMegabyteLimit);
     ~MemoryStorage();
 
     bool IsValid() const;
