@@ -21,8 +21,8 @@ void Storage::Store(const std::string& Label, const std::string& Format,
     Store(Label, Format.c_str(), Value);
 }
 
-void Preload(const std::string& Label, const std::string& Format) {
-    Preload(Label, Format.c_str());
+bool Preload(const std::string& Label, const std::string& Format) {
+    return Preload(Label, Format.c_str());
 }
 
 bool IsReady(const std::string& Label, const std::string& Format) {
@@ -35,3 +35,8 @@ std::shared_ptr<const RawData> Data(const std::string& Label,
     return Data(Label, Format.c_str());
 }
 
+std::shared_ptr<const RawData> ReadyData(const std::string& Label,
+    const std::string& Format)
+{
+    return ReadyData(Label, Format.c_str());
+}

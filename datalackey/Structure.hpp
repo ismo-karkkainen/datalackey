@@ -17,7 +17,8 @@ enum Structure {
     End, // End of any of the previous.
     True,
     False,
-    Null
+    Null,
+    RawItem // Marks that one RawData will be directly written.
 };
 
 #endif /* Structure_hpp */

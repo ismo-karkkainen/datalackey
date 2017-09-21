@@ -184,40 +184,47 @@ void MemoryStorage::Store(const std::string& Label, const char *const Format,
     label2data[Label] = val;
 }
 
-void MemoryStorage::Delete(const std::string& Label) {
+bool MemoryStorage::Delete(const std::string& Label) {
     std::lock_guard<std::mutex> lock(label2data_mutex);
     auto iter = label2data.find(Label);
     if (iter != label2data.end()) {
         label2data.erase(iter);
+        return true;
     }
+    return false;
 }
 
 void MemoryStorage::Clean() {
     // Nothing to do as user can not mess up with memory.
 }
 
-void MemoryStorage::Preload(const std::string& Label, const char *const Format)
+bool MemoryStorage::Preload(const std::string& Label, const char *const Format)
 {
     auto vl = get(Label);
+    if (!vl.first)
+        return false; // There is no such label.
     std::shared_ptr<MemoryStorage::Values>& v = vl.first;
     std::string fmt(Format);
     if (v->IsPresent(fmt))
-        return;
+        return true;
     auto cr = v->Receiver(fmt);
     if (!cr.first)
-        return; // Already being converted.
+        return true; // Already being converted.
     std::string source_format;
     std::shared_ptr<const RawData> source = find_source(v, fmt, source_format);
-    if (source)
+    if (source) {
         converter.Convert(source, source_format, Format, cr.second);
-    // There was no way to perform the conversion. At the time anyway.
+        return true;
+    }
+    // No way to get source, now anyway. Could only happen if chain is needed.
+    return false;
 }
 
 bool MemoryStorage::IsReady(const std::string& Label, const char *const Format)
 {
     std::string fmt(Format);
     auto vl = get(Label);
-    return vl.first->IsPresent(fmt);
+    return vl.first && vl.first->IsPresent(fmt);
 }
 
 std::shared_ptr<const RawData> MemoryStorage::Data(const std::string& Label,
@@ -225,6 +232,8 @@ std::shared_ptr<const RawData> MemoryStorage::Data(const std::string& Label,
 {
     std::string fmt(Format);
     auto vl = get(Label);
+    if (!vl.first)
+        return std::shared_ptr<const RawData>(); // No such label.
     std::shared_ptr<MemoryStorage::Values>& v = vl.first;
     std::shared_ptr<const RawData> rd = v->Get(fmt);
     if (rd)
@@ -260,4 +269,17 @@ std::shared_ptr<const RawData> MemoryStorage::Data(const std::string& Label,
         vl.second.unlock();
     }
     return rd;
+}
+
+std::shared_ptr<const RawData> MemoryStorage::ReadyData(
+    const std::string& Label, const char *const Format)
+{
+    std::string fmt(Format);
+    auto vl = get(Label);
+    if (!vl.first)
+        return std::shared_ptr<const RawData>(); // No such label.
+    std::shared_ptr<const RawData> rd = vl.first->Get(fmt);
+    if (rd)
+        return rd;
+    return std::shared_ptr<const RawData>(); // Data not ready.
 }

@@ -95,7 +95,7 @@ public:
     ~OutputItem();
     OutputItem& operator<<(Structure S);
     OutputItem& operator<<(const ValueReference& VR);
-    void Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
+    void Write(RawData::ConstIterator Start, RawData::ConstIterator End);
 };
 
 class Output {

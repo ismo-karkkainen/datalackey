@@ -11,6 +11,7 @@
 
 #include "MessageHandler.hpp"
 #include "Command.hpp"
+#include "Output.hpp"
 #include <string>
 #include <map>
 
@@ -18,9 +19,15 @@
 class CommandHandler : public MessageHandler {
 protected:
     std::map<std::string,Command*> handlers;
+    Output& out;
+
+    // Returns false. Used on format error.
+    bool error(const char *const one);
+    // Returns true. For content errors.
+    bool error(const char *const one, const char *const two, const char *const three = nullptr);
 
 public:
-    CommandHandler();
+    CommandHandler(Output& Out);
     ~CommandHandler();
 
     // Ownership does not transfer. Best to destroy this object before these.

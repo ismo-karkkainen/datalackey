@@ -13,6 +13,8 @@
 #include "StdIn.hpp"
 #include "CommandHandlerJSON.hpp"
 #include "ListCommand.hpp"
+#include "GetCommand.hpp"
+#include "DeleteCommand.hpp"
 #include "MemoryStorage.hpp"
 #include "StorageDataSinkJSON.hpp"
 #include "InputScannerJSON.hpp"
@@ -50,6 +52,8 @@ static int HandleArguments(int argc, char** argv) {
     opt::Usage("Print help and exit.");
     opt::Doc("Commands:");
     opt::Doc("[ \"list\", identifier ] to list data labels.");
+    opt::Doc("[ \"get\", identifier, label1, label2, ... ] to get data.");
+    opt::Doc("[ \"delete\", identifier, label1, label2, ... ] to delete data.");
     if (opt::GivenOption('h', "help", argc, argv)) {
         opt::PrintUsage(std::cerr, "datalackey");
         return 0;
@@ -104,8 +108,12 @@ int main(int argc, char** argv) {
     assert(scanner != nullptr);
 
     // Add commands.
-    ListCommand lc("list", *out, *storage);
-    command_handler->AddCommand(&lc);
+    ListCommand list("list", *out, *storage);
+    command_handler->AddCommand(&list);
+    GetCommand get("get", *out, *storage, enc->Format());
+    command_handler->AddCommand(&get);
+    DeleteCommand del("delete", *out, *storage);
+    command_handler->AddCommand(&del);
 
     scanner->Scan();
     while (!scanner->Ended()) {

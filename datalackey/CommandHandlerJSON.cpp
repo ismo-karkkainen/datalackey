@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 
 CommandHandlerJSON::CommandHandlerJSON(Output& Out)
-    : out(Out)
+    : CommandHandler(Out)
 { }
 
 CommandHandlerJSON::~CommandHandlerJSON() {
@@ -41,44 +41,28 @@ bool CommandHandlerJSON::End() {
     }
     catch (const std::exception& e) {
         buffer.Clear();
-        OutputItem* writer = out.Writable();
-        *writer << Structure::Array
-            << ValueRef<std::string>("error")
-            << ValueRef<std::string>("command")
-            << ValueRef<std::string>("format")
-            << Structure::End;
-        delete writer;
-        return false;
+        return error("Format");
     }
     assert(cmd.is_array());
+    if (cmd.size() == 0)
+        return error("command", "missing");
+    if (cmd.size() == 1)
+        return error("identifier", "missing");
+    if (!cmd[0].is_string())
+        return error("command", "not-string");
+    if (!cmd[1].is_string())
+        return error("identifier", "not-string");
     std::string command = cmd[0];
+    std::string identifier = cmd[1];
     auto iter = handlers.find(command);
-    if (iter == handlers.end()) {
-        OutputItem* writer = out.Writable();
-        *writer << Structure::Array
-            << ValueRef<std::string>("error")
-            << ValueRef<std::string>("command")
-            << ValueRef<std::string>("unknown")
-            << Structure::End;
-        delete writer;
-        return true;
-    }
+    if (iter == handlers.end())
+        return error(identifier.c_str(), "command", "unknown");
     std::vector<std::string> args;
     for (size_t k = 1; k < cmd.size(); ++k) {
         if (cmd[k].is_string())
             args.push_back(cmd[k]);
-        else {
-            // The output format may not be JSON so we can not dump the value
-            // and pass it through as is. Hence treat as an error.
-            OutputItem* writer = out.Writable();
-            *writer << Structure::Array
-                << ValueRef<std::string>("error")
-                << ValueRef<std::string>("command")
-                << ValueRef<std::string>("argument")
-                << Structure::End;
-            delete writer;
-            return true;
-        }
+        else
+            return error(identifier.c_str(), "argument", "not-string");
     }
     iter->second->Perform(args);
     return true;

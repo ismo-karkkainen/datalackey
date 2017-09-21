@@ -16,7 +16,6 @@
 
 class CommandHandlerJSON : public CommandHandler {
 private:
-    Output& out;
     RawData buffer;
 
 public:

@@ -75,6 +75,9 @@ bool JSONEncoder::Encode(RawData& Buffer, Structure S) {
         add_separator(Buffer);
         Buffer.Append("null");
         break;
+    case RawItem:
+        add_separator(Buffer);
+        break;
     }
     return true;
 }

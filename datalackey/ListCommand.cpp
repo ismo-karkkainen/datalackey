@@ -23,8 +23,9 @@ void ListCommand::Perform(const std::vector<std::string>& Arguments) {
         OutputItem* writer = out.Writable();
         *writer << Structure::Array
             << ValueRef<std::string>("error")
-            << ValueRef<std::string>("command")
+            << ValueRef<std::string>(Arguments[0])
             << ValueRef<std::string>("argument")
+            << ValueRef<std::string>("unexpected")
             << Structure::End;
         delete writer;
         return;

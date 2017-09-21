@@ -95,7 +95,7 @@ OutputItem& OutputItem::operator<<(const ValueReference& VR) {
 }
 
 void OutputItem::Write(
-    RawData::ConstIterator& Start, RawData::ConstIterator& End)
+    RawData::ConstIterator Start, RawData::ConstIterator End)
 {
     buffer.Write(Start, End);
 }

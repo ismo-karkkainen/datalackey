@@ -75,12 +75,14 @@ public:
 
     void Store(const std::string& Label, const char *const Format,
         RawData& Data);
-    void Delete(const std::string& Label);
+    bool Delete(const std::string& Label);
     void Clean();
 
-    void Preload(const std::string& Label, const char *const Format);
+    bool Preload(const std::string& Label, const char *const Format);
     bool IsReady(const std::string& Label, const char *const Format);
     std::shared_ptr<const RawData> Data(const std::string& Label,
+        const char *const Format);
+    std::shared_ptr<const RawData> ReadyData(const std::string& Label,
         const char *const Format);
 };
 

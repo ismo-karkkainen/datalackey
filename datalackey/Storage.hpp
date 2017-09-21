@@ -29,19 +29,19 @@ public:
 
     virtual bool IsValid() const = 0;
 
-    // Should return label, format, size.
+    // Return label, format, size in bytes.
     virtual std::vector<std::tuple<std::string,std::string,size_t>> List() const = 0;
 
     virtual void Store(const std::string& Label, const char *const Format,
         RawData& Value) = 0;
     void Store(const std::string& Label, const std::string& Format,
         RawData& Value);
-    virtual void Delete(const std::string& Label) = 0;
+    virtual bool Delete(const std::string& Label) = 0;
     virtual void Clean() = 0;
 
     // Pre-load a value.
-    virtual void Preload(const std::string& Label, const char *const Format) = 0;
-    void Preload(const std::string& Label, const std::string& Format);
+    virtual bool Preload(const std::string& Label, const char *const Format) = 0;
+    bool Preload(const std::string& Label, const std::string& Format);
 
     virtual bool IsReady(const std::string& Label, const char *const Format) = 0;
     bool IsReady(const std::string& Label, const std::string& Format);
@@ -49,6 +49,11 @@ public:
     // Return the value.
     virtual std::shared_ptr<const RawData> Data(const std::string& Label, const char *const Format) = 0;
     std::shared_ptr<const RawData> Data(const std::string& Label,
+        const std::string& Format);
+
+    // Return the value only if ready, no conversion done or started.
+    virtual std::shared_ptr<const RawData> ReadyData(const std::string& Label, const char *const Format) = 0;
+    std::shared_ptr<const RawData> ReadyData(const std::string& Label,
         const std::string& Format);
 };
 
@@ -59,17 +64,4 @@ public:
  Varasto tarvitaan aina tai ainakin hakemiston tarkistus joten varasto pitää 
  alustaa sen verran mutta datan lataus voisi olla vain tarvittaessa.
  - Varaston pitäisi pitää huolta, että vain yksi prosessi pääsee käsittelemään.
-
- - Syötteen lukeminen vaatii varaston ja jos ei olla alustettu varastoa niiin
-   se ei voi varastoida mitään.
- - Eli varaston olisi oltava jotain jolle osoitetaan paikka minne tallentaa
-   tiedostot. Siihen asti varastoidaan muistiin.
- - Koska käynnistetään aliprosessina niin voisiko silti olettaa nykyisen
-   hakemiston alta löytyvän varaston ellei toisin osoiteta. Ja voiko vaihtaa
-   kesken kaiken tai ennen kuin dataan on koskettu? Ei voi.
- - Olisiko varaston haku aina eksplisiittinen käsky? Eli käytetään muistia
-   kunnes toisin käsketään? Sen jälkeen voi käyttää levyä. Ei ole.
- - Tällöin levy olisi vain muistin jatke. Eli jos joku raja täyttyy niin
-   käytetään levyä jotta saadaan muistia vapautettua.
-
  */
