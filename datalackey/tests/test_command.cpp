@@ -21,6 +21,7 @@
 #include <ctime>
 #include <limits>
 #include <iostream>
+#include <cassert>
 
 static const char* inputs[1] = { "stdin" };
 static const char* outputs[2] = { "stdout", "stderr" };

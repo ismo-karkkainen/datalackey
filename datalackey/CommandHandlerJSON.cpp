@@ -63,10 +63,24 @@ bool CommandHandlerJSON::End() {
         delete writer;
         return true;
     }
-    // This requires some internal format separate from JSON for CBOR command
-    // support. Perhaps encourage use of internal mapping from id string to 
-    // some real value and not passing it via this.
-    iter->second->Perform(cmd);
+    std::vector<std::string> args;
+    for (size_t k = 1; k < cmd.size(); ++k) {
+        if (cmd[k].is_string())
+            args.push_back(cmd[k]);
+        else {
+            // The output format may not be JSON so we can not dump the value
+            // and pass it through as is. Hence treat as an error.
+            OutputItem* writer = out.Writable();
+            *writer << Structure::Array
+                << ValueRef<std::string>("error")
+                << ValueRef<std::string>("command")
+                << ValueRef<std::string>("argument")
+                << Structure::End;
+            delete writer;
+            return true;
+        }
+    }
+    iter->second->Perform(args);
     return true;
 }
 

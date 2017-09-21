@@ -17,9 +17,9 @@ ListCommand::ListCommand(const char *const Name, Output& Out, const Storage& S)
 ListCommand::~ListCommand() {
 }
 
-void ListCommand::Perform(nlohmann::json& JSONCommand) {
+void ListCommand::Perform(const std::vector<std::string>& Arguments) {
     // An array with output identifier that was given after the command.
-    if (!JSONCommand.is_array() || JSONCommand.size() != 2) {
+    if (Arguments.size() != 1) {
         OutputItem* writer = out.Writable();
         *writer << Structure::Array
             << ValueRef<std::string>("error")
@@ -32,13 +32,7 @@ void ListCommand::Perform(nlohmann::json& JSONCommand) {
     auto results = storage.List();
     OutputItem* writer = out.Writable();
     *writer << Array; // Start message array.
-    // This by-passes normal encoding in writer so take care of separator, too.
-    std::string id = JSONCommand[1].dump();
-    id += ",";
-    RawData tmp;
-    tmp.Append(id.c_str());
-    RawData::ConstIterator cb(tmp.CBegin()), ce(tmp.CEnd());
-    writer->Write(cb, ce);
+    *writer << ValueRef<std::string>(Arguments[0]);
     *writer << Dictionary; // Start label dictionary.
     std::string label, format;
     size_t size;

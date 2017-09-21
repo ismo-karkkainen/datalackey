@@ -21,7 +21,7 @@ public:
     ListCommand(const char *const Name, Output& Out, const Storage& S);
     ~ListCommand();
 
-    void Perform(nlohmann::json& JSONCommand);
+    void Perform(const std::vector<std::string>& Arguments);
 };
 
 #endif /* ListCommand_hpp */

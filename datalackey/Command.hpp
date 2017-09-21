@@ -10,7 +10,7 @@
 #define Command_hpp
 
 #include "Output.hpp"
-#include "json.hpp"
+#include <vector>
 #include <string>
 
 
@@ -27,8 +27,7 @@ public:
     virtual ~Command();
     const std::string& Name() const { return name; }
 
-    // First item in the array equals Name().
-    virtual void Perform(nlohmann::json& JSONCommand) = 0;
+    virtual void Perform(const std::vector<std::string>& Arguments) = 0;
 };
 
 

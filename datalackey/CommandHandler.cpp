@@ -8,6 +8,7 @@
 
 #include "CommandHandler.hpp"
 #include "Value_t.hpp"
+#include <cassert>
 
 
 CommandHandler::CommandHandler() {
