@@ -24,7 +24,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             in_string = escaping = false;
             open_something = 0;
             return std::make_tuple(
-                InputScanner::Discard, RangeBegin, ++curr);
+                InputScanner::Reset, RangeBegin, ++curr);
         }
         return std::make_tuple(
             InputScanner::DiscardRetroactively, RangeBegin, RangeEnd);
@@ -35,8 +35,8 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             // A resetting zero byte interrupts everything we are doing.
             open_something = 0;
             in_string = escaping = false;
-            return std::make_tuple(InputScanner::DiscardRetroactively,
-                RangeBegin, curr);
+            return std::make_tuple(InputScanner::Reset,
+                RangeBegin, ++curr);
         }
         if (in_string) {
             if (escaping)
@@ -98,9 +98,9 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
     return std::make_tuple(Previous, RangeBegin, RangeEnd); // Used all.
 }
 
-InputScannerJSON::InputScannerJSON(
-    InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS)
-    : InputScanner(IC, MH, SDS), open_something(0),
+InputScannerJSON::InputScannerJSON(InputChannel& IC, MessageHandler& MH,
+    StorageDataSink& SDS, Output& ProblemNotifications)
+    : InputScanner(IC, MH, SDS, ProblemNotifications), open_something(0),
     in_string(false), escaping(false)
 {
     assert(MH.Format() == nullptr || strcmp(Format(), MH.Format()) == 0);

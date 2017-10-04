@@ -7,6 +7,7 @@
 //
 
 #include "StorageDataSinkJSON.hpp"
+#include "Notifications.hpp"
 
 
 void StorageDataSinkJSON::pass_to_storage() {
@@ -15,9 +16,10 @@ void StorageDataSinkJSON::pass_to_storage() {
     value.Clear();
 }
 
-StorageDataSinkJSON::StorageDataSinkJSON(Storage& S)
-    : storage(S), part(InHead), open_dicts(0), open_arrays(0),
-    in_string(false), escaping(false)
+StorageDataSinkJSON::StorageDataSinkJSON(Storage& S,
+    Output& ProblemNotifications)
+    : storage(S), notifications(ProblemNotifications), part(InHead),
+    open_dicts(0), open_arrays(0), in_string(false), escaping(false)
 { }
 
 StorageDataSinkJSON::~StorageDataSinkJSON() {
@@ -37,12 +39,11 @@ bool StorageDataSinkJSON::Input(
         case InHead:
             // No incoming leading white-space, only allow {.
             if (*curr == '{') {
-                if (open_dicts)
-                    part = BadInput;
                 ++open_dicts;
                 part = InKey;
             } else {
                 part = BadInput;
+                Error(notifications, "format");
                 return false;
             }
             break;
@@ -74,6 +75,7 @@ bool StorageDataSinkJSON::Input(
                 break;
             default:
                 part = BadInput;
+                Error(notifications, "format");
                 return false;
             }
             break;
@@ -90,6 +92,7 @@ bool StorageDataSinkJSON::Input(
                 break;
             default:
                 part = BadInput;
+                Error(notifications, "format");
                 return false;
             }
             break;
@@ -110,7 +113,11 @@ bool StorageDataSinkJSON::Input(
                 ++open_arrays;
                 break;
             case ']':
-                --open_arrays;
+                if (--open_arrays < 0) {
+                    part = BadInput;
+                    Error(notifications, "format");
+                    return false;
+                }
                 break;
             case '{':
                 ++open_dicts;
@@ -123,6 +130,10 @@ bool StorageDataSinkJSON::Input(
                     // Expecting End(), anything else is an error.
                     part = InEnd;
                     continue; // Do not store the separator anywhere.
+                } else if (open_dicts < 0) {
+                    part = BadInput;
+                    Error(notifications, "format");
+                    return false;
                 }
                 break;
             case '"':

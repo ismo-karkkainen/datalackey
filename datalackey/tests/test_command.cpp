@@ -99,9 +99,10 @@ int main(int argc, char** argv) {
     InputScanner* scanner = nullptr;
     choice = opt::String("command-in", 2);
     if (choice == "JSON") {
-        sink = new StorageDataSinkJSON(*storage);
+        sink = new StorageDataSinkJSON(*storage, *out);
         command_handler = new CommandHandlerJSON(*out);
-        scanner = new InputScannerJSON(*in_channel, *command_handler, *sink);
+        scanner =
+            new InputScannerJSON(*in_channel, *command_handler, *sink, *out);
     }
     assert(sink != nullptr);
     assert(command_handler != nullptr);

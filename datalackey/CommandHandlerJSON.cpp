@@ -41,7 +41,7 @@ bool CommandHandlerJSON::End() {
     }
     catch (const std::exception& e) {
         buffer.Clear();
-        return error("Format");
+        return error("format");
     }
     assert(cmd.is_array());
     if (cmd.size() == 0)

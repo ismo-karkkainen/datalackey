@@ -18,6 +18,7 @@ list(APPEND StoreSources datalackey/StorageDataSink.cpp datalackey/StorageDataSi
 set(IOSources datalackey/Literal.cpp datalackey/ValueReference.cpp)
 list(APPEND IOSources datalackey/Encoder.cpp)
 list(APPEND IOSources datalackey/OutputChannel.cpp datalackey/Output.cpp)
+list(APPEND IOSources datalackey/Notifications.cpp)
 list(APPEND IOSources datalackey/StdOut.cpp datalackey/StdErr.cpp)
 list(APPEND IOSources datalackey/MessageHandler.cpp datalackey/MessagePassThrough.cpp)
 list(APPEND IOSources datalackey/StorageDataSink.cpp)

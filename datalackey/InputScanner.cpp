@@ -7,6 +7,8 @@
 //
 
 #include "InputScanner.hpp"
+#include "Structure.hpp"
+#include "Value_t.hpp"
 #include <cstring>
 #include <ctime>
 #include <cassert>
@@ -33,6 +35,8 @@ void input_scanner(InputScanner* IS) {
             switch (recipient) {
             case InputScanner::Discard:
                 break; // Throw blank data away.
+            case InputScanner::Reset:
+                // Same action as with next.
             case InputScanner::DiscardRetroactively:
                 // If passing data in, tell to discard it.
                 if (previous == InputScanner::Data)
@@ -60,6 +64,23 @@ void input_scanner(InputScanner* IS) {
             if (bad)
                 recipient = InputScanner::DiscardRetroactively;
             begin = end;
+            if (!bad && previous != recipient) {
+                if (recipient == InputScanner::DiscardRetroactively) {
+                    OutputItem* writer = IS->notifications.Writable();
+                    *writer << Array
+                        << ValueRef<std::string>("error")
+                        << ValueRef<std::string>("format")
+                        << End;
+                    delete writer;
+                } else if (recipient == InputScanner::Reset) {
+                    OutputItem* writer = IS->notifications.Writable();
+                    *writer << Array
+                        << ValueRef<std::string>("note")
+                        << ValueRef<std::string>("reset")
+                        << End;
+                    delete writer;
+                }
+            }
             previous = recipient;
         } while (end != IS->buffer.CEnd());
         IS->buffer.Clear();
@@ -67,10 +88,11 @@ void input_scanner(InputScanner* IS) {
 }
 
 
-InputScanner::InputScanner(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS)
-    : channel(IC), message_sink(MH), data_sink(SDS), worker(nullptr)
-{
-}
+InputScanner::InputScanner(InputChannel& IC, MessageHandler& MH,
+    StorageDataSink& SDS, Output& ProblemNotifications)
+    : channel(IC), message_sink(MH), data_sink(SDS), worker(nullptr),
+    notifications(ProblemNotifications)
+{ }
 
 InputScanner::~InputScanner() {
     assert(worker == nullptr);

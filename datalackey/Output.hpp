@@ -15,6 +15,9 @@
 #include "Encoder.hpp"
 #include "OutputChannel.hpp"
 #include "RawData.hpp"
+
+class Output;
+
 #include "InputScanner.hpp"
 #include <vector>
 #include <utility>
@@ -35,20 +38,6 @@
 // or a default writer is used for all other keys.
 // Hence program would have to map error output key to std::cerr writer or to
 // nothing.
-
-// We are meant to run a program. Everything in the output not recognized as
-// something to store is passed to caller. Can we specify multiple means of
-// communicating with program and deal with input from any channel regardless
-// of content? That way we only need to concern with output that can not be
-// recognized. 
-
-// Just deal with output keys so that one can specify channel. Maybe channel
-// name as extra parameter but if not recognized, use default channel. Or the
-// name to channel mapping has been done previously. That way error key would
-// be directed to stderr when available.
-
-
-class Output;
 
 
 // This receives the data that OutputItem produces.

@@ -12,6 +12,7 @@
 #include "StorageDataSink.hpp"
 #include "Storage.hpp"
 #include "Structure.hpp"
+#include "Output.hpp"
 #include <vector>
 
 
@@ -21,6 +22,7 @@ private:
     Storage& storage;
     std::vector<char> key;
     RawData value;
+    Output& notifications;
     // Needed for keeping track of the contents.
     Part part;
     int open_dicts, open_arrays;
@@ -30,7 +32,7 @@ private:
     void pass_to_storage();
 
 public:
-    StorageDataSinkJSON(Storage& S);
+    StorageDataSinkJSON(Storage& S, Output& ProblemNotifications);
     ~StorageDataSinkJSON();
     const char *const Format() const;
     bool Input(RawData::ConstIterator& Start, RawData::ConstIterator& End);

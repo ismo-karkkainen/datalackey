@@ -7,32 +7,19 @@
 //
 
 #include "CommandHandler.hpp"
-#include "Value_t.hpp"
+#include "Notifications.hpp"
 #include <cassert>
 
 
 bool CommandHandler::error(const char *const one) {
-    OutputItem* writer = out.Writable();
-    *writer << Array
-        << ValueRef<std::string>("error")
-        << ValueRef<std::string>(one)
-        << Structure::End;
-    delete writer;
+    Error(out, one);
     return false;
 }
 
 bool CommandHandler::error(
     const char *const one, const char *const two, const char *const three)
 {
-    OutputItem* writer = out.Writable();
-    *writer << Array
-        << ValueRef<std::string>("error")
-        << ValueRef<std::string>(one)
-        << ValueRef<std::string>(two);
-    if (three != nullptr)
-        *writer << ValueRef<std::string>(three);
-    *writer << Structure::End;
-    delete writer;
+    Error(out, one, two, three);
     return true;
 }
 

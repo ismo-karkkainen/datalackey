@@ -25,8 +25,8 @@ int main(int argc, char** argv) {
     StdIn in_channel;
     MessagePassThrough mpt(out);
     MemoryStorage storage(0, 0);
-    StorageDataSinkJSON front(storage);
-    InputScannerJSON scanner(in_channel, mpt, front);
+    StorageDataSinkJSON front(storage, out);
+    InputScannerJSON scanner(in_channel, mpt, front, out);
     scanner.Scan();
     while (!scanner.Ended()) {
         struct timespec ts;

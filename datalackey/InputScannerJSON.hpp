@@ -26,7 +26,8 @@ public:
             RawData::ConstIterator RangeBegin, RawData::ConstIterator RangeEnd);
 
 public:
-    InputScannerJSON(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS);
+    InputScannerJSON(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS,
+        Output& ProblemNotifications);
     ~InputScannerJSON();
 
     const char* const Format() const;
