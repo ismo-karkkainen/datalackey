@@ -7,6 +7,7 @@
 //
 
 #include "InputScannerJSON.hpp"
+#include "Notifications.hpp"
 #include <tuple>
 #include <cassert>
 
@@ -23,8 +24,8 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
                 continue;
             in_string = escaping = false;
             open_something = 0;
-            return std::make_tuple(
-                InputScanner::Reset, RangeBegin, ++curr);
+            Note(notifications, "reset");
+            return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         return std::make_tuple(
             InputScanner::DiscardRetroactively, RangeBegin, RangeEnd);
@@ -35,6 +36,8 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             // A resetting zero byte interrupts everything we are doing.
             open_something = 0;
             in_string = escaping = false;
+            if (Previous != InputScanner::Reset)
+                Note(notifications, "reset");
             return std::make_tuple(InputScanner::Reset,
                 RangeBegin, ++curr);
         }
@@ -91,17 +94,19 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             bad_stream = open_something <= 0;
             break;
         }
-        if (bad_stream)
+        if (bad_stream) {
+            Error(notifications, "format");
             return std::make_tuple(InputScanner::DiscardRetroactively,
                 RangeBegin, ++curr);
+        }
     }
     return std::make_tuple(Previous, RangeBegin, RangeEnd); // Used all.
 }
 
 InputScannerJSON::InputScannerJSON(InputChannel& IC, MessageHandler& MH,
     StorageDataSink& SDS, Output& ProblemNotifications)
-    : InputScanner(IC, MH, SDS, ProblemNotifications), open_something(0),
-    in_string(false), escaping(false)
+    : InputScanner(IC, MH, SDS), open_something(0),
+    in_string(false), escaping(false), notifications(ProblemNotifications)
 {
     assert(MH.Format() == nullptr || strcmp(Format(), MH.Format()) == 0);
     assert(strcmp(Format(), SDS.Format()) == 0);

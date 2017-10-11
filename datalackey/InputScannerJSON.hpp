@@ -19,6 +19,7 @@ private:
     int open_something;
     bool in_string;
     bool escaping;
+    Output& notifications;
 
 public:
     std::tuple<Recipient, RawData::ConstIterator, RawData::ConstIterator>

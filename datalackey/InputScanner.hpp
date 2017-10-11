@@ -30,7 +30,6 @@ protected:
     StorageDataSink& data_sink;
     std::thread* worker;
     RawData buffer; // Given to channel and scanned.
-    Output& notifications;
 
 public:
     enum Recipient {
@@ -52,8 +51,7 @@ protected:
     friend void input_scanner(InputScanner* IS);
 
 public:
-    InputScanner(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS,
-        Output& ProblemNotifications);
+    InputScanner(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS);
     virtual ~InputScanner();
 
     virtual const char* const Format() const = 0;
