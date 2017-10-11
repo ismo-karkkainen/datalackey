@@ -8,6 +8,7 @@
 
 #include "ListCommand.hpp"
 #include "Value_t.hpp"
+#include "Notifications.hpp"
 
 
 ListCommand::ListCommand(const char *const Name, Output& Out, const Storage& S)
@@ -20,14 +21,7 @@ ListCommand::~ListCommand() {
 void ListCommand::Perform(const std::vector<std::string>& Arguments) {
     // An array with output identifier that was given after the command.
     if (Arguments.size() != 1) {
-        OutputItem* writer = out.Writable();
-        *writer << Structure::Array
-            << ValueRef<std::string>("error")
-            << ValueRef<std::string>(Arguments[0])
-            << ValueRef<std::string>("argument")
-            << ValueRef<std::string>("unexpected")
-            << Structure::End;
-        delete writer;
+        Error(out, Arguments[0].c_str(), "argument", "unexpected");
         return;
     }
     auto results = storage.List();

@@ -30,7 +30,7 @@ list(APPEND JSONIO datalackey/InputScannerJSON.cpp)
 
 set(Commands datalackey/Command.cpp datalackey/CommandHandler.cpp)
 list(APPEND Commands datalackey/ListCommand.cpp datalackey/GetCommand.cpp)
-list(APPEND Commands datalackey/DeleteCommand.cpp)
+list(APPEND Commands datalackey/DeleteCommand.cpp datalackey/VersionCommand.cpp)
 
 set(JSONCommands datalackey/CommandHandlerJSON.cpp)
 

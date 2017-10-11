@@ -8,6 +8,7 @@
 
 #include "GetCommand.hpp"
 #include "Value_t.hpp"
+#include "Notifications.hpp"
 
 
 GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S,
@@ -21,14 +22,7 @@ GetCommand::~GetCommand() {
 void GetCommand::Perform(const std::vector<std::string>& Arguments) {
     // An array with output identifier and labels.
     if (Arguments.size() < 2) {
-        OutputItem* writer = out.Writable();
-        *writer << Array
-            << ValueRef<std::string>("error")
-            << ValueRef<std::string>(Arguments[0])
-            << ValueRef<std::string>("argument")
-            << ValueRef<std::string>("missing")
-            << End;
-        delete writer;
+        Error(out, Arguments[0].c_str(), "argument", "missing");
         return;
     }
     // Check if everything can be made available and if not, return an error.

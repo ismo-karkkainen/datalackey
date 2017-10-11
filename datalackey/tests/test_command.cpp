@@ -15,6 +15,7 @@
 #include "ListCommand.hpp"
 #include "GetCommand.hpp"
 #include "DeleteCommand.hpp"
+#include "VersionCommand.hpp"
 #include "MemoryStorage.hpp"
 #include "StorageDataSinkJSON.hpp"
 #include "InputScannerJSON.hpp"
@@ -54,6 +55,7 @@ static int HandleArguments(int argc, char** argv) {
     opt::Doc("[ \"list\", identifier ] to list data labels.");
     opt::Doc("[ \"get\", identifier, label1, label2, ... ] to get data.");
     opt::Doc("[ \"delete\", identifier, label1, label2, ... ] to delete data.");
+    opt::Doc("[ \"version\", identifier ] to return version.");
     if (opt::GivenOption('h', "help", argc, argv)) {
         opt::PrintUsage(std::cerr, "datalackey");
         return 0;
@@ -115,6 +117,8 @@ int main(int argc, char** argv) {
     command_handler->AddCommand(&get);
     DeleteCommand del("delete", *out, *storage);
     command_handler->AddCommand(&del);
+    VersionCommand version("version", *out);
+    command_handler->AddCommand(&version);
 
     scanner->Scan();
     while (!scanner->Ended()) {
