@@ -147,18 +147,13 @@ Output::Output(const Encoder& E, OutputChannel& Main)
 }
 
 Output::~Output() {
-    // Lock.
-    // An opportunity to check for OutputItems not yet done with.
-    // Though we could be exiting on exception or something.
-    // And where exactly are we going to report? This is the output.
-    // Write to file in current directory maybe?
     for (auto& buffer : buffers)
         delete buffer;
     // OutputChannels allocated and owned outside.
 }
 
 void Output::AddChannel(OutputChannel& OC, bool SideChannel) {
-    // Lock.
+    std::lock_guard<std::mutex> lock(mutex);
     if (SideChannel) {
         sides.push_back(std::make_pair<OutputChannel*,OutputItemBuffer*>(&OC, nullptr));
         AllocateChannels(true, sides);
@@ -169,8 +164,8 @@ void Output::AddChannel(OutputChannel& OC, bool SideChannel) {
 }
 
 OutputItem* Output::Writable(bool SideChannel) {
-    // Lock.
     OutputItemBuffer* buffer = new OutputItemBuffer(*this, SideChannel);
+    std::lock_guard<std::mutex> lock(mutex);
     buffers.push_back(buffer);
     AllocateChannels(SideChannel,
         (SideChannel && !sides.empty()) ? sides : mains);
@@ -178,11 +173,11 @@ OutputItem* Output::Writable(bool SideChannel) {
 }
 
 void Output::Ended(OutputItemBuffer& IB) {
-    // Lock.
     // Should find and free if ended and zero-size even if no channel?
     if (IB.Channel() == nullptr)
         return;
     IB.Channel()->Flush();
+    std::lock_guard<std::mutex> lock(mutex);
     for (size_t k = 0; k < mains.size(); ++k)
         if (mains[k].second == &IB) {
             mains[k].second = nullptr;

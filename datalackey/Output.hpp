@@ -21,23 +21,7 @@ class Output;
 #include "InputScanner.hpp"
 #include <vector>
 #include <utility>
-
-// We should use an array of dictionaries with each having just one key.
-// That way any value output can be interleaved with others.
-// And consequently, should the output be organized so that each Output object
-// handles one key and they internally deal with taking turns at output?
-// One dictionary, one value, written as soon as possible.
-// The first to output can still write immediately. When the writer ends the
-// output, others can dump. Or have one waiting buffer that receives object
-// when non-writing output receives end?
-// Removes a need to deal with nested output properly.
-
-// Generalize to multiple output streams? A writer object that takes data in
-// via operator<< but only needs to accept unsigned char array. Internally can
-// deal with std::cout and std::cerr. A writer would be mapped to specific key
-// or a default writer is used for all other keys.
-// Hence program would have to map error output key to std::cerr writer or to
-// nothing.
+#include <mutex>
 
 
 // This receives the data that OutputItem produces.
@@ -89,6 +73,7 @@ public:
 
 class Output {
 private:
+    std::mutex mutex;
     const Encoder& encoder;
     std::vector<OutputItemBuffer*> buffers;
     std::vector<std::pair<OutputChannel*,OutputItemBuffer*> > mains, sides;
