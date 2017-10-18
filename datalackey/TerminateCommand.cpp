@@ -1,24 +1,25 @@
 //
-//  DeleteCommand.cpp
+//  TerminateCommand.cpp
 //  datalackey
 //
 //  Created by Ismo Kärkkäinen on 21.9.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#include "DeleteCommand.hpp"
+#include "TerminateCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
 
 
-DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
-    : Command(Name, Out), storage(S)
+TerminateCommand::TerminateCommand(
+    const char *const Name, Output& Out, Processes& P)
+    : Command(Name, Out), processes(P)
 { }
 
-DeleteCommand::~DeleteCommand() {
+TerminateCommand::~TerminateCommand() {
 }
 
-void DeleteCommand::Perform(const std::vector<std::string>& Arguments) {
+void TerminateCommand::Perform(const std::vector<std::string>& Arguments) {
     // An array with output identifier and labels.
     if (Arguments.size() < 2) {
         Error(out, Arguments[0].c_str(), "argument", "missing");
@@ -27,7 +28,7 @@ void DeleteCommand::Perform(const std::vector<std::string>& Arguments) {
     // Check if everything can be made available and if not, return an error.
     std::vector<std::string> unavailable;
     for (size_t k = 1; k < Arguments.size(); ++k) {
-        if (!storage.Delete(Arguments[k]))
+        if (!processes.Terminate(Arguments[k]))
             unavailable.push_back(Arguments[k]);
     }
     if (!unavailable.empty()) {

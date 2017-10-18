@@ -32,6 +32,10 @@ set(Commands datalackey/Command.cpp datalackey/CommandHandler.cpp)
 list(APPEND Commands datalackey/ListCommand.cpp datalackey/GetCommand.cpp)
 list(APPEND Commands datalackey/DeleteCommand.cpp datalackey/VersionCommand.cpp)
 
+set(Processes datalackey/Processes.cpp datalackey/LocalProcesses.cpp)
+set(ProcessCommands datalackey/ProcessesCommand.cpp datalackey/RunCommand.cpp)
+list(APPEND ProcessCommands datalackey/TerminateCommand.cpp)
+
 set(JSONCommands datalackey/CommandHandlerJSON.cpp)
 
 set(CommandLine datalackey/Options.cpp)
@@ -44,8 +48,9 @@ set(CommandLine datalackey/Options.cpp)
 
 add_executable( test_MessagePassThrough ${StoreSources} ${IOSources} ${JSONIO} datalackey/tests/test_MessagePassThrough.cpp )
 
-
 add_executable( test_command ${StoreSources} ${IOSources} ${JSONIO} ${Commands} ${JSONCommands} ${CommandLine} datalackey/tests/test_command.cpp )
+
+add_executable( test_process ${StoreSources} ${IOSources} ${JSONIO} ${Commands} ${JSONCommands} ${CommandLine} ${Processes} ${ProcessCommands} datalackey/tests/test_process.cpp )
 
 # Add various components to source files list provided the list has not been
 # given from outside.
