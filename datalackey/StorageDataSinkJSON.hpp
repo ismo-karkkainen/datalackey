@@ -29,7 +29,7 @@ private:
     bool in_string;
     bool escaping;
 
-    void pass_to_storage();
+    bool pass_to_storage();
 
 public:
     StorageDataSinkJSON(Storage& S, Output& ProblemNotifications);

@@ -8,12 +8,32 @@
 
 #include "StorageDataSinkJSON.hpp"
 #include "Notifications.hpp"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 
-void StorageDataSinkJSON::pass_to_storage() {
-    storage.Store(std::string(key.cbegin(), key.cend()), Format(), value);
+bool StorageDataSinkJSON::pass_to_storage() {
+    std:string name;
+    try {
+        json s = json::parse(key.cbegin(), key.cend());
+        if (!s.is_string()) {
+            Error(notifications, "identifier", "not-string");
+            return false;
+        }
+        name = s;
+    }
+    catch (const std::exception& e) {
+        Error(notifications, "format");
+        return false;
+    }
+    Label label(name);
+    if (mapper != nullptr)
+        label = (*mapper)[label];
+    storage.Store(label, Format(), value);
     key.clear();
     value.Clear();
+    return true;
 }
 
 StorageDataSinkJSON::StorageDataSinkJSON(Storage& S,
@@ -49,19 +69,16 @@ bool StorageDataSinkJSON::Input(
             break;
         case InKey:
             if (in_string) {
+                key.push_back(*curr);
                 if (escaping) {
                     escaping = false;
-                    key.push_back(*curr);
+                } else if (*curr == '\\') {
+                    escaping = true; // Next character is to be ignored.
                 } else if (*curr == '"') {
                     in_string = false; // Ending quote.
                     part = InColon;
-                    continue;
-                } else if (*curr == '\\')
-                    escaping = true; // Next character is to be skipped.
-                else
-                    key.push_back(*curr);
-                if (in_string)
-                    continue; // No need for other checks.
+                }
+                continue;
             }
             // Allow leading white-space before double-quote.
             switch (*curr) {
@@ -71,6 +88,7 @@ bool StorageDataSinkJSON::Input(
             case '\r':
                 break;
             case '"':
+                key.push_back(*curr);
                 in_string = true;
                 break;
             default:
@@ -80,7 +98,7 @@ bool StorageDataSinkJSON::Input(
             }
             break;
         case InColon:
-            // Allow leading white-pace and then a colon.
+            // Allow leading white-space and then a colon.
             switch (*curr) {
             case ' ':
             case '\t':
@@ -126,7 +144,8 @@ bool StorageDataSinkJSON::Input(
                 --open_dicts;
                 if (open_dicts == 0) {
                     // We have the last value in the dictionary stored already.
-                    pass_to_storage();
+                    if (!pass_to_storage())
+                        return false;
                     // Expecting End(), anything else is an error.
                     part = InEnd;
                     continue; // Do not store the separator anywhere.

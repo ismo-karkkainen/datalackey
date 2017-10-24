@@ -10,11 +10,17 @@
 #define StorageDataSink_hpp
 
 #include "RawData.hpp"
+#include "LabelMapper.hpp"
 
 
 // Base class for passing data to storage.
 class StorageDataSink {
+protected:
+    const LabelMapper* mapper;
+
 public:
+    // Ownership does not transfer.
+    StorageDataSink(const LabelMapper* Mapper = nullptr);
     virtual ~StorageDataSink();
     virtual const char *const Format() const = 0;
     // Pass a data dictionary using this.

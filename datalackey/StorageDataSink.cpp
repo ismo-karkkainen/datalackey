@@ -8,4 +8,9 @@
 
 #include "StorageDataSink.hpp"
 
+
+StorageDataSink::StorageDataSink(LabelMapper* Mapper)
+    : mapper(Mapper)
+{ }
+
 StorageDataSink::~StorageDataSink() { }

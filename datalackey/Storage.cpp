@@ -9,34 +9,27 @@
 #include "Storage.hpp"
 
 
-Storage::Storage() {
-}
-
 Storage::~Storage() {
 }
 
-void Storage::Store(const std::string& Label, const std::string& Format,
-    RawData& Value)
-{
-    Store(Label, Format.c_str(), Value);
+void Storage::Store(const Label& L, const std::string& Format, RawData& Value) {
+    Store(L, Format.c_str(), Value);
 }
 
-bool Preload(const std::string& Label, const std::string& Format) {
-    return Preload(Label, Format.c_str());
+bool Preload(const Label& L, const std::string& Format) {
+    return Preload(L, Format.c_str());
 }
 
-bool IsReady(const std::string& Label, const std::string& Format) {
-    return IsReady(Label, Format.c_str());
+bool IsReady(const Label& L, const std::string& Format) {
+    return IsReady(L, Format.c_str());
 }
 
-std::shared_ptr<const RawData> Data(const std::string& Label,
+std::shared_ptr<const RawData> Data(const Label& L, const std::string& Format) {
+    return Data(L, Format.c_str());
+}
+
+std::shared_ptr<const RawData> ReadyData(const Label& L,
     const std::string& Format)
 {
-    return Data(Label, Format.c_str());
-}
-
-std::shared_ptr<const RawData> ReadyData(const std::string& Label,
-    const std::string& Format)
-{
-    return ReadyData(Label, Format.c_str());
+    return ReadyData(L, Format.c_str());
 }
