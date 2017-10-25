@@ -19,17 +19,26 @@ VersionCommand::VersionCommand(const char *const Name, Output& Out)
 VersionCommand::~VersionCommand() {
 }
 
-void VersionCommand::Perform(const std::vector<std::string>& Arguments) {
+bool VersionCommand::LabelsOnly() const {
+    return true;
+}
+
+void VersionCommand::Perform(
+    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+{
     // An array with output identifier and labels.
-    if (Arguments.size() != 1) {
-        Error(out, Arguments[0].c_str(), "argument", "unexpected");
+    if (!Arguments.empty()) {
+        Error(out, Id, "argument", "unexpected");
+        for (auto arg : Arguments)
+            delete arg;
         return;
     }
     OutputItem* writer = out.Writable();
-    *writer << Array << ValueRef<std::string>(Arguments[0])
-        << Dictionary
+    *writer << Array;
+    Feed(*writer, Id);
+    *writer << Dictionary
         << ValueRef<std::string>("version") << ValueRef<int>(Version)
+        // Maybe add a list of supported formats. And such.
         << End << End;
-    // Maybe add a list of supported formats. And such.
     delete writer;
 }

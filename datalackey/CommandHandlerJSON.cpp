@@ -8,7 +8,10 @@
 
 #include "CommandHandlerJSON.hpp"
 #include "Value_t.hpp"
-#include "json.hpp"
+#include "Identifier.hpp"
+#include "Label.hpp"
+#include <json.hpp>
+#include <cmath>
 
 using json = nlohmann::json;
 
@@ -50,21 +53,44 @@ bool CommandHandlerJSON::End() {
         return error("identifier", "missing");
     if (!cmd[0].is_string())
         return error("command", "not-string");
-    if (!cmd[1].is_string())
-        return error("identifier", "not-string");
     std::string command = cmd[0];
-    std::string identifier = cmd[1];
+    Identifier* identifier = nullptr;
+    if (cmd[1].is_string())
+        identifier = new Identifier(cmd[1].get<std::string>());
+    else if (cmd[1].is_number()) {
+        double d(cmd[1].get<double>()), i;
+        if (0.0 != std::modf(d, &i))
+            return error("identifier", "not-integer");
+        identifier = new Identifier(cmd[1].get<long long int>());
+    } else
+        return error("identifier", "not-string", "not-integer");
     auto iter = handlers.find(command);
     if (iter == handlers.end())
-        return error(identifier.c_str(), "command", "unknown");
-    std::vector<std::string> args;
+        return error(identifier, "command", "unknown");
+    bool label_only = iter->second->LabelsOnly();
+    std::vector<SimpleValue*> args;
     for (size_t k = 1; k < cmd.size(); ++k) {
-        if (cmd[k].is_string())
-            args.push_back(cmd[k]);
-        else
-            return error(identifier.c_str(), "argument", "not-string");
+        if (label_only) {
+            if (cmd[k].is_string())
+                args.push_back(new Label(cmd[k].get<std::string>());
+            else
+                return error(identifier, "argument", "not-string");
+        } else {
+            if (cmd[k].is_string())
+                args.push_back(new Identifier(cmd[k].get<std::string>());
+            else if (cmd[k].is_number()) {
+                double d(cmd[k].get<double>()), i;
+                if (0.0 != std::modf(d, &i))
+                    return error(identifier, "argument", "not-integer");
+                args.push_back(new Identifier(cmd[k].get<long long int>());
+            } else
+                return error(
+                    identifier, "argument", "not-string", "not-integer");
+        }
     }
-    iter->second->Perform(args);
+    // Ownership of contents of args transfers.
+    iter->second->Perform(identifier, args);
+    delete identifier;
     return true;
 }
 

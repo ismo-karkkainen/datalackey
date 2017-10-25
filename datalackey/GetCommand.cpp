@@ -19,49 +19,60 @@ GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S,
 GetCommand::~GetCommand() {
 }
 
-void GetCommand::Perform(const std::vector<std::string>& Arguments) {
+bool GetCommand::LabelsOnly() const {
+    return true;
+}
+
+void GetCommand::Perform(
+    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+{
     // An array with output identifier and labels.
-    if (Arguments.size() < 2) {
-        Error(out, Arguments[0].c_str(), "argument", "missing");
+    if (Arguments.empty()) {
+        Error(out, Id, "argument", "missing");
         return;
     }
     // Check if everything can be made available and if not, return an error.
-    std::vector<std::string> ready, loading, unavailable;
+    std::vector<Label*> ready, loading, unavailable;
     std::vector<std::shared_ptr<const RawData>> present;
-    for (size_t k = 1; k < Arguments.size(); ++k) {
-        auto rd = storage.ReadyData(Arguments[k], format.c_str());
+    for (auto arg : Arguments) {
+        Label* label = dynamic_cast<Label*>(arg);
+        assert(label != nullptr);
+        auto rd = storage.ReadyData(*label, format.c_str());
         if (rd) {
-            ready.push_back(Arguments[k]);
+            ready.push_back(label);
             present.push_back(rd);
-        } else if (storage.Preload(Arguments[k], format.c_str()))
-            loading.push_back(Arguments[k]);
+        } else if (storage.Preload(*label, format.c_str()))
+            loading.push_back(label);
         else
-            unavailable.push_back(Arguments[k]);
+            unavailable.push_back(label);
     }
     if (!unavailable.empty()) {
         OutputItem* writer = out.Writable();
         *writer << Array
-            << ValueRef<std::string>("error")
-            << ValueRef<std::string>(Arguments[0])
-            << ValueRef<std::string>("unavailable");
-        for (auto s : unavailable)
-            *writer << ValueRef<std::string>(s);
+            << ValueRef<std::string>("error");
+        Feed(*writer, Id);
+        *writer << ValueRef<std::string>("unavailable");
+        for (auto s : unavailable) {
+            Feed(*writer, *s);
+            delete s;
+        }
         *writer << End;
         delete writer;
-        return;
     }
     OutputItem* writer = out.Writable();
     *writer << Array; // Start message array.
-    *writer << ValueRef<std::string>(Arguments[0]);
+    Feed(*writer, Id);
     *writer << Dictionary; // Start data dictionary.
     for (size_t k = 0; k < ready.size(); ++k) {
-        *writer << ValueRef<std::string>(ready[k]) << RawItem;
+        Feed(*writer, *ready[k]);
+        *writer << RawItem;
         writer->Write(present[k]->CBegin(), present[k]->CEnd());
         present[k] = nullptr; // No longer needed here.
     }
     for (auto s : loading) {
-        *writer << ValueRef<std::string>(s) << RawItem;
-        auto data = storage.Data(s, format.c_str());
+        Feed(*writer, *s);
+        *writer << RawItem;
+        auto data = storage.Data(*s, format.c_str());
         writer->Write(data->CBegin(), data->CEnd());
     }
     *writer << End << End; // Close data dictionary and message array.

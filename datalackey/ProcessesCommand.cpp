@@ -18,22 +18,31 @@ ProcessesCommand::ProcessesCommand(const char *const Name, Output& Out, const Pr
 ProcessesCommand::~ProcessesCommand() {
 }
 
-void ProcessesCommand::Perform(const std::vector<std::string>& Arguments) {
+bool ProcessesCommand::LabelsOnly() const {
+    return false;
+}
+
+void ProcessesCommand::Perform(
+    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+{
     // An array with output identifier that was given after the command.
-    if (Arguments.size() != 1) {
-        Error(out, Arguments[0].c_str(), "argument", "unexpected");
+    if (!Arguments.empty()) {
+        Error(out, Id, "argument", "unexpected");
+        for (auto arg : Arguments)
+            delete arg;
         return;
     }
     auto results = processes.List();
     OutputItem* writer = out.Writable();
     *writer << Array; // Start message array.
-    *writer << ValueRef<std::string>(Arguments[0]);
+    Feed(*writer, Id);
     *writer << Dictionary; // Start process id to PID dictionary.
-    std::string id;
+    Identifier id;
     pid_t pid;
     for (size_t k = 0; k < results.size(); ++k) {
         std::tie(id, pid) = results[k];
-        *writer << ValueRef<std::string>(id) << ValueRef<pid_t>(pid);
+        Feed(*writer, id);
+        *writer << ValueRef<pid_t>(pid);
     }
     *writer << End << End; // Close dictionary and message array.
     delete writer;

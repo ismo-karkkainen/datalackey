@@ -21,7 +21,8 @@ public:
     TerminateCommand(const char *const Name, Output& Out, Processes& P);
     ~TerminateCommand();
 
-    void Perform(const std::vector<std::string>& Arguments);
+    bool LabelsOnly() const;
+    void Perform(const Identifier& Id, std::vector<SimpleValue*>& Arguments);
 };
 
 #endif /* TerminateCommand_hpp */

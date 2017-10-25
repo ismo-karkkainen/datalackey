@@ -21,7 +21,8 @@ public:
     ListCommand(const char *const Name, Output& Out, const Storage& S);
     ~ListCommand();
 
-    void Perform(const std::vector<std::string>& Arguments);
+    bool LabelsOnly() const;
+    void Perform(const Identifier& Id, std::vector<SimpleValue*>& Arguments);
 };
 
 #endif /* ListCommand_hpp */

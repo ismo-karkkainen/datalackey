@@ -19,33 +19,45 @@ TerminateCommand::TerminateCommand(
 TerminateCommand::~TerminateCommand() {
 }
 
-void TerminateCommand::Perform(const std::vector<std::string>& Arguments) {
+bool TerminateCommand::LabelsOnly() const {
+    return false;
+}
+
+void TerminateCommand::Perform(
+    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+{
     // An array with output identifier and labels.
-    if (Arguments.size() < 2) {
-        Error(out, Arguments[0].c_str(), "argument", "missing");
+    if (Arguments.empty()) {
+        Error(out, Id, "argument", "missing");
         return;
     }
     // Check if everything can be made available and if not, return an error.
-    std::vector<std::string> unavailable;
-    for (size_t k = 1; k < Arguments.size(); ++k) {
-        if (!processes.Terminate(Arguments[k]))
-            unavailable.push_back(Arguments[k]);
+    std::vector<Identifier*> unavailable;
+    for (auto arg : Arguments) {
+        Identifier* id(dynamic_cast<Identifier*>(arg));
+        assert(id != nullptr);
+        if (processes.Terminate(*id))
+            delete id;
+        else
+            unavailable.push_back(id);
     }
     if (!unavailable.empty()) {
         OutputItem* writer = out.Writable();
         *writer << Array
             << ValueRef<std::string>("error")
-            << ValueRef<std::string>(Arguments[0])
-            << ValueRef<std::string>("unavailable");
-        for (auto s : unavailable)
-            *writer << ValueRef<std::string>(s);
+        Feed(*writer, Id);
+        *writer << ValueRef<std::string>("unavailable");
+        for (auto arg : unavailable) {
+            Feed(*writer, *arg);
+            delete arg;
+        }
         *writer << End;
         delete writer;
         return;
     }
     OutputItem* writer = out.Writable();
-    *writer << Array
-        << ValueRef<std::string>(Arguments[0])
-        << End;
+    *writer << Array;
+    Feed(*writer, Id);
+    *writer << End;
     delete writer;
 }

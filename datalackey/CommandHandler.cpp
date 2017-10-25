@@ -23,6 +23,14 @@ bool CommandHandler::error(
     return true;
 }
 
+bool CommandHandler::error(const Identifier* Id,
+    const char *const one, const char *const two, const char *const three)
+{
+    Error(out, Id, one, two, three);
+    delete Id;
+    return true;
+}
+
 CommandHandler::CommandHandler(Output& Out)
     : out(Out)
 { }

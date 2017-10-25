@@ -18,33 +18,45 @@ DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
 DeleteCommand::~DeleteCommand() {
 }
 
-void DeleteCommand::Perform(const std::vector<std::string>& Arguments) {
+bool DeleteCommand::LabelsOnly() const {
+    return true;
+}
+
+void DeleteCommand::Perform(
+    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+{
     // An array with output identifier and labels.
-    if (Arguments.size() < 2) {
-        Error(out, Arguments[0].c_str(), "argument", "missing");
+    if (Arguments.empty()) {
+        Error(out, Id, "argument", "missing");
         return;
     }
     // Check if everything can be made available and if not, return an error.
-    std::vector<std::string> unavailable;
-    for (size_t k = 1; k < Arguments.size(); ++k) {
-        if (!storage.Delete(Arguments[k]))
-            unavailable.push_back(Arguments[k]);
+    std::vector<Label*> unavailable;
+    for (auto arg : Arguments) {
+        Label* label(dynamic_cast<Label*>(arg));
+        assert(label != nullptr);
+        if (storage.Delete(*label))
+            delete arg;
+        else
+            unavailable.push_back(label);
     }
     if (!unavailable.empty()) {
         OutputItem* writer = out.Writable();
         *writer << Array
-            << ValueRef<std::string>("error")
-            << ValueRef<std::string>(Arguments[0])
-            << ValueRef<std::string>("unavailable");
-        for (auto s : unavailable)
-            *writer << ValueRef<std::string>(s);
+            << ValueRef<std::string>("error");
+        Feed(*writer, Id);
+        *writer << ValueRef<std::string>("unavailable");
+        for (auto s : unavailable) {
+            Feed(*writer, s);
+            delete s;
+        }
         *writer << End;
         delete writer;
         return;
     }
     OutputItem* writer = out.Writable();
-    *writer << Array
-        << ValueRef<std::string>(Arguments[0])
-        << End;
+    *writer << Array;
+    Feed(*writer, Id);
+    *writer << End;
     delete writer;
 }

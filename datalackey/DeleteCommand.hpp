@@ -21,7 +21,8 @@ public:
     DeleteCommand(const char *const Name, Output& Out, Storage& S);
     ~DeleteCommand();
 
-    void Perform(const std::vector<std::string>& Arguments);
+    bool LabelsOnly() const;
+    void Perform(const Identifier& Id, std::vector<SimpleValue*>& Arguments);
 };
 
 #endif /* DeleteCommand_hpp */

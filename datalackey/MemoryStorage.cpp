@@ -136,10 +136,10 @@ std::shared_ptr<const RawData> MemoryStorage::find_source(
 }
 
 std::pair<std::shared_ptr<MemoryStorage::Values>,std::unique_lock<std::mutex>>
-MemoryStorage::get(const std::string& Label)
+MemoryStorage::get(const Label& L)
 {
     std::unique_lock<std::mutex> lock(label2data_mutex);
-    auto iter = label2data.find(Label);
+    auto iter = label2data.find(L);
     if (iter != label2data.end())
         return std::make_pair(
             iter->second, std::unique_lock<std::mutex>(iter->second->Mutex()));
@@ -159,9 +159,9 @@ bool MemoryStorage::IsValid() const {
     return true;
 }
 
-std::vector<std::tuple<std::string,std::string,size_t>> MemoryStorage::List() const
+std::vector<std::tuple<Label,std::string,size_t>> MemoryStorage::List() const
 {
-    std::vector<std::tuple<std::string,std::string,size_t>> results;
+    std::vector<std::tuple<Label,std::string,size_t>> results;
     std::lock_guard<std::mutex> lock(label2data_mutex);
     for (auto iter : label2data) {
         std::lock_guard<std::mutex> value_lock(iter.second->Mutex());
@@ -175,18 +175,18 @@ std::vector<std::tuple<std::string,std::string,size_t>> MemoryStorage::List() co
     return results;
 }
 
-void MemoryStorage::Store(const std::string& Label, const char *const Format,
+void MemoryStorage::Store(const Label& L, const char *const Format,
     RawData& Data)
 {
     std::shared_ptr<MemoryStorage::Values> val(
         new MemoryStorage::Values(Format, Data));
     std::lock_guard<std::mutex> lock(label2data_mutex);
-    label2data[Label] = val;
+    label2data[L] = val;
 }
 
-bool MemoryStorage::Delete(const std::string& Label) {
+bool MemoryStorage::Delete(const Label& L) {
     std::lock_guard<std::mutex> lock(label2data_mutex);
-    auto iter = label2data.find(Label);
+    auto iter = label2data.find(L);
     if (iter != label2data.end()) {
         label2data.erase(iter);
         return true;
@@ -198,9 +198,9 @@ void MemoryStorage::Clean() {
     // Nothing to do as user can not mess up with memory.
 }
 
-bool MemoryStorage::Preload(const std::string& Label, const char *const Format)
+bool MemoryStorage::Preload(const Label& L, const char *const Format)
 {
-    auto vl = get(Label);
+    auto vl = get(L);
     if (!vl.first)
         return false; // There is no such label.
     std::shared_ptr<MemoryStorage::Values>& v = vl.first;
@@ -220,18 +220,18 @@ bool MemoryStorage::Preload(const std::string& Label, const char *const Format)
     return false;
 }
 
-bool MemoryStorage::IsReady(const std::string& Label, const char *const Format)
+bool MemoryStorage::IsReady(const Label& L, const char *const Format)
 {
     std::string fmt(Format);
-    auto vl = get(Label);
+    auto vl = get(L);
     return vl.first && vl.first->IsPresent(fmt);
 }
 
-std::shared_ptr<const RawData> MemoryStorage::Data(const std::string& Label,
+std::shared_ptr<const RawData> MemoryStorage::Data(const Label& L,
     const char *const Format)
 {
     std::string fmt(Format);
-    auto vl = get(Label);
+    auto vl = get(L);
     if (!vl.first)
         return std::shared_ptr<const RawData>(); // No such label.
     std::shared_ptr<MemoryStorage::Values>& v = vl.first;
@@ -272,10 +272,10 @@ std::shared_ptr<const RawData> MemoryStorage::Data(const std::string& Label,
 }
 
 std::shared_ptr<const RawData> MemoryStorage::ReadyData(
-    const std::string& Label, const char *const Format)
+    const Label& L, const char *const Format)
 {
     std::string fmt(Format);
-    auto vl = get(Label);
+    auto vl = get(L);
     if (!vl.first)
         return std::shared_ptr<const RawData>(); // No such label.
     std::shared_ptr<const RawData> rd = vl.first->Get(fmt);

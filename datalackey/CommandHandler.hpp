@@ -12,6 +12,7 @@
 #include "MessageHandler.hpp"
 #include "Command.hpp"
 #include "Output.hpp"
+#include "Identifier.hpp"
 #include <string>
 #include <map>
 
@@ -23,8 +24,12 @@ protected:
 
     // Returns false. Used on format error.
     bool error(const char *const one);
-    // Returns true. For content errors.
-    bool error(const char *const one, const char *const two, const char *const three = nullptr);
+    // Return true. For content errors.
+    bool error(const char *const one, const char *const two,
+        const char *const three = nullptr);
+    // Deletes identifier due to the use as convenience function.
+    bool error(const Identifier* Id, const char *const one,
+        const char *const two = nullptr, const char *const three = nullptr);
 
 public:
     CommandHandler(Output& Out);

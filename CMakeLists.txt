@@ -11,7 +11,8 @@ link_libraries( boost_system boost_filesystem )
 enable_testing()
 set(Sources datalackey/main.cpp)
 
-set(StoreSources datalackey/RawData.cpp datalackey/Storage.cpp)
+set(StoreSources datalackey/SimpleValue.cpp datalackey/Label.cpp datalackey/Identifier.cpp)
+list(APPEND StoreSources datalackey/RawData.cpp datalackey/Storage.cpp)
 list(APPEND StoreSources datalackey/Converter.cpp datalackey/MemoryStorage.cpp)
 list(APPEND StoreSources datalackey/StorageDataSink.cpp datalackey/StorageDataSinkJSON.cpp)
 

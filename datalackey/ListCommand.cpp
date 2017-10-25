@@ -18,24 +18,33 @@ ListCommand::ListCommand(const char *const Name, Output& Out, const Storage& S)
 ListCommand::~ListCommand() {
 }
 
-void ListCommand::Perform(const std::vector<std::string>& Arguments) {
+bool ListCommand::LabelsOnly() const  {
+    return true;
+}
+
+void ListCommand::Perform(
+    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+{
     // An array with output identifier that was given after the command.
-    if (Arguments.size() != 1) {
-        Error(out, Arguments[0].c_str(), "argument", "unexpected");
+    if (!Arguments.empty()) {
+        Error(out, Id, "argument", "unexpected");
+        for (auto arg : Arguments)
+            delete arg;
         return;
     }
     auto results = storage.List();
     OutputItem* writer = out.Writable();
     *writer << Array; // Start message array.
-    *writer << ValueRef<std::string>(Arguments[0]);
+    Feed(*writer, Id);
     *writer << Dictionary; // Start label dictionary.
-    std::string label, format;
+    Label label;
+    std::string format;
     size_t size;
     if (!results.empty()) {
         std::tie(label, format, size) = results[0];
         *writer << ValueRef<std::string>(label) << Dictionary
             << ValueRef<std::string>(format) << ValueRef<size_t>(size);
-        std::string previous(label);
+        Label previous(label);
         for (size_t k = 1; k < results.size(); ++k) {
             std::tie(label, format, size) = results[k];
             if (previous != label) {

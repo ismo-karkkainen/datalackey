@@ -18,16 +18,24 @@ RunCommand::RunCommand(const char *const Name, Output& Out, Processes& P)
 RunCommand::~RunCommand() {
 }
 
-void RunCommand::Perform(const std::vector<std::string>& Arguments) {
+bool RunCommand::LabelsOnly() const {
+    return false;
+}
+
+void RunCommand::Perform(
+    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+{
     // An array with output identifier and run info.
-    if (Arguments.size() < 2) {
-        Error(out, Arguments[0].c_str(), "argument", "missing");
+    if (Arguments.empty()) {
+        Error(out, Id, "argument", "missing");
         return;
     }
-    std::vector<std::string> result = processes.Run(out, Arguments);
+    std::vector<std::string> result = processes.Run(out, Id, Arguments);
+    // If it turns out error reporting is easier in processes, then drop this.
     // Whatever is returned, report it as result.
     OutputItem* writer = out.Writable();
-    *writer << Array << ValueRef<std::string>(Arguments[0]);
+    *writer << Array;
+    Feed(*writer, Id);
     for (auto& s : result)
         *writer << ValueRef<std::string>(s);
     *writer << End;

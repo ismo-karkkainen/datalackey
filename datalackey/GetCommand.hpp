@@ -23,7 +23,8 @@ public:
         const char *const Format);
     ~GetCommand();
 
-    void Perform(const std::vector<std::string>& Arguments);
+    bool LabelsOnly() const;
+    void Perform(const Identifier& Id, std::vector<SimpleValue*>& Arguments);
 };
 
 #endif /* GetCommand_hpp */
