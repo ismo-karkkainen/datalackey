@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 
 bool StorageDataSinkJSON::pass_to_storage() {
-    std:string name;
+    std::string name;
     try {
         json s = json::parse(key.cbegin(), key.cend());
         if (!s.is_string()) {

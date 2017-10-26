@@ -37,7 +37,7 @@ void ListCommand::Perform(
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start label dictionary.
-    Label label;
+    Label label("");
     std::string format;
     size_t size;
     if (!results.empty()) {

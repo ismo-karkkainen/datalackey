@@ -22,23 +22,21 @@ bool LocalProcesses::Finished() const {
     return true;
 }
 
-std::vector<std::tuple<std::string,pid_t>> LocalProcesses::List() const {
+std::vector<std::tuple<Identifier,pid_t>> LocalProcesses::List() const {
     // For each process, return identifier and pid pair.
-    std::vector<std::tuple<std::string,pid_t>> results;
+    std::vector<std::tuple<Identifier,pid_t>> results;
     return results;
 }
 
-bool LocalProcesses::Terminate(const std::string& Id) {
+bool LocalProcesses::Terminate(const Identifier& Id) {
     // If process does not exist, return false.
     // Ask process owner to terminate it.
     return true;
 }
 
-std::vector<std::string> LocalProcesses::Run(
-    Output& Out, const std::vector<std::string>& Parameters)
+void LocalProcesses::Run(Output& Out,
+    const Identifier& Id, std::vector<SimpleValue*>& Parameters)
 {
-    std::vector<std::string> result;
-    // If there is process by same name, return error.
-    result.push_back(std::string("launching"));
-    return result;
+    // If there is process by same name, report error.
+    // Do some checks and send some launching report?
 }

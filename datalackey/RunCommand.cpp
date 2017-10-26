@@ -30,14 +30,5 @@ void RunCommand::Perform(
         Error(out, Id, "argument", "missing");
         return;
     }
-    std::vector<std::string> result = processes.Run(out, Id, Arguments);
-    // If it turns out error reporting is easier in processes, then drop this.
-    // Whatever is returned, report it as result.
-    OutputItem* writer = out.Writable();
-    *writer << Array;
-    Feed(*writer, Id);
-    for (auto& s : result)
-        *writer << ValueRef<std::string>(s);
-    *writer << End;
-    delete writer;
+    processes.Run(out, Id, Arguments);
 }

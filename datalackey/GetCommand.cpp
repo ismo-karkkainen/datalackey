@@ -9,6 +9,7 @@
 #include "GetCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
+#include <cassert>
 
 
 GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S,

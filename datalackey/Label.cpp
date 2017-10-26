@@ -14,7 +14,7 @@ Label::Label(const std::string& Name)
 { }
 
 bool Label::IsNumber() const {
-    return false;
+    return false;
 }
 
 long long int Label::Number() const {

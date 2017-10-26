@@ -37,7 +37,7 @@ void ProcessesCommand::Perform(
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start process id to PID dictionary.
-    Identifier id;
+    Identifier id(0);
     pid_t pid;
     for (size_t k = 0; k < results.size(); ++k) {
         std::tie(id, pid) = results[k];

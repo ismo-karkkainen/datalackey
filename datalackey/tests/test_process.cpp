@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
     assert(command_handler != nullptr);
     assert(scanner != nullptr);
 
-    Processes* procs = new LocalProcesses(*out, *storage);
+    Processes* procs = new LocalProcesses(*storage);
 
     // Add commands.
     ListCommand list("list", *out, *storage);

@@ -10,6 +10,7 @@
 #define Processes_hpp
 
 #include "Output.hpp"
+#include "Identifier.hpp"
 #include <vector>
 #include <tuple>
 #include <string>
@@ -25,12 +26,12 @@ public:
 
     // Return a list of identifier to process id (or similar) mappings.
     // Process ids are only for convenence reporting to user.
-    virtual std::vector<std::tuple<std::string,pid_t>> List() const = 0;
+    virtual std::vector<std::tuple<Identifier,pid_t>> List() const = 0;
     // Terminate process. Return true if process exists.
-    virtual bool Terminate(const std::string& Id) = 0;
-    // Start process. Returns status message.
-    virtual std::vector<std::string> Run(Output& Out,
-        const std::vector<std::string>& Parameters) = 0;
+    virtual bool Terminate(const Identifier& Id) = 0;
+    // Start process. Ownership of parameters transfers.
+    virtual void Run(Output& Out,
+        const Identifier& Id, std::vector<SimpleValue*>& Parameters) = 0;
 
     // Needs input and output channel information.
     // Needs arguments including program name.

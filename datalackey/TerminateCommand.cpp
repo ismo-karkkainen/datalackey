@@ -9,6 +9,7 @@
 #include "TerminateCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
+#include <cassert>
 
 
 TerminateCommand::TerminateCommand(
@@ -44,7 +45,7 @@ void TerminateCommand::Perform(
     if (!unavailable.empty()) {
         OutputItem* writer = out.Writable();
         *writer << Array
-            << ValueRef<std::string>("error")
+            << ValueRef<std::string>("error");
         Feed(*writer, Id);
         *writer << ValueRef<std::string>("unavailable");
         for (auto arg : unavailable) {

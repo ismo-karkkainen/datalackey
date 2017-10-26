@@ -13,7 +13,7 @@
 #include <string>
 
 
-class Identifier {
+class Identifier : public SimpleValue {
 private:
     // Could use variant but this is most likely sufficient for convenient use.
     // Allow integer or string as identifier.
@@ -22,12 +22,12 @@ private:
     std::string string;
 
 public:
-    Identifier(long long int N) : is_number(true), number(N) { }
-    Identifier(const std::string& S) : is_number(false), string(S) { }
+    Identifier(long long int N);
+    Identifier(const std::string& S);
 
-    bool IsNumber() const { return is_number; }
-    long long int Number() const { return number; }
-    const std::string& String() const { return string; }
+    bool IsNumber() const;
+    long long int Number() const;
+    const std::string& String() const;
 };
 
 

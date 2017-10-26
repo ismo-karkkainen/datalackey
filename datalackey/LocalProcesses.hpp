@@ -11,11 +11,17 @@
 
 #include "Processes.hpp"
 #include "Storage.hpp"
+#include "Process.hpp"
+#include <map>
+#include <memory>
 
 
 class LocalProcesses : public Processes {
 private:
     Storage& storage;
+
+    std::map<Identifier, Process*> processes;
+    std::mutex processes_mutex;
 
 public:
     LocalProcesses(Storage& S);
@@ -23,10 +29,10 @@ public:
 
     bool Finished() const;
 
-    std::vector<std::tuple<std::string,pid_t>> List() const;
-    bool Terminate(const std::string& Id);
-    std::vector<std::string> Run(
-        Output& Out, const std::vector<std::string>& Parameters);
+    std::vector<std::tuple<Identifier,pid_t>> List() const;
+    bool Terminate(const Identifier& Id);
+    void Run(Output& Out,
+        const Identifier& Id, std::vector<SimpleValue*>& Parameters);
 };
 
 

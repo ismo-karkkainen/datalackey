@@ -9,6 +9,7 @@
 #include "DeleteCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
+#include <cassert>
 
 
 DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
@@ -47,7 +48,7 @@ void DeleteCommand::Perform(
         Feed(*writer, Id);
         *writer << ValueRef<std::string>("unavailable");
         for (auto s : unavailable) {
-            Feed(*writer, s);
+            Feed(*writer, *s);
             delete s;
         }
         *writer << End;

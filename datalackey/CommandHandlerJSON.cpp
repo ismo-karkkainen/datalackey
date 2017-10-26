@@ -72,24 +72,24 @@ bool CommandHandlerJSON::End() {
     for (size_t k = 1; k < cmd.size(); ++k) {
         if (label_only) {
             if (cmd[k].is_string())
-                args.push_back(new Label(cmd[k].get<std::string>());
+                args.push_back(new Label(cmd[k].get<std::string>()));
             else
                 return error(identifier, "argument", "not-string");
         } else {
             if (cmd[k].is_string())
-                args.push_back(new Identifier(cmd[k].get<std::string>());
+                args.push_back(new Identifier(cmd[k].get<std::string>()));
             else if (cmd[k].is_number()) {
                 double d(cmd[k].get<double>()), i;
                 if (0.0 != std::modf(d, &i))
                     return error(identifier, "argument", "not-integer");
-                args.push_back(new Identifier(cmd[k].get<long long int>());
+                args.push_back(new Identifier(cmd[k].get<long long int>()));
             } else
                 return error(
                     identifier, "argument", "not-string", "not-integer");
         }
     }
     // Ownership of contents of args transfers.
-    iter->second->Perform(identifier, args);
+    iter->second->Perform(*identifier, args);
     delete identifier;
     return true;
 }

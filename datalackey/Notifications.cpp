@@ -27,7 +27,7 @@ static void message(Output& Out, const char *const type, const char *const one,
     delete writer;
 }
 
-static void message(Output& Out, const char *const type, const Identifier& Id,
+static void message(Output& Out, const char *const type, const SimpleValue& Id,
     const char *const one, const char *const two, const char *const three,
     const char *const four)
 {
@@ -53,7 +53,7 @@ void Note(Output& Out, const char *const one, const char *const two,
     message(Out, "note", one, two, three, four);
 }
 
-void Note(Output& Out, const Identifier& Id, const char *const one,
+void Note(Output& Out, const SimpleValue& Id, const char *const one,
     const char *const two, const char *const three, const char *const four)
 {
     message(Out, "note", Id, one, two, three, four);
@@ -65,7 +65,7 @@ void Error(Output& Out, const char *const one, const char *const two,
     message(Out, "error", one, two, three, four);
 }
 
-void Error(Output& Out, const Identifier& Id, const char *const one,
+void Error(Output& Out, const SimpleValue& Id, const char *const one,
     const char *const two, const char *const three, const char *const four)
 {
     message(Out, "error", Id, one, two, three, four);
