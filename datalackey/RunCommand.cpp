@@ -25,7 +25,7 @@ bool RunCommand::LabelsOnly() const {
 void RunCommand::Perform(
     const Identifier& Id, std::vector<SimpleValue*>& Arguments)
 {
-    // An array with output identifier and run info.
+    // An array with run info.
     if (Arguments.empty()) {
         Error(out, Id, "argument", "missing");
         return;

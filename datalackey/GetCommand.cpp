@@ -49,10 +49,10 @@ void GetCommand::Perform(
     }
     if (!unavailable.empty()) {
         OutputItem* writer = out.Writable();
-        *writer << Array
-            << ValueRef<std::string>("error");
+        *writer << Array;
         Feed(*writer, Id);
-        *writer << ValueRef<std::string>("unavailable");
+        *writer << ValueRef<std::string>("error")
+            << ValueRef<std::string>("unavailable");
         for (auto s : unavailable) {
             Feed(*writer, *s);
             delete s;

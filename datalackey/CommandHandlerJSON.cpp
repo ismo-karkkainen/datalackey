@@ -48,28 +48,28 @@ bool CommandHandlerJSON::End() {
     }
     assert(cmd.is_array());
     if (cmd.size() == 0)
-        return error("command", "missing");
-    if (cmd.size() == 1)
         return error("identifier", "missing");
-    if (!cmd[0].is_string())
-        return error("command", "not-string");
-    std::string command = cmd[0];
     Identifier* identifier = nullptr;
-    if (cmd[1].is_string())
-        identifier = new Identifier(cmd[1].get<std::string>());
-    else if (cmd[1].is_number()) {
-        double d(cmd[1].get<double>()), i;
+    if (cmd[0].is_string())
+        identifier = new Identifier(cmd[0].get<std::string>());
+    else if (cmd[0].is_number()) {
+        double d(cmd[0].get<double>()), i;
         if (0.0 != std::modf(d, &i))
             return error("identifier", "not-integer");
-        identifier = new Identifier(cmd[1].get<long long int>());
+        identifier = new Identifier(cmd[0].get<long long int>());
     } else
         return error("identifier", "not-string", "not-integer");
+    if (cmd.size() == 1)
+        return error("command", "missing");
+    if (!cmd[1].is_string())
+        return error("command", "not-string");
+    std::string command = cmd[1];
     auto iter = handlers.find(command);
     if (iter == handlers.end())
         return error(identifier, "command", "unknown");
     bool label_only = iter->second->LabelsOnly();
     std::vector<SimpleValue*> args;
-    for (size_t k = 1; k < cmd.size(); ++k) {
+    for (size_t k = 2; k < cmd.size(); ++k) {
         if (label_only) {
             if (cmd[k].is_string())
                 args.push_back(new Label(cmd[k].get<std::string>()));

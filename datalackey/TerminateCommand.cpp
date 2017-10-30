@@ -32,33 +32,23 @@ void TerminateCommand::Perform(
         Error(out, Id, "argument", "missing");
         return;
     }
-    // Check if everything can be made available and if not, return an error.
-    std::vector<Identifier*> unavailable;
-    for (auto arg : Arguments) {
-        Identifier* id(dynamic_cast<Identifier*>(arg));
-        assert(id != nullptr);
-        if (processes.Terminate(*id))
-            delete id;
-        else
-            unavailable.push_back(id);
-    }
-    if (!unavailable.empty()) {
-        OutputItem* writer = out.Writable();
-        *writer << Array
-            << ValueRef<std::string>("error");
-        Feed(*writer, Id);
-        *writer << ValueRef<std::string>("unavailable");
-        for (auto arg : unavailable) {
-            Feed(*writer, *arg);
-            delete arg;
-        }
-        *writer << End;
-        delete writer;
-        return;
-    }
+    bool has_unavailable = false;
     OutputItem* writer = out.Writable();
     *writer << Array;
     Feed(*writer, Id);
+    for (auto arg : Arguments) {
+        Identifier* id(dynamic_cast<Identifier*>(arg));
+        assert(id != nullptr);
+        if (!processes.Terminate(*id)) {
+            if (!has_unavailable) {
+                has_unavailable = true;
+                *writer << ValueRef<std::string>("error")
+                    << ValueRef<std::string>("unavailable");
+            }
+            Feed(*writer, *id);
+        }
+        delete id;
+    }
     *writer << End;
     delete writer;
 }

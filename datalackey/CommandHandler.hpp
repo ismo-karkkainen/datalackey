@@ -28,7 +28,7 @@ protected:
     bool error(const char *const one, const char *const two,
         const char *const three = nullptr);
     // Deletes identifier due to the use as convenience function.
-    bool error(const Identifier* Id, const char *const one,
+    bool error(Identifier* Id, const char *const one,
         const char *const two = nullptr, const char *const three = nullptr);
 
 public:

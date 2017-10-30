@@ -56,13 +56,13 @@ static int HandleArguments(int argc, char** argv) {
     opt::AddFlag('h', "help", false);
     opt::Usage("Print help and exit.");
     opt::Doc("Commands:");
-    opt::Doc("[ \"list\", identifier ] to list data labels.");
-    opt::Doc("[ \"get\", identifier, label1, label2, ... ] to get data.");
-    opt::Doc("[ \"delete\", identifier, label1, label2, ... ] to delete data.");
-    opt::Doc("[ \"version\", identifier ] to return version.");
-    opt::Doc("[ \"processes\", identifier ] to list running processes.");
-    opt::Doc("[ \"run\", identifier, args... ] to run process.");
-    opt::Doc("[ \"terminate\", identifier, proc1, proc2, ... ] to terminate process.");
+    opt::Doc("[ identifier, \"list\" ] to list data labels.");
+    opt::Doc("[ identifier, \"get\", label1, label2, ... ] to get data.");
+    opt::Doc("[ identifier, \"delete\", label1, label2, ... ] to delete data.");
+    opt::Doc("[ identifier, \"version\" ] to return version.");
+    opt::Doc("[ identifier, \"processes\" ] to list running processes.");
+    opt::Doc("[ identifier, \"run\", args... ] to run process.");
+    opt::Doc("[ identifier, \"terminate\", proc1, proc2, ... ] to terminate process.");
     if (opt::GivenOption('h', "help", argc, argv)) {
         opt::PrintUsage(std::cerr, "datalackey");
         return 0;

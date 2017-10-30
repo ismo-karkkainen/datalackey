@@ -10,31 +10,17 @@
 #include "Value_t.hpp"
 
 
-static void message(Output& Out, const char *const type, const char *const one,
-    const char *const two, const char *const three, const char *const four)
-{
-    OutputItem* writer = Out.Writable();
-    *writer << Array
-        << ValueRef<std::string>(type)
-        << ValueRef<std::string>(one);
-    if (two != nullptr)
-        *writer << ValueRef<std::string>(two);
-    if (three != nullptr)
-        *writer << ValueRef<std::string>(three);
-    if (four != nullptr)
-        *writer << ValueRef<std::string>(four);
-    *writer << End;
-    delete writer;
-}
-
-static void message(Output& Out, const char *const type, const SimpleValue& Id,
+static void message(Output& Out, const SimpleValue* Id, const char *const type,
     const char *const one, const char *const two, const char *const three,
     const char *const four)
 {
     OutputItem* writer = Out.Writable();
+    if (Id == nullptr)
+        *writer << Structure::Null;
+    else
+        Feed(*writer, *Id);
     *writer << Array
         << ValueRef<std::string>(type);
-    Feed(*writer, Id);
     if (one != nullptr)
         *writer << ValueRef<std::string>(one);
     if (two != nullptr)
@@ -50,25 +36,25 @@ static void message(Output& Out, const char *const type, const SimpleValue& Id,
 void Note(Output& Out, const char *const one, const char *const two,
     const char *const three, const char *const four)
 {
-    message(Out, "note", one, two, three, four);
+    message(Out, nullptr, "note", one, two, three, four);
 }
 
 void Note(Output& Out, const SimpleValue& Id, const char *const one,
     const char *const two, const char *const three, const char *const four)
 {
-    message(Out, "note", Id, one, two, three, four);
+    message(Out, &Id, "note", one, two, three, four);
 }
 
 void Error(Output& Out, const char *const one, const char *const two,
     const char *const three, const char *const four)
 {
-    message(Out, "error", one, two, three, four);
+    message(Out, nullptr, "error", one, two, three, four);
 }
 
 void Error(Output& Out, const SimpleValue& Id, const char *const one,
     const char *const two, const char *const three, const char *const four)
 {
-    message(Out, "error", Id, one, two, three, four);
+    message(Out, &Id, "error", one, two, three, four);
 }
 
 void Feed(OutputItem& Writer, const SimpleValue& Id) {
