@@ -55,14 +55,6 @@ static int HandleArguments(int argc, char** argv) {
         "Megabytes of total memory attempted to keep free. 0 for no limit.");
     opt::AddFlag('h', "help", false);
     opt::Usage("Print help and exit.");
-    opt::Doc("Commands:");
-    opt::Doc("[ identifier, \"list\" ] to list data labels.");
-    opt::Doc("[ identifier, \"get\", label1, label2, ... ] to get data.");
-    opt::Doc("[ identifier, \"delete\", label1, label2, ... ] to delete data.");
-    opt::Doc("[ identifier, \"version\" ] to return version.");
-    opt::Doc("[ identifier, \"processes\" ] to list running processes.");
-    opt::Doc("[ identifier, \"run\", args... ] to run process.");
-    opt::Doc("[ identifier, \"terminate\", proc1, proc2, ... ] to terminate process.");
     if (opt::GivenOption('h', "help", argc, argv)) {
         opt::PrintUsage(std::cerr, "datalackey");
         return 0;

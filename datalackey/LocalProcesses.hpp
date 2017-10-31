@@ -33,6 +33,8 @@ public:
     bool Terminate(const Identifier& Id);
     void Run(Output& Out,
         const Identifier& Id, std::vector<SimpleValue*>& Parameters);
+
+    void Finish(const Identifier& Id, Process* P);
 };
 
 

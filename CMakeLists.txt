@@ -33,7 +33,8 @@ set(Commands datalackey/Command.cpp datalackey/CommandHandler.cpp)
 list(APPEND Commands datalackey/ListCommand.cpp datalackey/GetCommand.cpp)
 list(APPEND Commands datalackey/DeleteCommand.cpp datalackey/VersionCommand.cpp)
 
-set(Processes datalackey/Processes.cpp datalackey/LocalProcesses.cpp)
+set(Processes datalackey/Process.cpp datalackey/Processes.cpp)
+list(APPEND Processes datalackey/LocalProcess.cpp datalackey/LocalProcesses.cpp)
 set(ProcessCommands datalackey/ProcessesCommand.cpp datalackey/RunCommand.cpp)
 list(APPEND ProcessCommands datalackey/TerminateCommand.cpp)
 

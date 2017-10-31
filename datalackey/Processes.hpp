@@ -11,6 +11,7 @@
 
 #include "Output.hpp"
 #include "Identifier.hpp"
+#include "Process.hpp"
 #include <vector>
 #include <tuple>
 #include <string>
@@ -51,6 +52,8 @@ public:
     // to a new value so it is simply a placeholder.
     // Depending on channel there could be fixed number of arguments and they
     // must be given or the command is erroneus. Just complain to user.
+
+    void Finish(const Identifier& Id, Process* P) = 0;
 };
 
 
