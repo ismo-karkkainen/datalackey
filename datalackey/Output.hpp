@@ -27,18 +27,15 @@ class Output;
 // This receives the data that OutputItem produces.
 class OutputItemBuffer {
 private:
-    bool side_channel;
     bool ended;
     OutputChannel* channel;
     Output& master;
     RawData buffer;
 
-    OutputItemBuffer(Output& Master, bool SideChannel);
+    OutputItemBuffer(Output& Master);
     ~OutputItemBuffer();
     void SetChannel(OutputChannel* OC);
 
-    OutputChannel* Channel() const { return channel; }
-    bool SideChannel() const { return side_channel; }
     size_t Size() const { return buffer.Size(); }
     bool Ended() const { return ended; }
 
@@ -76,10 +73,10 @@ private:
     std::mutex mutex;
     const Encoder& encoder;
     std::vector<OutputItemBuffer*> buffers;
-    std::vector<std::pair<OutputChannel*,OutputItemBuffer*> > mains, sides;
+    OutputChannel& main;
+    OutputItemBuffer* writer;
 
-    void AllocateChannels(bool SideChannel,
-        std::vector<std::pair<OutputChannel*,OutputItemBuffer*> >& List);
+    void AllocateChannel(OutputItemBuffer* PreviousWriter = nullptr);
 
 public:
     Output(const Encoder& E, OutputChannel& Main);
@@ -87,9 +84,7 @@ public:
 
     const char *const Format() const { return encoder.Format(); }
 
-    void AddChannel(OutputChannel& OC, bool SideChannel);
-
-    OutputItem* Writable(bool SideChannel = false);
+    OutputItem* Writable();
 
     // For communication from OutputItemBuffer objects.
     void Ended(OutputItemBuffer& IB);

@@ -15,8 +15,6 @@
 #include "StorageDataSink.hpp"
 #include "MessageHandler.hpp"
 #include "Output.hpp"
-#include <vector>
-#include <thread>
 #include <tuple>
 
 
@@ -28,7 +26,6 @@ protected:
     InputChannel& channel;
     MessageHandler& message_sink;
     StorageDataSink& data_sink;
-    std::thread* worker;
     RawData buffer; // Given to channel and scanned.
 
 public:
@@ -48,7 +45,8 @@ protected:
         scan_input(Recipient Previous, RawData::ConstIterator RangeBegin,
             RawData::ConstIterator RangeEnd) = 0;
 
-    friend void input_scanner(InputScanner* IS);
+private:
+    Recipient previous;
 
 public:
     InputScanner(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS);
@@ -57,12 +55,8 @@ public:
     virtual const char* const Format() const = 0;
 
     bool Ended() const { return channel.Ended(); }
-    void Scan(); // Starts scanning thread that runs until channel ends.
-    void FinishScan();
+    void Scan(); // Reads as much data as is available and handles it.
 };
-
-
-extern void input_scanner(InputScanner* IS);
 
 
 #endif /* InputScanner_hpp */

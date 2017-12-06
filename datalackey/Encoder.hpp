@@ -27,7 +27,7 @@ public:
     virtual bool Encode(RawData& Buffer, Structure S) = 0;
     virtual bool Encode(RawData& Buffer, const ValueReference& VR) = 0;
     // Return an instance of the same class.
-    virtual Encoder* CreateSame() const = 0;
+    virtual Encoder* Clone() const = 0;
     // Return true if Encode always produces output (returns true).
     virtual bool EncodeOutputsDirectly() const = 0;
 

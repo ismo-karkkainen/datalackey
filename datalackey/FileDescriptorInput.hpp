@@ -1,28 +1,29 @@
 //
-//  StdIn.hpp
+//  FileDescriptorInput.hpp
 //  datalackey
 //
 //  Created by Ismo Kärkkäinen on 24.5.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#ifndef StdIn_hpp
-#define StdIn_hpp
+#ifndef FileDescriptorInput_hpp
+#define FileDescriptorInput_hpp
 
 #include "InputChannel.hpp"
 #include "RawData.hpp"
 
 
-class StdIn : public InputChannel {
+class FileDescriptorInput : public InputChannel {
 private:
     bool eof;
+    int fd;
 
 public:
-    StdIn();
-    ~StdIn();
+    FileDescriptorInput(int FileDescriptor = 0);
+    ~FileDescriptorInput();
     int Read(RawData& Buffer);
     bool Ended();
 };
 
 
-#endif /* StdIn_hpp */
+#endif /* FileDescriptorInput_hpp */

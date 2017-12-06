@@ -20,12 +20,8 @@ GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S,
 GetCommand::~GetCommand() {
 }
 
-bool GetCommand::LabelsOnly() const {
-    return true;
-}
-
 void GetCommand::Perform(
-    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
@@ -33,11 +29,15 @@ void GetCommand::Perform(
         return;
     }
     // Check if everything can be made available and if not, return an error.
-    std::vector<Label*> ready, loading, unavailable;
+    std::vector<StringValue*> ready, loading, unavailable;
+    std::vector<SimpleValue*> not_string;
     std::vector<std::shared_ptr<const RawData>> present;
     for (auto arg : Arguments) {
-        Label* label = dynamic_cast<Label*>(arg);
-        assert(label != nullptr);
+        StringValue* label = dynamic_cast<StringValue*>(arg);
+        if (label == nullptr) {
+            not_string.push_back(arg);
+            continue;
+        }
         auto rd = storage.ReadyData(*label, format.c_str());
         if (rd) {
             ready.push_back(label);
@@ -47,11 +47,26 @@ void GetCommand::Perform(
         else
             unavailable.push_back(label);
     }
+    if (!not_string.empty()) {
+        OutputItem* writer = out.Writable();
+        *writer << Array;
+        Feed(*writer, Id);
+        *writer << ValueRef<std::string>("error")
+            << ValueRef<std::string>("argument")
+            << ValueRef<std::string>("not-string");
+        for (auto s : unavailable) {
+            Feed(*writer, *s);
+            delete s;
+        }
+        *writer << End;
+        delete writer;
+    }
     if (!unavailable.empty()) {
         OutputItem* writer = out.Writable();
         *writer << Array;
         Feed(*writer, Id);
         *writer << ValueRef<std::string>("error")
+            << ValueRef<std::string>("argument")
             << ValueRef<std::string>("unavailable");
         for (auto s : unavailable) {
             Feed(*writer, *s);

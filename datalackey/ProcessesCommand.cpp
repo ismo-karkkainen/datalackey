@@ -18,12 +18,8 @@ ProcessesCommand::ProcessesCommand(const char *const Name, Output& Out, const Pr
 ProcessesCommand::~ProcessesCommand() {
 }
 
-bool ProcessesCommand::LabelsOnly() const {
-    return false;
-}
-
 void ProcessesCommand::Perform(
-    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
@@ -37,12 +33,13 @@ void ProcessesCommand::Perform(
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start process id to PID dictionary.
-    Identifier id(0);
+    SimpleValue* id(nullptr);
     pid_t pid;
     for (size_t k = 0; k < results.size(); ++k) {
         std::tie(id, pid) = results[k];
-        Feed(*writer, id);
+        Feed(*writer, *id);
         *writer << ValueRef<pid_t>(pid);
+        delete id;
     }
     *writer << End << End; // Close dictionary and message array.
     delete writer;

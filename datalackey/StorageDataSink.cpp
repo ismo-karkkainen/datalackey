@@ -9,7 +9,7 @@
 #include "StorageDataSink.hpp"
 
 
-StorageDataSink::StorageDataSink(const LabelMapper* Mapper)
+StorageDataSink::StorageDataSink(const StringValueMapper* Mapper)
     : mapper(Mapper)
 { }
 

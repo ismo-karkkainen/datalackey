@@ -21,8 +21,7 @@ public:
     RunCommand(const char *const Name, Output& Out, Processes& P);
     ~RunCommand();
 
-    bool LabelsOnly() const;
-    void Perform(const Identifier& Id, std::vector<SimpleValue*>& Arguments);
+    void Perform(const SimpleValue& Id, std::vector<SimpleValue*>& Arguments);
 };
 
 #endif /* RunCommand_hpp */

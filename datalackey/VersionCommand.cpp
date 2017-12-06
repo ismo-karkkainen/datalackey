@@ -19,12 +19,8 @@ VersionCommand::VersionCommand(const char *const Name, Output& Out)
 VersionCommand::~VersionCommand() {
 }
 
-bool VersionCommand::LabelsOnly() const {
-    return true;
-}
-
 void VersionCommand::Perform(
-    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
     // An array with output identifier and labels.
     if (!Arguments.empty()) {

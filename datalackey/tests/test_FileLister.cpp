@@ -7,13 +7,13 @@
 //
 
 #include "FileLister.hpp"
-#include "StdOut.hpp"
+#include "FileDescriptorOutput.hpp"
 #include "Value_t.hpp"
 #include "Literal.hpp"
 #include "JSONEncoder.hpp"
 
 int main(int argc, char** argv) {
-    StdOut out;
+    FileDescriptorOutput out(1);
     JSONEncoder encoder;
     Output results(encoder, out);
     OutputItem* writer = results.Writable();

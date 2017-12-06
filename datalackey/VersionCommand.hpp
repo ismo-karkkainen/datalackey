@@ -18,8 +18,7 @@ public:
     VersionCommand(const char *const Name, Output& Out);
     ~VersionCommand();
 
-    bool LabelsOnly() const;
-    void Perform(const Identifier& Id, std::vector<SimpleValue*>& Arguments);
+    void Perform(const SimpleValue& Id, std::vector<SimpleValue*>& Arguments);
 };
 
 #endif /* VersionCommand_hpp */

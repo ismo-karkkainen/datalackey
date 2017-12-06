@@ -7,9 +7,9 @@
 //
 
 #include "JSONEncoder.hpp"
-#include "StdOut.hpp"
+#include "FileDescriptorOutput.hpp"
 #include "Output.hpp"
-#include "StdIn.hpp"
+#include "FileDescriptorInput.hpp"
 #include "MessagePassThrough.hpp"
 #include "MemoryStorage.hpp"
 #include "StorageDataSinkJSON.hpp"
@@ -20,9 +20,9 @@
 
 int main(int argc, char** argv) {
     JSONEncoder enc;
-    StdOut out_channel;
+    FileDescriptorOutput out_channel(1);
     Output out(enc, out_channel);
-    StdIn in_channel;
+    FileDescriptorInput in_channel;
     MessagePassThrough mpt(out);
     MemoryStorage storage(0, 0);
     StorageDataSinkJSON front(storage, out);

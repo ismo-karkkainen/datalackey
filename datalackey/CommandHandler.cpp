@@ -16,17 +16,17 @@ bool CommandHandler::error(const char *const one) {
     return false;
 }
 
-bool CommandHandler::error(
-    const char *const one, const char *const two, const char *const three)
+bool CommandHandler::error(const char *const one, const char *const two,
+    const char *const three, const char* const four)
 {
-    Error(out, one, two, three);
+    Error(out, one, two, three, four);
     return true;
 }
 
-bool CommandHandler::error(Identifier* Id,
-    const char *const one, const char *const two, const char *const three)
+bool CommandHandler::error(SimpleValue* Id, const char *const one,
+    const char *const two, const char *const three, const char* const four)
 {
-    Error(out, *Id, one, two, three);
+    Error(out, *Id, one, two, three, four);
     delete Id; // For convenience since caller is returning on this call.
     return true;
 }

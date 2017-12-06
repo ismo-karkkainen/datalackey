@@ -17,9 +17,11 @@ class SimpleValue {
 public:
     virtual ~SimpleValue();
 
-    virtual bool IsNumber() const = 0;
     virtual long long int Number() const = 0;
     virtual const std::string& String() const = 0;
+    virtual SimpleValue* Clone() const = 0;
+
+    bool operator<(const SimpleValue& S) const;
 };
 
 

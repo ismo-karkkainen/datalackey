@@ -18,14 +18,9 @@ RunCommand::RunCommand(const char *const Name, Output& Out, Processes& P)
 RunCommand::~RunCommand() {
 }
 
-bool RunCommand::LabelsOnly() const {
-    return false;
-}
-
 void RunCommand::Perform(
-    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
-    // An array with run info.
     if (Arguments.empty()) {
         Error(out, Id, "argument", "missing");
         return;

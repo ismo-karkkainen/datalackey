@@ -10,7 +10,7 @@
 #define Storage_hpp
 
 #include "RawData.hpp"
-#include "Label.hpp"
+#include "StringValue.hpp"
 #include <memory>
 #include <string>
 #include <vector>
@@ -30,30 +30,32 @@ public:
     virtual bool IsValid() const = 0;
 
     // Return label, format, size in bytes.
-    virtual std::vector<std::tuple<Label,std::string,size_t>> List() const = 0;
+    virtual std::vector<std::tuple<StringValue,std::string,size_t>> List() const = 0;
 
-    virtual void Store(const Label& L, const char *const Format,
+    virtual void Store(const StringValue& L, const char *const Format,
         RawData& Value) = 0;
-    void Store(const Label& L, const std::string& Format,
+    void Store(const StringValue& L, const std::string& Format,
         RawData& Value);
-    virtual bool Delete(const Label& L) = 0;
+    virtual bool Delete(const StringValue& L) = 0;
     virtual void Clean() = 0;
 
     // Pre-load a value.
-    virtual bool Preload(const Label& L, const char *const Format) = 0;
-    bool Preload(const Label& L, const std::string& Format);
+    virtual bool Preload(const StringValue& L, const char *const Format) = 0;
+    bool Preload(const StringValue& L, const std::string& Format);
 
-    virtual bool IsReady(const Label& L, const char *const Format) = 0;
-    bool IsReady(const Label& L, const std::string& Format);
+    virtual bool IsReady(const StringValue& L, const char *const Format) = 0;
+    bool IsReady(const StringValue& L, const std::string& Format);
 
     // Return the value.
-    virtual std::shared_ptr<const RawData> Data(const Label& L, const char *const Format) = 0;
-    std::shared_ptr<const RawData> Data(const Label& L,
+    virtual std::shared_ptr<const RawData> Data(const StringValue& L,
+        const char *const Format) = 0;
+    std::shared_ptr<const RawData> Data(const StringValue& L,
         const std::string& Format);
 
     // Return the value only if ready, no conversion done or started.
-    virtual std::shared_ptr<const RawData> ReadyData(const Label& L, const char *const Format) = 0;
-    std::shared_ptr<const RawData> ReadyData(const Label& L,
+    virtual std::shared_ptr<const RawData> ReadyData(const StringValue& L,
+        const char *const Format) = 0;
+    std::shared_ptr<const RawData> ReadyData(const StringValue& L,
         const std::string& Format);
 };
 

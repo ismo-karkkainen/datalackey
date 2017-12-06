@@ -20,12 +20,8 @@ TerminateCommand::TerminateCommand(
 TerminateCommand::~TerminateCommand() {
 }
 
-bool TerminateCommand::LabelsOnly() const {
-    return false;
-}
-
 void TerminateCommand::Perform(
-    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
@@ -37,17 +33,14 @@ void TerminateCommand::Perform(
     *writer << Array;
     Feed(*writer, Id);
     for (auto arg : Arguments) {
-        Identifier* id(dynamic_cast<Identifier*>(arg));
-        assert(id != nullptr);
-        if (!processes.Terminate(*id)) {
+        if (!processes.Terminate(Id)) {
             if (!has_unavailable) {
                 has_unavailable = true;
                 *writer << ValueRef<std::string>("error")
                     << ValueRef<std::string>("unavailable");
             }
-            Feed(*writer, *id);
+            Feed(*writer, Id);
         }
-        delete id;
     }
     *writer << End;
     delete writer;

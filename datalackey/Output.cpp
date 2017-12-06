@@ -9,9 +9,8 @@
 #include "Output.hpp"
 
 
-OutputItemBuffer::OutputItemBuffer(Output& Master, bool SideChannel)
-    : side_channel(SideChannel), ended(false), channel(nullptr),
-    master(Master)
+OutputItemBuffer::OutputItemBuffer(Output& Master)
+    : ended(false), channel(nullptr), master(Master)
 { }
 
 void OutputItemBuffer::SetChannel(OutputChannel* OC) {
@@ -51,9 +50,10 @@ void OutputItemBuffer::End() {
         *channel << buffer;
         buffer.Clear(true);
     }
-    if (!ended)
+    if (!ended) {
+        ended = true;
         master.Ended(*this);
-    ended = true;
+    }
 }
 
 
@@ -101,93 +101,54 @@ void OutputItem::Write(
 }
 
 
-void Output::AllocateChannels(bool SideChannel,
-    std::vector<std::pair<OutputChannel*,OutputItemBuffer*> >& List)
-{
+void Output::AllocateChannel(OutputItemBuffer* PreviousWriter) {
     if (buffers.empty()) // Nothing to use the channel.
         return;
-    // Find an available channel.
-    std::pair<OutputChannel*,OutputItemBuffer*>* available = nullptr;
-    for (size_t k = 0; k < List.size(); ++k)
-        if (List[k].second == nullptr) {
-            available = &List[k];
-            break;
-        }
-    if (available == nullptr)
+    if (writer != nullptr)
         return;
     // Get ended buffers out of the way first.
     for (size_t k = buffers.size(); k; --k) {
         OutputItemBuffer* current = buffers[k - 1];
-        if (!current->Ended() || current->SideChannel() != SideChannel)
+        if (!current->Ended())
             continue;
-        if (current->Size())
-            current->SetChannel(available->first); // Writes out all.
+        if (current != PreviousWriter && current->Size())
+            current->SetChannel(&main); // Writes out all.
         delete current;
         buffers[k - 1] = buffers.back();
         buffers.pop_back();
     }
-    // Find buffer with most data.
-    OutputItemBuffer* largest = nullptr;
+    // Find buffer with most data. Or least? One with most can write it onwards.
     for (auto b : buffers) {
-        if (b->Channel() != nullptr)
-            continue;
-        if (largest == nullptr || largest->Size() < b->Size())
-            largest = b;
+        if (writer == nullptr || writer->Size() < b->Size())
+            writer = b;
     }
-    if (largest == nullptr)
-        return;
-    available->second = largest;
-    largest->SetChannel(available->first);
+    if (writer != nullptr)
+        writer->SetChannel(&main);
 }
 
 Output::Output(const Encoder& E, OutputChannel& Main)
-    : encoder(E)
-{
-    mains.push_back(std::make_pair<OutputChannel*,OutputItemBuffer*>(&Main, nullptr));
-}
+    : encoder(E), main(Main), writer(nullptr)
+{ }
 
 Output::~Output() {
     for (auto& buffer : buffers)
         delete buffer;
-    // OutputChannels allocated and owned outside.
+    // OutputChannel allocated and owned outside.
 }
 
-void Output::AddChannel(OutputChannel& OC, bool SideChannel) {
-    std::lock_guard<std::mutex> lock(mutex);
-    if (SideChannel) {
-        sides.push_back(std::make_pair<OutputChannel*,OutputItemBuffer*>(&OC, nullptr));
-        AllocateChannels(true, sides);
-    } else {
-        mains.push_back(std::make_pair<OutputChannel*,OutputItemBuffer*>(&OC, nullptr));
-        AllocateChannels(false, mains);
-    }
-}
-
-OutputItem* Output::Writable(bool SideChannel) {
-    OutputItemBuffer* buffer = new OutputItemBuffer(*this, SideChannel);
+OutputItem* Output::Writable() {
+    OutputItemBuffer* buffer = new OutputItemBuffer(*this);
     std::lock_guard<std::mutex> lock(mutex);
     buffers.push_back(buffer);
-    AllocateChannels(SideChannel,
-        (SideChannel && !sides.empty()) ? sides : mains);
-    return new OutputItem(encoder.CreateSame(), *buffer);
+    AllocateChannel();
+    return new OutputItem(encoder.Clone(), *buffer);
 }
 
 void Output::Ended(OutputItemBuffer& IB) {
-    // Should find and free if ended and zero-size even if no channel?
-    if (IB.Channel() == nullptr)
+    if (&IB != writer)
         return;
-    IB.Channel()->Flush();
+    main.Flush();
     std::lock_guard<std::mutex> lock(mutex);
-    for (size_t k = 0; k < mains.size(); ++k)
-        if (mains[k].second == &IB) {
-            mains[k].second = nullptr;
-            AllocateChannels(false, mains);
-            return;
-        }
-    for (size_t k = 0; k < sides.size(); ++k)
-        if (sides[k].second == &IB) {
-            sides[k].second = nullptr;
-            AllocateChannels(true, sides);
-            return;
-        }
+    writer = nullptr;
+    AllocateChannel(&IB);
 }

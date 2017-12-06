@@ -51,7 +51,7 @@ private:
         std::pair<bool,std::shared_ptr<ConversionResult>> Receiver(
             const std::string& Format);
     };
-    std::map<Label,std::shared_ptr<Values>> label2data;
+    std::map<StringValue,std::shared_ptr<Values>> label2data;
     mutable std::mutex label2data_mutex;
 
     // Finds the most suitable source format and returns the data or nullptr.
@@ -60,7 +60,7 @@ private:
 
     // Returns Values and lock to its mutex.
     std::pair<std::shared_ptr<Values>,std::unique_lock<std::mutex>> get(
-        const Label& L);
+        const StringValue& L);
 
     Converter converter;
     size_t used_limit, free_limit;
@@ -71,17 +71,17 @@ public:
 
     bool IsValid() const;
 
-    std::vector<std::tuple<Label,std::string,size_t>> List() const;
+    std::vector<std::tuple<StringValue,std::string,size_t>> List() const;
 
-    void Store(const Label& L, const char *const Format, RawData& Data);
-    bool Delete(const Label& L);
+    void Store(const StringValue& L, const char *const Format, RawData& Data);
+    bool Delete(const StringValue& L);
     void Clean();
 
-    bool Preload(const Label& L, const char *const Format);
-    bool IsReady(const Label& L, const char *const Format);
-    std::shared_ptr<const RawData> Data(const Label& L,
+    bool Preload(const StringValue& L, const char *const Format);
+    bool IsReady(const StringValue& L, const char *const Format);
+    std::shared_ptr<const RawData> Data(const StringValue& L,
         const char *const Format);
-    std::shared_ptr<const RawData> ReadyData(const Label& L,
+    std::shared_ptr<const RawData> ReadyData(const StringValue& L,
         const char *const Format);
 };
 

@@ -22,12 +22,12 @@ private:
 public:
     JSONEncoder();
     ~JSONEncoder();
-    // If outputs directly, only appending to Buffer is allowed.
+
     bool Encode(RawData& Buffer, Structure S);
     bool Encode(RawData& Buffer, const ValueReference& VR);
-    // Return an instance of the same class.
-    Encoder* CreateSame() const;
-    // Return true if Encode always produces output (returns true).
+
+    Encoder* Clone() const;
+
     bool EncodeOutputsDirectly() const;
     const char *const Format() const;
 };

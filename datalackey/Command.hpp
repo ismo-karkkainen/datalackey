@@ -10,7 +10,6 @@
 #define Command_hpp
 
 #include "Output.hpp"
-#include "Identifier.hpp"
 #include "SimpleValue.hpp"
 #include <vector>
 #include <string>
@@ -29,8 +28,8 @@ public:
     virtual ~Command();
     const std::string& Name() const { return name; }
 
-    virtual bool LabelsOnly() const = 0;
-    virtual void Perform(const Identifier& Id, std::vector<SimpleValue*>& Arguments) = 0;
+    virtual void Perform(const SimpleValue& Id,
+        std::vector<SimpleValue*>& Arguments) = 0;
 };
 
 

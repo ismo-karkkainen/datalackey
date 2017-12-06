@@ -18,12 +18,8 @@ ListCommand::ListCommand(const char *const Name, Output& Out, const Storage& S)
 ListCommand::~ListCommand() {
 }
 
-bool ListCommand::LabelsOnly() const  {
-    return true;
-}
-
 void ListCommand::Perform(
-    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
@@ -37,14 +33,14 @@ void ListCommand::Perform(
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start label dictionary.
-    Label label("");
+    StringValue label("");
     std::string format;
     size_t size;
     if (!results.empty()) {
         std::tie(label, format, size) = results[0];
         *writer << ValueRef<std::string>(label) << Dictionary
             << ValueRef<std::string>(format) << ValueRef<size_t>(size);
-        Label previous(label);
+        StringValue previous(label);
         for (size_t k = 1; k < results.size(); ++k) {
             std::tie(label, format, size) = results[k];
             if (previous != label) {

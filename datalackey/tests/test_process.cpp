@@ -1,5 +1,5 @@
 //
-//  test_MessagePassThrough.cpp
+//  test_process.cpp
 //  datalackey
 //
 //  Created by Ismo Kärkkäinen on 17.7.17.
@@ -7,10 +7,9 @@
 //
 
 #include "JSONEncoder.hpp"
-#include "StdOut.hpp"
-#include "StdErr.hpp"
+#include "FileDescriptorOutput.hpp"
 #include "Output.hpp"
-#include "StdIn.hpp"
+#include "FileDescriptorInput.hpp"
 #include "CommandHandlerJSON.hpp"
 #include "ListCommand.hpp"
 #include "GetCommand.hpp"
@@ -20,10 +19,12 @@
 #include "ProcessesCommand.hpp"
 #include "RunCommand.hpp"
 #include "TerminateCommand.hpp"
+#include "NoOperationCommand.hpp"
 #include "MemoryStorage.hpp"
 #include "StorageDataSinkJSON.hpp"
 #include "InputScannerJSON.hpp"
 #include "Options.hpp"
+#include "Time.hpp"
 #include <cstring>
 #include <ctime>
 #include <limits>
@@ -77,9 +78,9 @@ int main(int argc, char** argv) {
     OutputChannel* out_channel = nullptr;
     std::string choice = opt::String("command-out", 1);
     if (choice == "stdout")
-        out_channel = new StdOut();
+        out_channel = new FileDescriptorOutput(1);
     else if (choice == "stderr")
-        out_channel = new StdErr();
+        out_channel = new FileDescriptorOutput(2);
     assert(out_channel != nullptr);
 
     Encoder* enc = nullptr;
@@ -92,7 +93,7 @@ int main(int argc, char** argv) {
     choice = opt::String("command-in", 1);
     InputChannel* in_channel = nullptr;
     if (choice == "stdin")
-        in_channel = new StdIn();
+        in_channel = new FileDescriptorInput();
     assert(in_channel != nullptr);
 
     StorageDataSink* sink = nullptr;
@@ -126,15 +127,13 @@ int main(int argc, char** argv) {
     command_handler->AddCommand(&run);
     TerminateCommand terminate("terminate", *out, *procs);
     command_handler->AddCommand(&terminate);
+    NoOperationCommand noop("no-op", *out);
+    command_handler->AddCommand(&noop);
 
-    scanner->Scan();
     while (!scanner->Ended() || !procs->Finished()) {
-        struct timespec ts;
-        ts.tv_sec = 0;
-        ts.tv_nsec = 10000000;
-        nanosleep(&ts, nullptr);
+        scanner->Scan();
+        Nap(100000000);
     }
-    scanner->FinishScan();
 
     delete procs;
     delete scanner;

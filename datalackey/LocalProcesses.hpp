@@ -12,16 +12,26 @@
 #include "Processes.hpp"
 #include "Storage.hpp"
 #include "Process.hpp"
+#include "SimpleValue.hpp"
 #include <map>
 #include <memory>
+#include <stack>
+#include <thread>
 
 
 class LocalProcesses : public Processes {
 private:
     Storage& storage;
 
-    std::map<Identifier, Process*> processes;
-    std::mutex processes_mutex;
+    std::map<SimpleValue*, Process*> processes;
+    mutable std::mutex processes_mutex;
+
+    std::stack<SimpleValue*> to_delete;
+    mutable std::mutex to_delete_mutex;
+
+    bool terminate;
+    void deleter();
+    std::thread* cleaner;
 
 public:
     LocalProcesses(Storage& S);
@@ -29,12 +39,12 @@ public:
 
     bool Finished() const;
 
-    std::vector<std::tuple<Identifier,pid_t>> List() const;
-    bool Terminate(const Identifier& Id);
+    std::vector<std::tuple<SimpleValue*,pid_t>> List() const;
+    bool Terminate(const SimpleValue& Id);
     void Run(Output& Out,
-        const Identifier& Id, std::vector<SimpleValue*>& Parameters);
+        const SimpleValue& Id, std::vector<SimpleValue*>& Parameters);
 
-    void Finish(const Identifier& Id, Process* P);
+    void HasFinished(const SimpleValue& Id);
 };
 
 

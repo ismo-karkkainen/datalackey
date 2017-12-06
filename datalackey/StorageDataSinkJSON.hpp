@@ -13,6 +13,7 @@
 #include "Storage.hpp"
 #include "Structure.hpp"
 #include "Output.hpp"
+#include "StringValueMapper.hpp"
 #include <vector>
 
 
@@ -23,6 +24,7 @@ private:
     std::vector<char> key;
     RawData value;
     Output& notifications;
+    const StringValueMapper* renamer;
     // Needed for keeping track of the contents.
     Part part;
     int open_dicts, open_arrays;
@@ -32,7 +34,8 @@ private:
     bool pass_to_storage();
 
 public:
-    StorageDataSinkJSON(Storage& S, Output& ProblemNotifications);
+    StorageDataSinkJSON(Storage& S, Output& ProblemNotifications,
+        const StringValueMapper* Renamer = nullptr);
     ~StorageDataSinkJSON();
     const char *const Format() const;
     bool Input(RawData::ConstIterator& Start, RawData::ConstIterator& End);

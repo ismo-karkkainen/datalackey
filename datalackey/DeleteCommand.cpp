@@ -19,25 +19,32 @@ DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
 DeleteCommand::~DeleteCommand() {
 }
 
-bool DeleteCommand::LabelsOnly() const {
-    return true;
-}
-
 void DeleteCommand::Perform(
-    const Identifier& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
         Error(out, Id, "argument", "missing");
         return;
     }
+    // Output should be always something for each value, even deletions.
+    for (auto arg : Arguments) {
+        StringValue* label(dynamic_cast<StringValue*>(arg));
+        if (label == nullptr) {
+            Error(out, Id, "argument", "not-string");
+            return;
+        }
+    }
     bool has_unavailable = false;
     OutputItem* writer = out.Writable();
     *writer << Array;
     Feed(*writer, Id);
     for (auto arg : Arguments) {
-        Label* label(dynamic_cast<Label*>(arg));
-        assert(label != nullptr);
+        StringValue* label(dynamic_cast<StringValue*>(arg));
+        if (label == nullptr) {
+            Error(out, Id, "argument", "not-string");
+            return;
+        }
         if (!storage.Delete(*label)) {
             if (!has_unavailable) {
                 has_unavailable = true;

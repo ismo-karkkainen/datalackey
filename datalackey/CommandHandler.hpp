@@ -12,7 +12,7 @@
 #include "MessageHandler.hpp"
 #include "Command.hpp"
 #include "Output.hpp"
-#include "Identifier.hpp"
+#include "NumberValue.hpp"
 #include <string>
 #include <map>
 
@@ -26,10 +26,11 @@ protected:
     bool error(const char *const one);
     // Return true. For content errors.
     bool error(const char *const one, const char *const two,
-        const char *const three = nullptr);
+        const char *const three = nullptr, const char *const four = nullptr);
     // Deletes identifier due to the use as convenience function.
-    bool error(Identifier* Id, const char *const one,
-        const char *const two = nullptr, const char *const three = nullptr);
+    bool error(SimpleValue* Id, const char *const one,
+        const char *const two = nullptr, const char *const three = nullptr,
+        const char *const four = nullptr);
 
 public:
     CommandHandler(Output& Out);

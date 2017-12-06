@@ -27,19 +27,21 @@ bool StorageDataSinkJSON::pass_to_storage() {
         Error(notifications, "format");
         return false;
     }
-    Label label(name);
-    if (mapper != nullptr)
-        label = (*mapper)[label];
-    storage.Store(label, Format(), value);
+    StringValue label(name);
+    if (renamer != nullptr)
+        label = (*renamer)[label];
+    if (!label.String().empty())
+        storage.Store(label, Format(), value);
     key.clear();
     value.Clear();
     return true;
 }
 
 StorageDataSinkJSON::StorageDataSinkJSON(Storage& S,
-    Output& ProblemNotifications)
-    : storage(S), notifications(ProblemNotifications), part(InHead),
-    open_dicts(0), open_arrays(0), in_string(false), escaping(false)
+    Output& ProblemNotifications, const StringValueMapper* Renamer)
+    : storage(S), notifications(ProblemNotifications), renamer(Renamer),
+    part(InHead), open_dicts(0), open_arrays(0), in_string(false),
+    escaping(false)
 { }
 
 StorageDataSinkJSON::~StorageDataSinkJSON() {

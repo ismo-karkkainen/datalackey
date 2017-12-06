@@ -99,7 +99,7 @@ bool JSONEncoder::Encode(RawData& Buffer, const ValueReference& VR) {
     return true;
 }
 
-Encoder* JSONEncoder::CreateSame() const {
+Encoder* JSONEncoder::Clone() const {
     return new JSONEncoder();
 }
 

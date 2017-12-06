@@ -21,6 +21,8 @@ public:
     virtual void Write(
         RawData::ConstIterator& Start, RawData::ConstIterator& End) = 0;
     virtual void Flush() = 0;
+    // Return true if previous write operation failed.
+    virtual bool Failed() const = 0;
 };
 
 

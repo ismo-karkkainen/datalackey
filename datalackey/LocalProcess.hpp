@@ -10,40 +10,92 @@
 #define LocalProcess_hpp
 
 #include "Process.hpp"
+#include "Processes.hpp"
+#include "InputChannel.hpp"
+#include "MessageHandler.hpp"
+#include "StorageDataSink.hpp"
+#include "InputScanner.hpp"
+#include "Encoder.hpp"
+#include "OutputChannel.hpp"
+#include "Output.hpp"
+#include "Storage.hpp"
+#include "StringValueMapperSimple.hpp"
 #include <vector>
 #include <string>
 #include <unistd.h>
 #include <memory>
 #include <utility>
+#include <thread>
+#include <queue>
+#include <map>
 
 
-// Base class for LocalProcess classes.
-class LocalProcess {
-protected:
-    Output& out; // Status message output. Also pass-through to caller?
-    Identifier id;
-    std::vector<std::string> arguments;
-    // For passing data to process.
+class LocalProcess : public Process {
+private:
+    struct ChildOutput {
+        InputChannel* channel;
+        MessageHandler* handler;
+        StorageDataSink* sink;
+        InputScanner* scanner;
+
+        // Ownership transfers.
+        ChildOutput(InputChannel* IC, MessageHandler* MH, StorageDataSink* SDS,
+            InputScanner* IS);
+        ~ChildOutput();
+    };
+    // Created during child process start-up.
+    std::vector<std::shared_ptr<ChildOutput>> child_output;
+    Encoder* child_input_enc;
+    OutputChannel* child_input;
+    int stdin_child[2];
+    int stdouterr_child[2][2];
+    Output* child_feed;
+    OutputItem* child_writer;
+
+    // Values obtained via constructor.
+    Processes* owner;
+    Output& out;
     Storage& storage;
-    std::vector<std::pair<Label, std::string>> label2name;
-    // For passing results to storage and to caller.
-    std::vector<InputChannel*> incoming_channels;
-    std::vector<OutputChannel*> outgoing_channels;
-    Output program_feed; // Provides output to program.
-    LabelMapper* renamer;
+    SimpleValue* id;
+    std::string program_name;
+    std::vector<std::string> args;
+    std::vector<std::string> env;
+    std::vector<std::string> input_info;
+    std::queue<
+        std::tuple<StringValue, std::shared_ptr<const RawData>, std::string>>
+            label_data_name;
+    std::vector<std::vector<std::string>> outputs_info;
+    StringValueMapperSimple* renamer;
+
+    bool kill();
+
+    enum ChildState {
+        None,
+        Stopped,
+        Running
+    };
+    ChildState get_child_state(ChildState Previous);
+
+    pid_t pid;
+    std::thread* worker;
+    bool running, terminate;
+
+    void real_runner();
+    void runner();
 
 public:
-    // LabelMapper* ownership transfers.
-    LocalProcess(Output& StatusOut, Storage& S, const Identifier& Id,
-        std::vector<std::string>& Arguments,
-        std::vector<std::tuple<std::string,std::string>> Environment,
-        std::vector<std::pair<Label, std::string>> Label2Name,
-        std::vector<std::vector<std::string>> ProgramInputInfo,
-        std::vector<std::vector<std::string>> ProgramOutputInfo,
-        LabelMapper* Renamer);
-    // Arguments should have program output channel and what to do with the
-    // information that is passed through. Raw, unformatted output wrapped?
-    // If wrapped then it could be sent to status output.
+    // Probably does simple conversions.
+    // Top-level pointer ownership transfers.
+    LocalProcess(Processes* Owner,
+        Output& StatusOut, Storage& S, const SimpleValue& Id,
+        const std::string& ProgramName,
+        const std::vector<std::string>& Arguments,
+        const std::map<std::string,std::string>& Environment,
+        const std::vector<std::string>& InputInfo,
+        std::shared_ptr<std::vector<std::tuple<StringValue, std::shared_ptr<const RawData>, std::string>>> LabelDataName,
+        const std::vector<std::pair<SimpleValue*,std::string>>& ValueName,
+        const std::vector<std::vector<std::string>>& OutputsInfo,
+        StringValueMapperSimple* Renamer);
 
     ~LocalProcess();
 

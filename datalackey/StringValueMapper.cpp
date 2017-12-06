@@ -1,12 +1,12 @@
 //
-//  LabelMapper.cpp
+//  StringValueMapper.cpp
 //  datalackey
 //
 //  Created by Ismo Kärkkäinen on 23.10.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#include "LabelMapper.hpp"
+#include "StringValueMapper.hpp"
 
 
-LabelMapper::~LabelMapper() { }
+StringValueMapper::~StringValueMapper() { }
