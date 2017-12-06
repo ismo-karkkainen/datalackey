@@ -9,6 +9,7 @@
 #include "ListCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
+#include "NullValue.hpp"
 
 
 ListCommand::ListCommand(const char *const Name, Output& Out, const Storage& S)
@@ -29,7 +30,7 @@ void ListCommand::Perform(
         return;
     }
     auto results = storage.List();
-    OutputItem* writer = out.Writable();
+    OutputItem* writer = out.Writable(IsNullValue(&Id));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start label dictionary.

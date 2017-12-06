@@ -15,9 +15,9 @@
 #include "JSONEncoder.hpp"
 #include "StorageDataSinkJSON.hpp"
 #include "InputScannerJSON.hpp"
-#include "MessageWrapperJSON.hpp"
+#include "MessageRawJSON.hpp"
 #include "InputScannerDiscard.hpp"
-#include "InputScannerWrapMessage.hpp"
+#include "InputScannerRawMessage.hpp"
 #include "MessagePassThrough.hpp"
 #include "Value_t.hpp"
 #include "NumberValue.hpp"
@@ -146,15 +146,15 @@ void LocalProcess::real_runner() {
         }
         if (settings[0] == "JSON") {
             if (!strcmp(out.Format(), "JSON")) {
-                mh = new MessagePassThrough(out, id);
+                mh = new MessagePassThrough(out, *id);
                 sds = new StorageDataSinkJSON(storage, out, renamer);
                 is = new InputScannerJSON(*ic, *mh, *sds, out);
             } else
                 assert(false);
-        } else if (settings[0] == "wrap") {
-            is = new InputScannerWrapMessage(*ic, *mh, *sds);
+        } else if (settings[0] == "raw") {
+            is = new InputScannerRawMessage(*ic, *mh, *sds);
             if (!strcmp(out.Format(), "JSON")) {
-                mh = new MessageWrapperJSON(out, id);
+                mh = new MessageRawJSON(out, *id);
                 sds = new StorageDataSinkJSON(storage, out);
             } else
                 assert(false);
@@ -168,7 +168,7 @@ void LocalProcess::real_runner() {
         if (used_std[k])
             continue;
         InputChannel* ic = new FileDescriptorInput(stdouterr_child[k][0]);
-        MessageHandler* mh = new MessagePassThrough(out, nullptr);
+        MessageHandler* mh = new MessagePassThrough(out, *id);
         StorageDataSink* sds = nullptr;
         if (!strcmp(out.Format(), "JSON")) {
             sds = new StorageDataSinkJSON(storage, out);

@@ -30,7 +30,7 @@ public:
 
     // Terminate process. Return true if process exists.
     virtual bool Terminate(const SimpleValue& Id) = 0;
-    
+
     // Start process. Ownership of parameters transfers.
     virtual void Run(Output& Out,
         const SimpleValue& Id, std::vector<SimpleValue*>& Parameters) = 0;

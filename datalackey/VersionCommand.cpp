@@ -10,6 +10,7 @@
 #include "Version.hpp"
 #include "Notifications.hpp"
 #include "Value_t.hpp"
+#include "NullValue.hpp"
 
 
 VersionCommand::VersionCommand(const char *const Name, Output& Out)
@@ -29,7 +30,7 @@ void VersionCommand::Perform(
             delete arg;
         return;
     }
-    OutputItem* writer = out.Writable();
+    OutputItem* writer = out.Writable(IsNullValue(&Id));
     *writer << Array;
     Feed(*writer, Id);
     *writer << Dictionary

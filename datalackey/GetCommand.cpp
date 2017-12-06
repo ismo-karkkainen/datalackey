@@ -9,7 +9,7 @@
 #include "GetCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
-#include <cassert>
+#include "NullValue.hpp"
 
 
 GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S,
@@ -48,7 +48,7 @@ void GetCommand::Perform(
             unavailable.push_back(label);
     }
     if (!not_string.empty()) {
-        OutputItem* writer = out.Writable();
+        OutputItem* writer = out.Writable(IsNullValue(&Id));
         *writer << Array;
         Feed(*writer, Id);
         *writer << ValueRef<std::string>("error")
@@ -62,7 +62,7 @@ void GetCommand::Perform(
         delete writer;
     }
     if (!unavailable.empty()) {
-        OutputItem* writer = out.Writable();
+        OutputItem* writer = out.Writable(IsNullValue(&Id));
         *writer << Array;
         Feed(*writer, Id);
         *writer << ValueRef<std::string>("error")
@@ -75,7 +75,7 @@ void GetCommand::Perform(
         *writer << End;
         delete writer;
     }
-    OutputItem* writer = out.Writable();
+    OutputItem* writer = out.Writable(IsNullValue(&Id));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start data dictionary.

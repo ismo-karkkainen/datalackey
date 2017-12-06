@@ -15,6 +15,7 @@
 #include "Encoder.hpp"
 #include "OutputChannel.hpp"
 #include "RawData.hpp"
+#include "OutputItem.hpp"
 
 class Output;
 
@@ -51,18 +52,19 @@ public:
 };
 
 // User hands output to this and then deletes when not needed anymore.
-class OutputItem {
+class OutputItemWriter : public OutputItem {
 private:
     Encoder* encoder;
     RawData encoder_buffer;
     OutputItemBuffer& buffer;
 
     // Owns Encoder.
-    OutputItem(Encoder* E, OutputItemBuffer& B);
+    OutputItemWriter(Encoder* E, OutputItemBuffer& B);
 
     friend class Output;
+
 public:
-    ~OutputItem();
+    ~OutputItemWriter();
     OutputItem& operator<<(Structure S);
     OutputItem& operator<<(const ValueReference& VR);
     void Write(RawData::ConstIterator Start, RawData::ConstIterator End);
@@ -84,7 +86,7 @@ public:
 
     const char *const Format() const { return encoder.Format(); }
 
-    OutputItem* Writable();
+    OutputItem* Writable(bool Discarder = false);
 
     // For communication from OutputItemBuffer objects.
     void Ended(OutputItemBuffer& IB);

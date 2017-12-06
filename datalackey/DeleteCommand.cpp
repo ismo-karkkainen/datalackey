@@ -9,6 +9,7 @@
 #include "DeleteCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
+#include "NullValue.hpp"
 #include <cassert>
 
 
@@ -36,7 +37,7 @@ void DeleteCommand::Perform(
         }
     }
     bool has_unavailable = false;
-    OutputItem* writer = out.Writable();
+    OutputItem* writer = out.Writable(IsNullValue(&Id));
     *writer << Array;
     Feed(*writer, Id);
     for (auto arg : Arguments) {

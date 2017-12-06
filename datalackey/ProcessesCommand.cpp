@@ -9,6 +9,7 @@
 #include "ProcessesCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
+#include "NullValue.hpp"
 
 
 ProcessesCommand::ProcessesCommand(const char *const Name, Output& Out, const Processes& P)
@@ -29,7 +30,7 @@ void ProcessesCommand::Perform(
         return;
     }
     auto results = processes.List();
-    OutputItem* writer = out.Writable();
+    OutputItem* writer = out.Writable(IsNullValue(&Id));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start process id to PID dictionary.

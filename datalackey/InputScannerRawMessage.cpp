@@ -1,29 +1,29 @@
 //
-//  InputScannerWrapMessage.cpp
+//  InputScannerRawMessage.cpp
 //  datalackey
 //
 //  Created by Ismo Kärkkäinen on 3.12.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#include "InputScannerWrapMessage.hpp"
+#include "InputScannerRawMessage.hpp"
 
 
 std::tuple<InputScanner::Recipient, RawData::ConstIterator, RawData::ConstIterator>
-InputScannerWrapMessage::scan_input(InputScanner::Recipient Previous,
+InputScannerRawMessage::scan_input(InputScanner::Recipient Previous,
     RawData::ConstIterator RangeBegin, RawData::ConstIterator RangeEnd)
 {
     return std::make_tuple(InputScanner::MessageEnd, RangeBegin, RangeEnd);
 }
 
-InputScannerWrapMessage::InputScannerWrapMessage(
+InputScannerRawMessage::InputScannerRawMessage(
     InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS)
     : InputScanner(IC, MH, SDS)
 { }
 
-InputScannerWrapMessage::~InputScannerWrapMessage() {
+InputScannerRawMessage::~InputScannerRawMessage() {
 }
 
-const char* const InputScannerWrapMessage::Format() const {
+const char* const InputScannerRawMessage::Format() const {
     return nullptr;
 }

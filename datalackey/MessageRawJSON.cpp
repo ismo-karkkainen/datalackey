@@ -1,62 +1,52 @@
 //
-//  MessageWrapperJSON.cpp
+//  MessageRawJSON.cpp
 //  datalackey
 //
 //  Created by Ismo Kärkkäinen on 3.12.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#include "MessageWrapperJSON.hpp"
+#include "MessageRawJSON.hpp"
 #include "NullValue.hpp"
 #include "Notifications.hpp"
 #include "Value_t.hpp"
 
 
-MessageWrapperJSON::MessageWrapperJSON(
-    Output& Out, const SimpleValue* Identifier)
+MessageRawJSON::MessageRawJSON(
+    Output& Out, const SimpleValue& Identifier)
     : out(Out), writer(nullptr), identifier(Identifier)
-{
-    const NullValue* null(dynamic_cast<const NullValue*>(identifier));
-    if (null != nullptr)
-        identifier = nullptr;
-}
+{ }
 
-MessageWrapperJSON::~MessageWrapperJSON() {
+MessageRawJSON::~MessageRawJSON() {
     End();
 }
 
-const char *const MessageWrapperJSON::Format() const {
+const char *const MessageRawJSON::Format() const {
     return "JSON";
 }
 
-bool MessageWrapperJSON::Input(
+bool MessageRawJSON::Input(
     RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
-    if (identifier == nullptr)
-        return true;
     if (writer == nullptr) {
-        writer = out.Writable();
+        writer = out.Writable(IsNullValue(&identifier));
         *writer << Array;
-        Feed(*writer, *identifier);
+        Feed(*writer, identifier);
     }
-    // Writes the bytes as an array.
-    *writer << Array;
+    // Writes the bytes as an extension to the existing array.
     while (Start != End)
         *writer << ValueRef<unsigned>(static_cast<unsigned char>(*Start++));
-    *writer << Structure::End;
     return true;
 }
 
-bool MessageWrapperJSON::End() {
-    if (identifier == nullptr)
-        return true;
+bool MessageRawJSON::End() {
     *writer << Structure::End;
     delete writer;
     writer = nullptr;
     return true;
 }
 
-void MessageWrapperJSON::Discard(
+void MessageRawJSON::Discard(
     RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     // Given the scanned input is not structured, this should not happen.

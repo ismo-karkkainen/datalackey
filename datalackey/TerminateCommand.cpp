@@ -9,7 +9,7 @@
 #include "TerminateCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
-#include <cassert>
+#include "NullValue.hpp"
 
 
 TerminateCommand::TerminateCommand(
@@ -29,7 +29,7 @@ void TerminateCommand::Perform(
         return;
     }
     bool has_unavailable = false;
-    OutputItem* writer = out.Writable();
+    OutputItem* writer = out.Writable(IsNullValue(&Id));
     *writer << Array;
     Feed(*writer, Id);
     for (auto arg : Arguments) {

@@ -244,7 +244,7 @@ void LocalProcesses::Run(Output& Out,
                     !is_string(k + 1, command, Parameters, Out, Id))
                     return;
                 std::string format = Parameters[k]->String();
-                if (format != "JSON" && format != "wrap") {
+                if (format != "JSON" && format != "raw") {
                     Error(Out, Id, "argument", "unknown", command.c_str(),
                         direction.c_str());
                     return;

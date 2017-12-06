@@ -19,10 +19,10 @@ class MessagePassThrough : public MessageHandler {
 private:
     Output& out;
     OutputItem* writer;
-    const SimpleValue* identifier;
+    const SimpleValue& identifier;
 
 public:
-    MessagePassThrough(Output& Out, const SimpleValue* Identifier);
+    MessagePassThrough(Output& Out, const SimpleValue& Identifier);
     ~MessagePassThrough();
     const char *const Format() const;
     bool Input(RawData::ConstIterator& Start, RawData::ConstIterator& End);

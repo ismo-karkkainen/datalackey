@@ -57,16 +57,16 @@ void OutputItemBuffer::End() {
 }
 
 
-OutputItem::OutputItem(Encoder* E, OutputItemBuffer& B)
+OutputItemWriter::OutputItemWriter(Encoder* E, OutputItemBuffer& B)
     : encoder(E), buffer(B)
 { }
 
-OutputItem::~OutputItem() {
+OutputItemWriter::~OutputItemWriter() {
     buffer.End();
     delete encoder;
 }
 
-OutputItem& OutputItem::operator<<(Structure S) {
+OutputItem& OutputItemWriter::operator<<(Structure S) {
     RawData* buf = buffer.IntermediateBuffer();
     if (encoder->EncodeOutputsDirectly() && buf != nullptr) {
         // Writing directly to output buffer.
@@ -80,7 +80,7 @@ OutputItem& OutputItem::operator<<(Structure S) {
     return *this;
 }
 
-OutputItem& OutputItem::operator<<(const ValueReference& VR) {
+OutputItem& OutputItemWriter::operator<<(const ValueReference& VR) {
     RawData* buf = buffer.IntermediateBuffer();
     if (encoder->EncodeOutputsDirectly() && buf != nullptr) {
         // Writing directly to output buffer.
@@ -94,7 +94,7 @@ OutputItem& OutputItem::operator<<(const ValueReference& VR) {
     return *this;
 }
 
-void OutputItem::Write(
+void OutputItemWriter::Write(
     RawData::ConstIterator Start, RawData::ConstIterator End)
 {
     buffer.Write(Start, End);
@@ -112,7 +112,7 @@ void Output::AllocateChannel(OutputItemBuffer* PreviousWriter) {
         if (!current->Ended())
             continue;
         if (current != PreviousWriter && current->Size())
-            current->SetChannel(&main); // Writes out all.
+            current->SetChannel(&main); // Writes out all it has stored.
         delete current;
         buffers[k - 1] = buffers.back();
         buffers.pop_back();
@@ -136,12 +136,14 @@ Output::~Output() {
     // OutputChannel allocated and owned outside.
 }
 
-OutputItem* Output::Writable() {
+OutputItem* Output::Writable(bool Discarder) {
+    if (Discarder)
+        return new OutputItemDiscarder();
     OutputItemBuffer* buffer = new OutputItemBuffer(*this);
     std::lock_guard<std::mutex> lock(mutex);
     buffers.push_back(buffer);
     AllocateChannel();
-    return new OutputItem(encoder.Clone(), *buffer);
+    return new OutputItemWriter(encoder.Clone(), *buffer);
 }
 
 void Output::Ended(OutputItemBuffer& IB) {
