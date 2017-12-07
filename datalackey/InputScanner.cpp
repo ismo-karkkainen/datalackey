@@ -22,8 +22,10 @@ InputScanner::InputScanner(InputChannel& IC, MessageHandler& MH,
 InputScanner::~InputScanner() {
 }
 
-void InputScanner::Scan() {
+bool InputScanner::Scan() {
+    bool had_input = false;
     while (!channel.Ended() && channel.Read(buffer)) {
+        had_input = true;
         // Use all data piece by piece and keep track of used part.
         RawData::ConstIterator begin = buffer.CBegin();
         RawData::ConstIterator end = begin;
@@ -68,4 +70,5 @@ void InputScanner::Scan() {
         } while (end != buffer.CEnd());
         buffer.Clear();
     }
+    return had_input;
 }

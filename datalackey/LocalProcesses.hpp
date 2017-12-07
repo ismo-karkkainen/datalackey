@@ -29,14 +29,11 @@ private:
     std::stack<SimpleValue*> to_delete;
     mutable std::mutex to_delete_mutex;
 
-    bool terminate;
-    void deleter();
-    std::thread* cleaner;
-
 public:
     LocalProcesses(Storage& S);
     ~LocalProcesses();
 
+    bool CleanFinished();
     bool Finished() const;
 
     std::vector<std::tuple<SimpleValue*,pid_t>> List() const;

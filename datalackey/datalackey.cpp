@@ -1,8 +1,8 @@
 //
-//  test_process.cpp
+//  datalackey.cpp
 //  datalackey
 //
-//  Created by Ismo Kärkkäinen on 17.7.17.
+//  Created by Ismo Kärkkäinen on 7.12.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     assert(command_handler != nullptr);
     assert(scanner != nullptr);
 
-    Processes* procs = new LocalProcesses(*storage);
+    LocalProcesses* procs = new LocalProcesses(*storage);
 
     // Add commands.
     ListCommand list("list", *out, *storage);
@@ -131,8 +131,10 @@ int main(int argc, char** argv) {
     command_handler->AddCommand(&noop);
 
     while (!scanner->Ended() || !procs->Finished()) {
-        scanner->Scan();
-        Nap(100000000);
+        bool did_something = scanner->Scan();
+        did_something = procs->CleanFinished() || did_something;
+        if (!did_something)
+            Nap(100000000);
     }
 
     delete procs;

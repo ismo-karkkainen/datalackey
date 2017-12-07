@@ -20,6 +20,7 @@
 #include "InputScannerRawMessage.hpp"
 #include "MessagePassThrough.hpp"
 #include "Value_t.hpp"
+#include "Number_t.hpp"
 #include "NumberValue.hpp"
 #include "NullValue.hpp"
 #include <system_error>
@@ -366,16 +367,14 @@ LocalProcess::LocalProcess(Processes* Owner,
             assert(false);
         for (auto& vn : ValueName) {
             std::shared_ptr<RawData> value(new RawData());
-            const StringValue* str(dynamic_cast<StringValue*>(vn.first));
-            if (str != nullptr)
-                enc->Encode(*value, ValueRef<std::string>(str->String()));
+            if (IsStringValue(vn.first))
+                enc->Encode(*value, ValueRef<std::string>(vn.first->String()));
             else {
-                const NumberValue* num(dynamic_cast<NumberValue*>(vn.first));
-                if (num != nullptr)
-                    enc->Encode(*value, ValueRef<long long int>(num->Number()));
+                if (IsNumberValue(vn.first))
+                    enc->Encode(
+                        *value, NumberRef<long long int>(vn.first->Number()));
                 else {
-                    const NullValue* null(dynamic_cast<NullValue*>(vn.first));
-                    if (null != nullptr)
+                    if (IsNullValue(vn.first))
                         enc->Encode(*value, Null);
                     else
                         assert(false);

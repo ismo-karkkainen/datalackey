@@ -21,39 +21,29 @@
 extern char **environ;
 
 
-void LocalProcesses::deleter() {
-    while (!terminate) {
-        struct timespec ts;
-        ts.tv_sec = 0;
-        ts.tv_nsec = 500000000;
-        nanosleep(&ts, nullptr);
-        std::lock_guard<std::mutex> lock(to_delete_mutex);
-        if (!to_delete.empty()) {
-            std::lock_guard<std::mutex> lock(processes_mutex);
-            while (!to_delete.empty()) {
-                SimpleValue* id = to_delete.top();
-                to_delete.pop();
-                auto proc = processes.find(id);
-                delete id;
-                assert(proc != processes.end());
-                delete proc->second;
-                processes.erase(proc);
-            }
-        }
-    }
-}
-
 LocalProcesses::LocalProcesses(Storage& S)
-    : storage(S), terminate(false), cleaner(nullptr)
-{
-    cleaner = new std::thread(&LocalProcesses::cleaner, this);
-}
+    : storage(S)
+{ }
 
 LocalProcesses::~LocalProcesses() {
     assert(Finished());
-    terminate = true;
-    cleaner->join();
-    delete cleaner;
+}
+
+bool LocalProcesses::CleanFinished() {
+    std::lock_guard<std::mutex> lock(to_delete_mutex);
+    if (to_delete.empty())
+        return false;
+    std::lock_guard<std::mutex> proc_lock(processes_mutex);
+    while (!to_delete.empty()) {
+        SimpleValue* id = to_delete.top();
+        to_delete.pop();
+        auto proc = processes.find(id);
+        delete id;
+        assert(proc != processes.end());
+        delete proc->second;
+        processes.erase(proc);
+    }
+    return true;
 }
 
 bool LocalProcesses::Finished() const {

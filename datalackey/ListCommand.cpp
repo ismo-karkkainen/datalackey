@@ -8,6 +8,7 @@
 
 #include "ListCommand.hpp"
 #include "Value_t.hpp"
+#include "Number_t.hpp"
 #include "Notifications.hpp"
 #include "NullValue.hpp"
 
@@ -40,7 +41,7 @@ void ListCommand::Perform(
     if (!results.empty()) {
         std::tie(label, format, size) = results[0];
         *writer << ValueRef<std::string>(label) << Dictionary
-            << ValueRef<std::string>(format) << ValueRef<size_t>(size);
+            << ValueRef<std::string>(format) << NumberRef<size_t>(size);
         StringValue previous(label);
         for (size_t k = 1; k < results.size(); ++k) {
             std::tie(label, format, size) = results[k];
@@ -49,7 +50,7 @@ void ListCommand::Perform(
                 *writer << End << ValueRef<std::string>(label) << Dictionary;
                 previous = label;
             }
-            *writer << ValueRef<std::string>(format) << ValueRef<size_t>(size);
+            *writer << ValueRef<std::string>(format) << NumberRef<size_t>(size);
         }
         *writer << End; // Close previous format:size dictionary.
     }

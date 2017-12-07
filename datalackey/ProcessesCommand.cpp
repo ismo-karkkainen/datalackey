@@ -7,7 +7,7 @@
 //
 
 #include "ProcessesCommand.hpp"
-#include "Value_t.hpp"
+#include "Number_t.hpp"
 #include "Notifications.hpp"
 #include "NullValue.hpp"
 
@@ -39,7 +39,7 @@ void ProcessesCommand::Perform(
     for (size_t k = 0; k < results.size(); ++k) {
         std::tie(id, pid) = results[k];
         Feed(*writer, *id);
-        *writer << ValueRef<pid_t>(pid);
+        *writer << NumberRef<pid_t>(pid);
         delete id;
     }
     *writer << End << End; // Close dictionary and message array.

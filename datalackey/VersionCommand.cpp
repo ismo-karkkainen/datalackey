@@ -10,6 +10,7 @@
 #include "Version.hpp"
 #include "Notifications.hpp"
 #include "Value_t.hpp"
+#include "Number_t.hpp"
 #include "NullValue.hpp"
 
 
@@ -34,7 +35,7 @@ void VersionCommand::Perform(
     *writer << Array;
     Feed(*writer, Id);
     *writer << Dictionary
-        << ValueRef<std::string>("version") << ValueRef<int>(Version)
+        << ValueRef<std::string>("version") << NumberRef<int>(Version)
         // Maybe add a list of supported formats. And such.
         << End << End;
     delete writer;

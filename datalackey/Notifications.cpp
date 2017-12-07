@@ -8,6 +8,7 @@
 
 #include "Notifications.hpp"
 #include "Value_t.hpp"
+#include "Number_t.hpp"
 #include "Structure.hpp"
 #include <cassert>
 #include "StringValue.hpp"
@@ -38,7 +39,7 @@ static void message(Output& Out, const SimpleValue* Id, const char *const type,
     if (four != nullptr)
         *writer << ValueRef<std::string>(four);
     if (last != nullptr)
-        *writer << ValueRef<int>(*last);
+        *writer << NumberRef<int>(*last);
     *writer << End;
     delete writer;
 }
@@ -92,7 +93,7 @@ void Feed(OutputItem& Writer, const SimpleValue& Id) {
         return;
     }
     if (IsNumberValue(&Id)) {
-        Writer << ValueRef<long long int>(Id.Number());
+        Writer << NumberRef<long long int>(Id.Number());
         return;
     }
     if (IsNullValue(&Id)) {

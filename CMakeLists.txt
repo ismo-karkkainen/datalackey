@@ -9,7 +9,7 @@ link_directories( /usr/local/lib/ )
 link_libraries( boost_system boost_filesystem )
 
 enable_testing()
-set(Sources datalackey/main.cpp)
+set(Sources datalackey/datalackey.cpp)
 
 set(StoreSources datalackey/SimpleValue.cpp)
 list(APPEND StoreSources datalackey/StringValue.cpp)
@@ -70,11 +70,5 @@ set(CommandLine datalackey/Options.cpp)
 #set_property(TARGET test_FileLister.sh  PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_FileLister.sh)
 #add_test(NAME FileLister_List COMMAND test_FileLister.sh $<TARGET_FILE:test_FileLister> )
 
-add_executable( test_process ${StoreSources} ${IOSources} ${JSONIO} ${Commands} ${JSONCommands} ${CommandLine} ${Processes} ${ProcessCommands} datalackey/tests/test_process.cpp )
-
-# Add various components to source files list provided the list has not been
-# given from outside.
-
-
-#add_executable (datalackey ${Sources} ${IOSources})
+add_executable( datalackey ${StoreSources} ${IOSources} ${JSONIO} ${Commands} ${JSONCommands} ${CommandLine} ${Processes} ${ProcessCommands} ${Sources} )
 

@@ -9,7 +9,7 @@
 #include "MessageRawJSON.hpp"
 #include "NullValue.hpp"
 #include "Notifications.hpp"
-#include "Value_t.hpp"
+#include "Number_t.hpp"
 
 
 MessageRawJSON::MessageRawJSON(
@@ -35,7 +35,7 @@ bool MessageRawJSON::Input(
     }
     // Writes the bytes as an extension to the existing array.
     while (Start != End)
-        *writer << ValueRef<unsigned>(static_cast<unsigned char>(*Start++));
+        *writer << NumberRef<unsigned>(static_cast<unsigned char>(*Start++));
     return true;
 }
 

@@ -55,7 +55,7 @@ public:
     virtual const char* const Format() const = 0;
 
     bool Ended() const { return channel.Ended(); }
-    void Scan(); // Reads as much data as is available and handles it.
+    bool Scan(); // Reads as much data as is available and handles it.
 };
 
 
