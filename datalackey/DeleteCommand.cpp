@@ -9,8 +9,6 @@
 #include "DeleteCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
-#include "NullValue.hpp"
-#include <cassert>
 
 
 DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
@@ -28,34 +26,21 @@ void DeleteCommand::Perform(
         Error(out, Id, "argument", "missing");
         return;
     }
-    // Output should be always something for each value, even deletions.
+    std::vector<SimpleValue*> deleted, missing, invalid;
     for (auto arg : Arguments) {
         StringValue* label(dynamic_cast<StringValue*>(arg));
-        if (label == nullptr) {
-            Error(out, Id, "argument", "not-string");
-            return;
-        }
+        if (label != nullptr) {
+            if (storage.Delete(*label))
+                deleted.push_back(arg);
+            else
+                missing.push_back(arg);
+        } else
+            invalid.push_back(arg);
     }
-    bool has_unavailable = false;
-    OutputItem* writer = out.Writable(IsNullValue(&Id));
-    *writer << Array;
-    Feed(*writer, Id);
-    for (auto arg : Arguments) {
-        StringValue* label(dynamic_cast<StringValue*>(arg));
-        if (label == nullptr) {
-            Error(out, Id, "argument", "not-string");
-            return;
-        }
-        if (!storage.Delete(*label)) {
-            if (!has_unavailable) {
-                has_unavailable = true;
-                *writer << ValueRef<std::string>("error")
-                    << ValueRef<std::string>("unavailable");
-            }
-            Feed(*writer, *label);
-        }
-        delete arg;
-    }
-    *writer << End;
-    delete writer;
+    if (!invalid.empty())
+        ListMessage(out, Id, "invalid", invalid);
+    if (!missing.empty())
+        ListMessage(out, Id, "missing", missing);
+    if (!deleted.empty())
+        ListMessage(out, Id, "deleted", deleted);
 }

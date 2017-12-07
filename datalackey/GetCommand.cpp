@@ -29,13 +29,13 @@ void GetCommand::Perform(
         return;
     }
     // Check if everything can be made available and if not, return an error.
-    std::vector<StringValue*> ready, loading, unavailable;
-    std::vector<SimpleValue*> not_string;
+    std::vector<StringValue*> ready, loading;
+    std::vector<SimpleValue*> missing, invalid;
     std::vector<std::shared_ptr<const RawData>> present;
     for (auto arg : Arguments) {
         StringValue* label = dynamic_cast<StringValue*>(arg);
         if (label == nullptr) {
-            not_string.push_back(arg);
+            invalid.push_back(arg);
             continue;
         }
         auto rd = storage.ReadyData(*label, format.c_str());
@@ -45,36 +45,12 @@ void GetCommand::Perform(
         } else if (storage.Preload(*label, format.c_str()))
             loading.push_back(label);
         else
-            unavailable.push_back(label);
+            missing.push_back(arg);
     }
-    if (!not_string.empty()) {
-        OutputItem* writer = out.Writable(IsNullValue(&Id));
-        *writer << Array;
-        Feed(*writer, Id);
-        *writer << ValueRef<std::string>("error")
-            << ValueRef<std::string>("argument")
-            << ValueRef<std::string>("not-string");
-        for (auto s : unavailable) {
-            Feed(*writer, *s);
-            delete s;
-        }
-        *writer << End;
-        delete writer;
-    }
-    if (!unavailable.empty()) {
-        OutputItem* writer = out.Writable(IsNullValue(&Id));
-        *writer << Array;
-        Feed(*writer, Id);
-        *writer << ValueRef<std::string>("error")
-            << ValueRef<std::string>("argument")
-            << ValueRef<std::string>("unavailable");
-        for (auto s : unavailable) {
-            Feed(*writer, *s);
-            delete s;
-        }
-        *writer << End;
-        delete writer;
-    }
+    if (!invalid.empty())
+        ListMessage(out, Id, "invalid", invalid);
+    if (!missing.empty())
+        ListMessage(out, Id, "missing", missing);
     OutputItem* writer = out.Writable(IsNullValue(&Id));
     *writer << Array; // Start message array.
     Feed(*writer, Id);

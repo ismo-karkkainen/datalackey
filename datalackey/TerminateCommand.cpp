@@ -9,7 +9,6 @@
 #include "TerminateCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
-#include "NullValue.hpp"
 
 
 TerminateCommand::TerminateCommand(
@@ -28,20 +27,15 @@ void TerminateCommand::Perform(
         Error(out, Id, "argument", "missing");
         return;
     }
-    bool has_unavailable = false;
-    OutputItem* writer = out.Writable(IsNullValue(&Id));
-    *writer << Array;
-    Feed(*writer, Id);
+    std::vector<SimpleValue*> terminated, missing;
     for (auto arg : Arguments) {
-        if (!processes.Terminate(Id)) {
-            if (!has_unavailable) {
-                has_unavailable = true;
-                *writer << ValueRef<std::string>("error")
-                    << ValueRef<std::string>("unavailable");
-            }
-            Feed(*writer, Id);
-        }
+        if (processes.Terminate(*arg))
+            terminated.push_back(arg);
+        else
+            missing.push_back(arg);
     }
-    *writer << End;
-    delete writer;
+    if (!missing.empty())
+        ListMessage(out, Id, "missing", missing);
+    if (!terminated.empty())
+        ListMessage(out, Id, "terminated", terminated);
 }

@@ -15,7 +15,7 @@
 #include <string>
 
 
-// Base class for command handlers.
+// Base class for commands.
 class Command {
 protected:
     Output& out;

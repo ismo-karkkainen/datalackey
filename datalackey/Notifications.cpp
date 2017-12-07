@@ -102,3 +102,18 @@ void Feed(OutputItem& Writer, const SimpleValue& Id) {
     }
     assert(false);
 }
+
+void ListMessage(Output& Out, const SimpleValue& Id, const char *const one,
+    std::vector<SimpleValue*>& List, bool DeleteListItems)
+{
+    OutputItem* writer = Out.Writable(IsNullValue(&Id));
+    *writer << Array;
+    Feed(*writer, Id);
+    *writer << ValueRef<std::string>(one);
+    for (auto arg : List) {
+        Feed(*writer, *arg);
+        if (DeleteListItems)
+            delete arg;
+    }
+    *writer << End;
+}

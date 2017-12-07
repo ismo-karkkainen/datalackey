@@ -39,5 +39,8 @@ void Message(Output& Out, const SimpleValue& Id, int last,
 
 void Feed(OutputItem& Writer, const SimpleValue& Id);
 
+void ListMessage(Output& Out, const SimpleValue& Id, const char *const one,
+    std::vector<SimpleValue*>& List, bool DeleteListItems = true);
+
 
 #endif /* Notifications_hpp */
