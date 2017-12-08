@@ -10,6 +10,7 @@
 #define SimpleValue_hpp
 
 #include <string>
+#include <functional>
 
 
 // Base class for strings and numbers. Sort of simple variant class.
@@ -24,5 +25,12 @@ public:
     bool operator<(const SimpleValue& S) const;
 };
 
+namespace std {
+template <> struct less<SimpleValue*> {
+    bool operator() (const SimpleValue* A, const SimpleValue* B) const {
+        return *A < *B;
+    }
+};
+}
 
 #endif /* SimpleValue_hpp */

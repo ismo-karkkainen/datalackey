@@ -37,9 +37,11 @@ bool MessagePassThrough::Input(
 }
 
 bool MessagePassThrough::End() {
-    *writer << Structure::End;
-    delete writer;
-    writer = nullptr;
+    if (writer != nullptr) {
+        *writer << Structure::End;
+        delete writer;
+        writer = nullptr;
+    }
     return true;
 }
 

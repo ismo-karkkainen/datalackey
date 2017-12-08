@@ -64,11 +64,21 @@ set(JSONCommands datalackey/CommandHandlerJSON.cpp)
 
 set(CommandLine datalackey/Options.cpp)
 
-#add_executable( test_FileLister datalackey/Encoder.cpp datalackey/JSONEncoder.cpp datalackey/OutputChannel.cpp datalackey/Output.cpp datalackey/Literal.cpp datalackey/StdOut.cpp datalackey/ValueReference.cpp datalackey/Literal.cpp datalackey/FileLister.cpp datalackey/tests/test_FileLister.cpp )
-
-#add_executable(test_FileLister.sh IMPORTED)
-#set_property(TARGET test_FileLister.sh  PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_FileLister.sh)
-#add_test(NAME FileLister_List COMMAND test_FileLister.sh $<TARGET_FILE:test_FileLister> )
-
 add_executable( datalackey ${StoreSources} ${IOSources} ${JSONIO} ${Commands} ${JSONCommands} ${CommandLine} ${Processes} ${ProcessCommands} ${Sources} )
+
+#
+# Tests.
+#
+
+# Exit code tests.
+add_executable(test_exit.sh IMPORTED)
+set_property(TARGET test_exit.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_exit.sh)
+add_test(NAME exit0 COMMAND test_exit.sh 0 $<TARGET_FILE:datalackey> )
+add_test(NAME exit9 COMMAND test_exit.sh 9 $<TARGET_FILE:datalackey> )
+
+# Signal tests.
+add_executable(test_signal.sh IMPORTED)
+set_property(TARGET test_signal.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_signal.sh)
+add_test(NAME signal6 COMMAND test_signal.sh 6 $<TARGET_FILE:datalackey> )
+add_test(NAME signal9 COMMAND test_signal.sh 9 $<TARGET_FILE:datalackey> )
 

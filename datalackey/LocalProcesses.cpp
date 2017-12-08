@@ -47,12 +47,7 @@ bool LocalProcesses::CleanFinished() {
 }
 
 bool LocalProcesses::Finished() const {
-    std::lock_guard<std::mutex> lock(processes_mutex);
-    for (auto& proc : processes) {
-        if (!proc.second->Finished())
-            return false;
-    }
-    return true;
+    return processes.empty();
 }
 
 std::vector<std::tuple<SimpleValue*,pid_t>> LocalProcesses::List() const {
