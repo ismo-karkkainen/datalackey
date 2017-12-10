@@ -88,6 +88,9 @@ public:
 
     OutputItem* Writable(bool Discarder = false);
 
+    // True when there is no expected output anywhere at the moment.
+    bool Finished() const { return buffers.empty(); }
+
     // For communication from OutputItemBuffer objects.
     void Ended(OutputItemBuffer& IB);
 };

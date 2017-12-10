@@ -153,12 +153,12 @@ void LocalProcess::real_runner() {
             } else
                 assert(false);
         } else if (settings[0] == "raw") {
-            is = new InputScannerRawMessage(*ic, *mh, *sds);
             if (!strcmp(out.Format(), "JSON")) {
                 mh = new MessageRawJSON(out, *id);
                 sds = new StorageDataSinkJSON(storage, out);
             } else
                 assert(false);
+            is = new InputScannerRawMessage(*ic, *mh, *sds);
         } else
             assert(false);
         child_output.push_back(std::shared_ptr<ChildOutput>(

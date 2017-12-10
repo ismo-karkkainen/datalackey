@@ -62,6 +62,8 @@ bool JSONEncoder::Encode(RawData& Buffer, Structure S) {
         }
         open.pop();
         counter.pop();
+        if (open.empty())
+            Buffer.Append('\n');
         break;
     case True:
         add_separator(Buffer);

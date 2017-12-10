@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
     NoOperationCommand noop("no-op", *out);
     command_handler->AddCommand(&noop);
 
-    while (!scanner->Ended() || !procs->Finished()) {
+    while (!scanner->Ended() || !procs->Finished() || !out->Finished()) {
         bool did_something = scanner->Scan();
         did_something = procs->CleanFinished() || did_something;
         if (!did_something)
