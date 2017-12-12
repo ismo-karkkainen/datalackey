@@ -21,4 +21,3 @@ cat > $EXP <<EOF
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP && exit 0
-exit $?

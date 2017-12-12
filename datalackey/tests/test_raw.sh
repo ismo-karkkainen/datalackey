@@ -21,7 +21,7 @@ chmod a+x _script.sh
 
 echo '[1,"run","channel","out","raw","stdout","program","./_script.sh"]' |
 $DL -m -i stdin JSON -o stdout JSON > $OUT
-rm -f _script.txt
+rm -f _script.sh
 
 cat > $EXP <<EOF
 [1,97,10]
@@ -32,4 +32,3 @@ cat > $EXP <<EOF
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP && exit 0
-exit $?

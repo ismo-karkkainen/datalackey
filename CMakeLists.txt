@@ -93,11 +93,14 @@ add_executable(test_version.sh IMPORTED)
 set_property(TARGET test_version.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_version.sh)
 add_test(NAME test_version COMMAND test_version.sh ${CMAKE_CURRENT_LIST_DIR}/datalackey/Version.hpp $<TARGET_FILE:datalackey> )
 
-# Process lists
+# Processes
 #
 add_executable(test_processes.sh IMPORTED)
 set_property(TARGET test_processes.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_processes.sh)
 add_test(NAME test_processes COMMAND test_processes.sh $<TARGET_FILE:datalackey> )
+add_executable(test_terminate.sh IMPORTED)
+set_property(TARGET test_terminate.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_terminate.sh)
+add_test(NAME test_terminate COMMAND test_terminate.sh $<TARGET_FILE:datalackey> )
 
 # Data handling
 #
