@@ -10,19 +10,19 @@
 #include "Value_t.hpp"
 #include "Number_t.hpp"
 #include "Structure.hpp"
-#include <cassert>
 #include "StringValue.hpp"
 #include "NumberValue.hpp"
 #include "NullValue.hpp"
+#include <cassert>
+#include <memory>
 
 
 static void message(Output& Out, const SimpleValue* Id, const char *const type,
     const char *const one, const char *const two, const char *const three,
     const char *const four, int* last)
 {
-    if (Id != nullptr && IsNullValue(Id))
-        return;
-    OutputItem* writer = Out.Writable();
+    std::unique_ptr<OutputItem> writer(
+        Out.Writable(Id != nullptr && IsNullValue(Id)));
     *writer << Array;
     if (Id == nullptr)
         *writer << Structure::Null;
@@ -41,7 +41,6 @@ static void message(Output& Out, const SimpleValue* Id, const char *const type,
     if (last != nullptr)
         *writer << NumberRef<int>(*last);
     *writer << End;
-    delete writer;
 }
 
 void Note(Output& Out, const char *const one, const char *const two,
@@ -104,16 +103,13 @@ void Feed(OutputItem& Writer, const SimpleValue& Id) {
 }
 
 void ListMessage(Output& Out, const SimpleValue& Id, const char *const one,
-    std::vector<SimpleValue*>& List, bool DeleteListItems)
+    std::vector<SimpleValue*>& List)
 {
-    OutputItem* writer = Out.Writable(IsNullValue(&Id));
+    std::unique_ptr<OutputItem> writer(Out.Writable(IsNullValue(&Id)));
     *writer << Array;
     Feed(*writer, Id);
     *writer << ValueRef<std::string>(one);
-    for (auto arg : List) {
+    for (auto arg : List)
         Feed(*writer, *arg);
-        if (DeleteListItems)
-            delete arg;
-    }
     *writer << End;
 }

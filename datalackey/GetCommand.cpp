@@ -10,6 +10,7 @@
 #include "Value_t.hpp"
 #include "Notifications.hpp"
 #include "NullValue.hpp"
+#include <memory>
 
 
 GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S,
@@ -51,7 +52,7 @@ void GetCommand::Perform(
         ListMessage(out, Id, "invalid", invalid);
     if (!missing.empty())
         ListMessage(out, Id, "missing", missing);
-    OutputItem* writer = out.Writable(IsNullValue(&Id));
+    std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start data dictionary.
@@ -68,5 +69,4 @@ void GetCommand::Perform(
         writer->Write(data->CBegin(), data->CEnd());
     }
     *writer << End << End; // Close data dictionary and message array.
-    delete writer;
 }

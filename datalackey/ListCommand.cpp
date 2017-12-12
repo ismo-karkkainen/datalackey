@@ -11,6 +11,7 @@
 #include "Number_t.hpp"
 #include "Notifications.hpp"
 #include "NullValue.hpp"
+#include <memory>
 
 
 ListCommand::ListCommand(const char *const Name, Output& Out, const Storage& S)
@@ -26,12 +27,10 @@ void ListCommand::Perform(
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
         Error(out, Id, "argument", "unexpected");
-        for (auto arg : Arguments)
-            delete arg;
         return;
     }
     auto results = storage.List();
-    OutputItem* writer = out.Writable(IsNullValue(&Id));
+    std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start label dictionary.
@@ -55,5 +54,4 @@ void ListCommand::Perform(
         *writer << End; // Close previous format:size dictionary.
     }
     *writer << End << End; // Close label dictionary and message array.
-    delete writer;
 }

@@ -18,14 +18,16 @@ bool StorageDataSinkJSON::pass_to_storage() {
     try {
         json s = json::parse(key.cbegin(), key.cend());
         if (!s.is_string()) {
-            Error(notifications, "identifier", "not-string");
+            if (identifier == nullptr)
+                Error(notifications, "identifier", "not-string");
+            else
+                Error(notifications, *identifier, "identifier", "not-string");
             return false;
         }
         name = s;
     }
     catch (const std::exception& e) {
-        Error(notifications, "format");
-        return false;
+        return error_format();
     }
     StringValue label(name);
     if (renamer != nullptr)
@@ -37,14 +39,26 @@ bool StorageDataSinkJSON::pass_to_storage() {
     return true;
 }
 
-StorageDataSinkJSON::StorageDataSinkJSON(Storage& S,
+bool StorageDataSinkJSON::error_format() const {
+    if (identifier == nullptr)
+        Error(notifications, "format");
+    else
+        Error(notifications, *identifier, "format");
+    return false;
+}
+
+StorageDataSinkJSON::StorageDataSinkJSON(Storage& S, const SimpleValue* Id,
     Output& ProblemNotifications, const StringValueMapper* Renamer)
-    : storage(S), notifications(ProblemNotifications), renamer(Renamer),
-    part(InHead), open_dicts(0), open_arrays(0), in_string(false),
-    escaping(false)
-{ }
+    : storage(S), identifier(nullptr), notifications(ProblemNotifications),
+    renamer(Renamer), part(InHead), open_dicts(0), open_arrays(0),
+    in_string(false), escaping(false)
+{
+    if (Id != nullptr)
+        identifier = Id->Clone();
+}
 
 StorageDataSinkJSON::~StorageDataSinkJSON() {
+    delete identifier;
 }
 
 const char *const StorageDataSinkJSON::Format() const {
@@ -65,8 +79,7 @@ bool StorageDataSinkJSON::Input(
                 part = InKey;
             } else {
                 part = BadInput;
-                Error(notifications, "format");
-                return false;
+                return error_format();
             }
             break;
         case InKey:
@@ -95,8 +108,7 @@ bool StorageDataSinkJSON::Input(
                 break;
             default:
                 part = BadInput;
-                Error(notifications, "format");
-                return false;
+                return error_format();
             }
             break;
         case InColon:
@@ -112,8 +124,7 @@ bool StorageDataSinkJSON::Input(
                 break;
             default:
                 part = BadInput;
-                Error(notifications, "format");
-                return false;
+                return error_format();
             }
             break;
         case InValue:
@@ -135,8 +146,7 @@ bool StorageDataSinkJSON::Input(
             case ']':
                 if (--open_arrays < 0) {
                     part = BadInput;
-                    Error(notifications, "format");
-                    return false;
+                    return error_format();
                 }
                 break;
             case '{':
@@ -153,8 +163,7 @@ bool StorageDataSinkJSON::Input(
                     continue; // Do not store the separator anywhere.
                 } else if (open_dicts < 0) {
                     part = BadInput;
-                    Error(notifications, "format");
-                    return false;
+                    return error_format();
                 }
                 break;
             case '"':

@@ -84,6 +84,27 @@ set_property(TARGET test_signal.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LI
 add_test(NAME signal6 COMMAND test_signal.sh 6 $<TARGET_FILE:datalackey> )
 add_test(NAME signal9 COMMAND test_signal.sh 9 $<TARGET_FILE:datalackey> )
 
+# Simple commands
+#
+add_executable(test_noop.sh IMPORTED)
+set_property(TARGET test_noop.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_noop.sh)
+add_test(NAME test_noop COMMAND test_noop.sh $<TARGET_FILE:datalackey> )
+add_executable(test_version.sh IMPORTED)
+set_property(TARGET test_version.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_version.sh)
+add_test(NAME test_version COMMAND test_version.sh ${CMAKE_CURRENT_LIST_DIR}/datalackey/Version.hpp $<TARGET_FILE:datalackey> )
+
+# Process lists
+#
+add_executable(test_processes.sh IMPORTED)
+set_property(TARGET test_processes.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_processes.sh)
+add_test(NAME test_processes COMMAND test_processes.sh $<TARGET_FILE:datalackey> )
+
+# Data handling
+#
+add_executable(test_set_delete.sh IMPORTED)
+set_property(TARGET test_set_delete.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_set_delete.sh)
+add_test(NAME test_set_delete COMMAND test_set_delete.sh $<TARGET_FILE:datalackey> )
+
 # Message output from process tests.
 #
 add_executable(test_raw.sh IMPORTED)
@@ -98,4 +119,14 @@ add_test(NAME raw_stderr2_abc COMMAND test_stderr_raw_stderr.sh $<TARGET_FILE:da
 add_executable(test_output.sh IMPORTED)
 set_property(TARGET test_output.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_output.sh)
 add_test(NAME output_get COMMAND test_output.sh $<TARGET_FILE:datalackey> )
+
+# Bad label output
+#
+add_executable(test_bad_label_output.sh IMPORTED)
+set_property(TARGET test_bad_label_output.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_bad_label_output.sh)
+add_test(NAME label_null COMMAND test_bad_label_output.sh null $<TARGET_FILE:datalackey> )
+add_test(NAME label_number COMMAND test_bad_label_output.sh 4 $<TARGET_FILE:datalackey> )
+add_test(NAME label_chars COMMAND test_bad_label_output.sh bad $<TARGET_FILE:datalackey> )
+add_test(NAME label_array COMMAND test_bad_label_output.sh '[\ 4\ ]' $<TARGET_FILE:datalackey> )
+add_test(NAME label_object COMMAND test_bad_label_output.sh '{\ "a":\ 4\ }' $<TARGET_FILE:datalackey> )
 

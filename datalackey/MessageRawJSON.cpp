@@ -10,6 +10,7 @@
 #include "NullValue.hpp"
 #include "Notifications.hpp"
 #include "Number_t.hpp"
+#include <memory>
 
 
 MessageRawJSON::MessageRawJSON(

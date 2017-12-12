@@ -20,7 +20,5 @@ NoOperationCommand::~NoOperationCommand() {
 void NoOperationCommand::Perform(
     const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
-    for (auto arg : Arguments)
-        delete arg;
     Message(out, Id);
 }

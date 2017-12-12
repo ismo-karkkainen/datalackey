@@ -148,14 +148,14 @@ void LocalProcess::real_runner() {
         if (settings[0] == "JSON") {
             if (!strcmp(out.Format(), "JSON")) {
                 mh = new MessagePassThrough(out, *id);
-                sds = new StorageDataSinkJSON(storage, out, renamer);
+                sds = new StorageDataSinkJSON(storage, id, out, renamer);
                 is = new InputScannerJSON(*ic, *mh, *sds, out);
             } else
                 assert(false);
         } else if (settings[0] == "raw") {
             if (!strcmp(out.Format(), "JSON")) {
                 mh = new MessageRawJSON(out, *id);
-                sds = new StorageDataSinkJSON(storage, out);
+                sds = new StorageDataSinkJSON(storage, id, out);
             } else
                 assert(false);
             is = new InputScannerRawMessage(*ic, *mh, *sds);
@@ -172,7 +172,7 @@ void LocalProcess::real_runner() {
         MessageHandler* mh = new MessagePassThrough(out, *id);
         StorageDataSink* sds = nullptr;
         if (!strcmp(out.Format(), "JSON")) {
-            sds = new StorageDataSinkJSON(storage, out);
+            sds = new StorageDataSinkJSON(storage, id, out);
         } else
             assert(false);
         InputScanner* is = new InputScannerDiscard(*ic, *mh, *sds);

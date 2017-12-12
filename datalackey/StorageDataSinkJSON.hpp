@@ -23,6 +23,7 @@ private:
     Storage& storage;
     std::vector<char> key;
     RawData value;
+    SimpleValue* identifier;
     Output& notifications;
     const StringValueMapper* renamer;
     // Needed for keeping track of the contents.
@@ -32,9 +33,11 @@ private:
     bool escaping;
 
     bool pass_to_storage();
+    bool error_format() const;
 
 public:
-    StorageDataSinkJSON(Storage& S, Output& ProblemNotifications,
+    StorageDataSinkJSON(Storage& S, const SimpleValue* Id,
+        Output& ProblemNotifications,
         const StringValueMapper* Renamer = nullptr);
     ~StorageDataSinkJSON();
     const char *const Format() const;

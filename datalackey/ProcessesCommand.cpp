@@ -10,6 +10,7 @@
 #include "Number_t.hpp"
 #include "Notifications.hpp"
 #include "NullValue.hpp"
+#include <memory>
 
 
 ProcessesCommand::ProcessesCommand(const char *const Name, Output& Out, const Processes& P)
@@ -25,12 +26,10 @@ void ProcessesCommand::Perform(
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
         Error(out, Id, "argument", "unexpected");
-        for (auto arg : Arguments)
-            delete arg;
         return;
     }
     auto results = processes.List();
-    OutputItem* writer = out.Writable(IsNullValue(&Id));
+    std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start process id to PID dictionary.
@@ -43,5 +42,4 @@ void ProcessesCommand::Perform(
         delete id;
     }
     *writer << End << End; // Close dictionary and message array.
-    delete writer;
 }
