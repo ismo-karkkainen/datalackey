@@ -49,6 +49,12 @@ void Note(Output& Out, const char *const one, const char *const two,
     message(Out, nullptr, "note", one, two, three, four, nullptr);
 }
 
+void Note(Output& Out, const SimpleValue* Id, const char *const one,
+    const char *const two, const char *const three, const char *const four)
+{
+    message(Out, Id, "note", one, two, three, four, nullptr);
+}
+
 void Note(Output& Out, const SimpleValue& Id, const char *const one,
     const char *const two, const char *const three, const char *const four)
 {
@@ -59,6 +65,12 @@ void Error(Output& Out, const char *const one, const char *const two,
     const char *const three, const char *const four)
 {
     message(Out, nullptr, "error", one, two, three, four, nullptr);
+}
+
+void Error(Output& Out, const SimpleValue* Id, const char *const one,
+    const char *const two, const char *const three, const char *const four)
+{
+    message(Out, Id, "error", one, two, three, four, nullptr);
 }
 
 void Error(Output& Out, const SimpleValue& Id, const char *const one,

@@ -36,7 +36,8 @@ public:
         Data,
         DataEnd,
         Message,
-        MessageEnd
+        MessageEnd,
+        SpaceDiscard
     };
 
 protected:

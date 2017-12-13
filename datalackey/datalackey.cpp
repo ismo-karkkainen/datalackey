@@ -19,6 +19,7 @@
 #include "ProcessesCommand.hpp"
 #include "RunCommand.hpp"
 #include "TerminateCommand.hpp"
+#include "WaitCommand.hpp"
 #include "NoOperationCommand.hpp"
 #include "MemoryStorage.hpp"
 #include "StorageDataSinkJSON.hpp"
@@ -127,6 +128,8 @@ int main(int argc, char** argv) {
     command_handler->AddCommand(&run);
     TerminateCommand terminate("terminate", *out, *procs);
     command_handler->AddCommand(&terminate);
+    WaitCommand wait("wait", *out, *procs);
+    command_handler->AddCommand(&wait);
     NoOperationCommand noop("no-op", *out);
     command_handler->AddCommand(&noop);
 

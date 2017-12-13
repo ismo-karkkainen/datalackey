@@ -62,11 +62,14 @@ bool InputScanner::Scan() {
                 bad = !message_sink.End() || bad;
                 recipient = Discard;
                 break;
+            case SpaceDiscard:
+                break; // Throw away.
             }
             if (bad)
                 recipient = DiscardRetroactively;
             begin = end;
-            previous = recipient;
+            if (recipient != SpaceDiscard)
+                previous = recipient;
         } while (end != buffer.CEnd());
         buffer.Clear();
     }

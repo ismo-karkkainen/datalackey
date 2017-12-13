@@ -17,12 +17,18 @@
 
 void Note(Output& Out, const char *const one, const char *const two = nullptr,
     const char *const three = nullptr, const char *const four = nullptr);
+void Note(Output& Out, const SimpleValue* Id, const char *const one,
+    const char *const two = nullptr, const char *const three = nullptr,
+    const char *const four = nullptr);
 void Note(Output& Out, const SimpleValue& Id, const char *const one,
     const char *const two = nullptr, const char *const three = nullptr,
     const char *const four = nullptr);
 
 void Error(Output& Out, const char *const one, const char *const two = nullptr,
     const char *const three = nullptr, const char *const four = nullptr);
+void Error(Output& Out, const SimpleValue* Id, const char *const one,
+    const char *const two = nullptr, const char *const three = nullptr,
+    const char *const four = nullptr);
 void Error(Output& Out, const SimpleValue& Id, const char *const one,
     const char *const two = nullptr, const char *const three = nullptr,
     const char *const four = nullptr);

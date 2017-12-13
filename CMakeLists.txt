@@ -59,6 +59,7 @@ list(APPEND Processes datalackey/LocalProcesses.cpp)
 set(ProcessCommands datalackey/ProcessesCommand.cpp)
 list(APPEND ProcessCommands datalackey/RunCommand.cpp)
 list(APPEND ProcessCommands datalackey/TerminateCommand.cpp)
+list(APPEND ProcessCommands datalackey/WaitCommand.cpp)
 
 set(JSONCommands datalackey/CommandHandlerJSON.cpp)
 
@@ -88,25 +89,28 @@ add_test(NAME signal9 COMMAND test_signal.sh 9 $<TARGET_FILE:datalackey> )
 #
 add_executable(test_noop.sh IMPORTED)
 set_property(TARGET test_noop.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_noop.sh)
-add_test(NAME test_noop COMMAND test_noop.sh $<TARGET_FILE:datalackey> )
+add_test(NAME noop COMMAND test_noop.sh $<TARGET_FILE:datalackey> )
 add_executable(test_version.sh IMPORTED)
 set_property(TARGET test_version.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_version.sh)
-add_test(NAME test_version COMMAND test_version.sh ${CMAKE_CURRENT_LIST_DIR}/datalackey/Version.hpp $<TARGET_FILE:datalackey> )
+add_test(NAME version COMMAND test_version.sh ${CMAKE_CURRENT_LIST_DIR}/datalackey/Version.hpp $<TARGET_FILE:datalackey> )
 
 # Processes
 #
 add_executable(test_processes.sh IMPORTED)
 set_property(TARGET test_processes.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_processes.sh)
-add_test(NAME test_processes COMMAND test_processes.sh $<TARGET_FILE:datalackey> )
+add_test(NAME processes COMMAND test_processes.sh $<TARGET_FILE:datalackey> )
 add_executable(test_terminate.sh IMPORTED)
 set_property(TARGET test_terminate.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_terminate.sh)
-add_test(NAME test_terminate COMMAND test_terminate.sh $<TARGET_FILE:datalackey> )
+add_test(NAME terminate COMMAND test_terminate.sh $<TARGET_FILE:datalackey> )
+add_executable(test_wait.sh IMPORTED)
+set_property(TARGET test_wait.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_wait.sh)
+add_test(NAME wait COMMAND test_wait.sh $<TARGET_FILE:datalackey> )
 
 # Data handling
 #
 add_executable(test_set_delete.sh IMPORTED)
 set_property(TARGET test_set_delete.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_set_delete.sh)
-add_test(NAME test_set_delete COMMAND test_set_delete.sh $<TARGET_FILE:datalackey> )
+add_test(NAME set_delete COMMAND test_set_delete.sh $<TARGET_FILE:datalackey> )
 
 # Message output from process tests.
 #
@@ -122,6 +126,12 @@ add_test(NAME raw_stderr2_abc COMMAND test_stderr_raw_stderr.sh $<TARGET_FILE:da
 add_executable(test_output.sh IMPORTED)
 set_property(TARGET test_output.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_output.sh)
 add_test(NAME output_get COMMAND test_output.sh $<TARGET_FILE:datalackey> )
+add_executable(test_output_etc.sh IMPORTED)
+set_property(TARGET test_output_etc.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_output_etc.sh)
+add_test(NAME output_etc COMMAND test_output_etc.sh $<TARGET_FILE:datalackey> )
+add_executable(test_null_terminate.sh IMPORTED)
+set_property(TARGET test_null_terminate.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_null_terminate.sh)
+add_test(NAME null_terminate COMMAND test_null_terminate.sh $<TARGET_FILE:datalackey> )
 
 # Bad label output
 #

@@ -1,35 +1,35 @@
 //
-//  TerminateCommand.cpp
+//  WaitCommand.cpp
 //  datalackey
 //
-//  Created by Ismo Kärkkäinen on 21.9.17.
+//  Created by Ismo Kärkkäinen on 13.12.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
 
-#include "TerminateCommand.hpp"
+#include "WaitCommand.hpp"
 #include "Value_t.hpp"
 #include "Notifications.hpp"
 
 
-TerminateCommand::TerminateCommand(
+WaitCommand::WaitCommand(
     const char *const Name, Output& Out, Processes& P)
     : Command(Name, Out), processes(P)
 { }
 
-TerminateCommand::~TerminateCommand() {
+WaitCommand::~WaitCommand() {
 }
 
-void TerminateCommand::Perform(
+void WaitCommand::Perform(
     const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
 {
-    // An array with process identifiers.
+    // An array with output identifiers.
     if (Arguments.empty()) {
         Error(out, Id, "argument", "missing");
         return;
     }
     std::vector<SimpleValue*> terminated, missing;
     for (auto arg : Arguments) {
-        if (processes.Terminate(*arg))
+        if (processes.Wait(*arg))
             terminated.push_back(arg);
         else
             missing.push_back(arg);

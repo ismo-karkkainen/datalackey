@@ -20,6 +20,7 @@ private:
     bool in_string;
     bool escaping;
     Output& notifications;
+    const SimpleValue* identifier;
 
 public:
     std::tuple<Recipient, RawData::ConstIterator, RawData::ConstIterator>
@@ -28,7 +29,7 @@ public:
 
 public:
     InputScannerJSON(InputChannel& IC, MessageHandler& MH, StorageDataSink& SDS,
-        Output& ProblemNotifications);
+        Output& ProblemNotifications, const SimpleValue* Id = nullptr);
     ~InputScannerJSON();
 
     const char* const Format() const;

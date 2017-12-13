@@ -38,6 +38,7 @@ public:
 
     std::vector<std::tuple<SimpleValue*,pid_t>> List() const;
     bool Terminate(const SimpleValue& Id);
+    bool Wait(const SimpleValue& Id);
     void Run(Output& Out,
         const SimpleValue& Id, std::vector<SimpleValue*>& Parameters);
 

@@ -18,10 +18,7 @@ bool StorageDataSinkJSON::pass_to_storage() {
     try {
         json s = json::parse(key.cbegin(), key.cend());
         if (!s.is_string()) {
-            if (identifier == nullptr)
-                Error(notifications, "identifier", "not-string");
-            else
-                Error(notifications, *identifier, "identifier", "not-string");
+            Error(notifications, identifier, "identifier", "not-string");
             return false;
         }
         name = s;
@@ -40,10 +37,7 @@ bool StorageDataSinkJSON::pass_to_storage() {
 }
 
 bool StorageDataSinkJSON::error_format() const {
-    if (identifier == nullptr)
-        Error(notifications, "format");
-    else
-        Error(notifications, *identifier, "format");
+    Error(notifications, identifier, "format");
     return false;
 }
 

@@ -31,6 +31,7 @@ bool MessagePassThrough::Input(
         writer = out.Writable(IsNullValue(&identifier));
         *writer << Array;
         Feed(*writer, identifier);
+        *writer << RawItem;
     }
     writer->Write(Start, End);
     return true;

@@ -10,6 +10,7 @@
 #include "LocalProcess.hpp"
 #include "Notifications.hpp"
 #include "NullValue.hpp"
+#include "Time.hpp"
 #include <set>
 #include <map>
 #include <cstdlib>
@@ -18,6 +19,7 @@
 #include <string.h>
 #include <cassert>
 #include <ctime>
+#include <memory>
 extern char **environ;
 
 
@@ -62,13 +64,30 @@ std::vector<std::tuple<SimpleValue*,pid_t>> LocalProcesses::List() const {
 }
 
 bool LocalProcesses::Terminate(const SimpleValue& Id) {
-    std::lock_guard<std::mutex> lock(processes_mutex);
     SimpleValue* sv = Id.Clone();
+    std::lock_guard<std::mutex> lock(processes_mutex);
     auto proc = processes.find(sv);
     delete sv;
-    if (proc == processes.end() || proc->second->Finished())
+    if (proc == processes.end())
         return false;
+    if (proc->second->Finished())
+        return true;
     proc->second->Terminate();
+    return true;
+}
+
+bool LocalProcesses::Wait(const SimpleValue& Id) {
+    std::unique_ptr<SimpleValue> sv(Id.Clone());
+    std::unique_lock<std::mutex> lock(processes_mutex);
+    auto proc = processes.find(sv.get());
+    if (proc == processes.end())
+        return false;
+    while (proc != processes.end() && !proc->second->Finished()) {
+        lock.unlock();
+        Nap(10000000); // 10 ms.
+        lock.lock();
+        proc = processes.find(sv.get());
+    }
     return true;
 }
 

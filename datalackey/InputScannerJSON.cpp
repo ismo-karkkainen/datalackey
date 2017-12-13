@@ -10,25 +10,33 @@
 #include "Notifications.hpp"
 #include <tuple>
 #include <cassert>
+#include <ctype.h>
 
 
 std::tuple<InputScanner::Recipient, RawData::ConstIterator, RawData::ConstIterator>
 InputScannerJSON::scan_input(InputScanner::Recipient Previous,
     RawData::ConstIterator RangeBegin, RawData::ConstIterator RangeEnd)
 {
+    // Stream is in bad state, scans for zero byte allowed to reset it.
     if (Previous == InputScanner::DiscardRetroactively) {
-        // Allow zero byte in the stream to reset it.
         for (RawData::ConstIterator curr = RangeBegin; curr != RangeEnd; ++curr)
         {
             if (*curr)
                 continue;
             in_string = escaping = false;
             open_something = 0;
-            Note(notifications, "reset");
+            Note(notifications, identifier, "reset");
             return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         return std::make_tuple(
             InputScanner::DiscardRetroactively, RangeBegin, RangeEnd);
+    }
+    // Performs discarding of meaningless space inside array or dictionary.
+    if (open_something > 0 && !in_string && isspace(*RangeBegin)) {
+        RawData::ConstIterator curr = RangeBegin + 1;
+        while (curr != RangeEnd && isspace(*curr))
+            ++curr;
+        return std::make_tuple(InputScanner::SpaceDiscard, RangeBegin, curr);
     }
     // Could arrange this to first check for state and then loop inside it.
     for (RawData::ConstIterator curr = RangeBegin; curr != RangeEnd; ++curr) {
@@ -37,9 +45,8 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             open_something = 0;
             in_string = escaping = false;
             if (Previous != InputScanner::Reset)
-                Note(notifications, "reset");
-            return std::make_tuple(InputScanner::Reset,
-                RangeBegin, ++curr);
+                Note(notifications, identifier, "reset");
+            return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         if (in_string) {
             if (escaping)
@@ -81,21 +88,19 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             if (0 < open_something) {
                 // String only allowed inside array or dictionary.
                 in_string = true;
-                break;
-            }
-            bad_stream = true;
+            } else
+                bad_stream = true;
             break;
-        case ' ':
-        case '\t':
-        case '\n':
-        case '\r':
-            break; // Whitespace outside strings.
         default:
-            bad_stream = open_something <= 0;
+            if (isspace(*curr)) { // Whitespace outside strings.
+                if (open_something > 0) // Message/Data up to this.
+                    return std::make_tuple(Previous, RangeBegin, curr);
+            } else
+                bad_stream = open_something <= 0;
             break;
         }
         if (bad_stream) {
-            Error(notifications, "format");
+            Error(notifications, identifier, "format");
             return std::make_tuple(InputScanner::DiscardRetroactively,
                 RangeBegin, ++curr);
         }
@@ -104,9 +109,10 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
 }
 
 InputScannerJSON::InputScannerJSON(InputChannel& IC, MessageHandler& MH,
-    StorageDataSink& SDS, Output& ProblemNotifications)
+    StorageDataSink& SDS, Output& ProblemNotifications, const SimpleValue* Id)
     : InputScanner(IC, MH, SDS), open_something(0),
-    in_string(false), escaping(false), notifications(ProblemNotifications)
+    in_string(false), escaping(false), notifications(ProblemNotifications),
+    identifier(Id)
 {
     assert(MH.Format() == nullptr || strcmp(Format(), MH.Format()) == 0);
     assert(strcmp(Format(), SDS.Format()) == 0);

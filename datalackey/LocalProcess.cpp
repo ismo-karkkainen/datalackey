@@ -149,7 +149,7 @@ void LocalProcess::real_runner() {
             if (!strcmp(out.Format(), "JSON")) {
                 mh = new MessagePassThrough(out, *id);
                 sds = new StorageDataSinkJSON(storage, id, out, renamer);
-                is = new InputScannerJSON(*ic, *mh, *sds, out);
+                is = new InputScannerJSON(*ic, *mh, *sds, out, id);
             } else
                 assert(false);
         } else if (settings[0] == "raw") {
