@@ -33,4 +33,4 @@ cat > $EXP <<EOF
 EOF
 rm -f _pid.txt
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP && exit 0
+diff -bq $OUT $EXP && rm -f $OUT $EXP

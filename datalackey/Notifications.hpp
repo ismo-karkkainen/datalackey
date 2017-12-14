@@ -36,6 +36,9 @@ void Error(Output& Out, const SimpleValue& Id, const char *const one,
 void Message(Output& Out, const char *const one,
     const char *const two = nullptr, const char *const three = nullptr,
     const char *const four = nullptr);
+void Message(Output& Out, const SimpleValue* Id,
+    const char *const one = nullptr, const char *const two = nullptr,
+    const char *const three = nullptr, const char *const four = nullptr);
 void Message(Output& Out, const SimpleValue& Id,
     const char *const one = nullptr, const char *const two = nullptr,
     const char *const three = nullptr, const char *const four = nullptr);

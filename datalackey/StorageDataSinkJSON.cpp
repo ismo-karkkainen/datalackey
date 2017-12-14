@@ -29,8 +29,11 @@ bool StorageDataSinkJSON::pass_to_storage() {
     StringValue label(name);
     if (renamer != nullptr)
         label = (*renamer)[label];
-    if (!label.String().empty())
+    if (!label.String().empty()) {
         storage.Store(label, Format(), value);
+        Message(notifications, identifier,
+            "stored", label.String().c_str(), Format());
+    }
     key.clear();
     value.Clear();
     return true;

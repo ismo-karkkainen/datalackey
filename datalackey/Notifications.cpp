@@ -85,6 +85,12 @@ void Message(Output& Out, const char *const one, const char *const two,
     message(Out, nullptr, nullptr, one, two, three, four, nullptr);
 }
 
+void Message(Output& Out, const SimpleValue* Id, const char *const one,
+    const char *const two, const char *const three, const char *const four)
+{
+    message(Out, Id, nullptr, one, two, three, four, nullptr);
+}
+
 void Message(Output& Out, const SimpleValue& Id, const char *const one,
     const char *const two, const char *const three, const char *const four)
 {

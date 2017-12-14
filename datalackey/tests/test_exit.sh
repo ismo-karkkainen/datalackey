@@ -25,4 +25,4 @@ cat > $EXP <<EOF
 [1,"finished"]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP && exit 0
+diff -bq $OUT $EXP && rm -f $OUT $EXP

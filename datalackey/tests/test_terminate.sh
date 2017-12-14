@@ -34,4 +34,4 @@ cat > $EXP <<EOF
 [3,{}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP && exit 0
+diff -bq $OUT $EXP && rm -f $OUT $EXP

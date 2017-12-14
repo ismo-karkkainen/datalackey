@@ -24,10 +24,11 @@ echo '[3,"get","mapped"]'
 rm -f _script.sh
 
 cat > $EXP <<EOF
+[1,"stored","mapped","JSON"]
 [1,"exit",0]
 [1,"finished"]
 [2,{"mapped":{"JSON":7}}]
 [3,{"mapped":"value"}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP && exit 0
+diff -bq $OUT $EXP && rm -f $OUT $EXP

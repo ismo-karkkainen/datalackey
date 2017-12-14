@@ -17,4 +17,4 @@ cat > $EXP <<EOF
 [1,{"version":$(cat $VH | grep "Version " | awk '{ printf("%s", $NF) }' | sed 's/;//')}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP && exit 0
+diff -bq $OUT $EXP && rm -f $OUT $EXP

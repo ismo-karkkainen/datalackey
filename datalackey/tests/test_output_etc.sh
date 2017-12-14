@@ -33,7 +33,10 @@ echo '[5,"list"]'
 rm -f _script.sh
 
 cat > $EXP <<EOF
+[1,"stored","mapped","JSON"]
+[1,"stored","pre-label2-post","JSON"]
 [1,["message in a\\nscript"]]
+[1,"stored","pre-label3-post","JSON"]
 [1,"exit",0]
 [1,"finished"]
 [2,{"mapped":{"JSON":7},"pre-label2-post":{"JSON":2},"pre-label3-post":{"JSON":2}}]
@@ -42,4 +45,4 @@ cat > $EXP <<EOF
 [5,{"mapped":{"JSON":7},"pre-label3-post":{"JSON":2}}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP && exit 0
+diff -bq $OUT $EXP && rm -f $OUT $EXP
