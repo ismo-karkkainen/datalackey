@@ -249,13 +249,12 @@ static int CheckValuesGivenAndCompulsory(std::ostream& Error) {
         }
         if (opt.Index) {
             NeedsValue = NeedsValue && !opt.Given;
-        } else {
             if (NeedsValue) {
                 retval = !retval ? 6 : retval; // No value for previous option.
                 Error << "Error: missing value: " << prev_names << "\n";
             }
+        } else
             NeedsValue = opt.Given && !opt.Flag;
-        }
         prev_names = names;
     }
     if (NeedsValue) {

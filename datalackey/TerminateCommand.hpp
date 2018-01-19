@@ -21,7 +21,8 @@ public:
     TerminateCommand(const char *const Name, Output& Out, Processes& P);
     ~TerminateCommand();
 
-    void Perform(const SimpleValue& Id, std::vector<SimpleValue*>& Arguments);
+    void Perform(const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 #endif /* TerminateCommand_hpp */

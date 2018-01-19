@@ -21,7 +21,8 @@ public:
     DeleteCommand(const char *const Name, Output& Out, Storage& S);
     ~DeleteCommand();
 
-    void Perform(const SimpleValue& Id, std::vector<SimpleValue*>& Arguments);
+    void Perform(const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 #endif /* DeleteCommand_hpp */

@@ -101,6 +101,9 @@ void OutputItemWriter::Write(
 }
 
 
+OutputCollection GloballyMessageableOutputs;
+
+
 void Output::AllocateChannel(OutputItemBuffer* PreviousWriter) {
     if (buffers.empty()) // Nothing to use the channel.
         return;
@@ -126,14 +129,22 @@ void Output::AllocateChannel(OutputItemBuffer* PreviousWriter) {
         writer->SetChannel(&main);
 }
 
-Output::Output(const Encoder& E, OutputChannel& Main)
+Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages)
     : encoder(E), main(Main), writer(nullptr)
-{ }
+{
+    if (GlobalMessages)
+        GloballyMessageableOutputs.Add(this);
+}
 
 Output::~Output() {
+    GloballyMessageableOutputs.Remove(this);
     for (auto& buffer : buffers)
         delete buffer;
     // OutputChannel allocated and owned outside.
+}
+
+void Output::NoGlobalMessages() {
+    GloballyMessageableOutputs.Remove(this);
 }
 
 OutputItem* Output::Writable(bool Discarder) {
@@ -153,4 +164,15 @@ void Output::Ended(OutputItemBuffer& IB) {
     std::lock_guard<std::mutex> lock(mutex);
     writer = nullptr;
     AllocateChannel(&IB);
+}
+
+
+void OutputCollection::Add(Output* O) {
+    std::lock_guard<std::mutex> lock(mutex);
+    collection.insert(O);
+}
+
+void OutputCollection::Remove(Output* O) {
+    std::lock_guard<std::mutex> lock(mutex);
+    collection.erase(O);
 }

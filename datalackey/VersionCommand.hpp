@@ -18,7 +18,8 @@ public:
     VersionCommand(const char *const Name, Output& Out);
     ~VersionCommand();
 
-    void Perform(const SimpleValue& Id, std::vector<SimpleValue*>& Arguments);
+    void Perform(const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 #endif /* VersionCommand_hpp */

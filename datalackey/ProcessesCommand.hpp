@@ -21,7 +21,8 @@ public:
     ProcessesCommand(const char *const Name, Output& Out, const Processes& P);
     ~ProcessesCommand();
 
-    void Perform(const SimpleValue& Id, std::vector<SimpleValue*>& Arguments);
+    void Perform(const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 #endif /* ProcessesCommand_hpp */

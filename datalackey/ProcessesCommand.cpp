@@ -21,7 +21,7 @@ ProcessesCommand::~ProcessesCommand() {
 }
 
 void ProcessesCommand::Perform(
-    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {

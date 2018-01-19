@@ -22,7 +22,7 @@ chmod a+x _script.sh
 echo '[null,"run","program","./_script.sh"]'
 sleep 1
 echo '[null,"terminate",null]'
-echo '[null,"wait",null]'
+sleep 2
 echo '[null,"processes"]'
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
 rm -f _script.sh

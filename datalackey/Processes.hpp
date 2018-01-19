@@ -31,12 +31,9 @@ public:
     // Terminate process. Return true if process exists.
     virtual bool Terminate(const SimpleValue& Id) = 0;
 
-    // Wait for process to finish. Return true if process exists.
-    virtual bool Wait(const SimpleValue& Id) = 0;
-
     // Start process. Ownership of parameters transfers.
-    virtual void Run(Output& Out,
-        const SimpleValue& Id, std::vector<SimpleValue*>& Parameters) = 0;
+    virtual void Run(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Parameters) = 0;
 
     // Running process reports it has finished using this.
     virtual void HasFinished(const SimpleValue& Id) = 0;

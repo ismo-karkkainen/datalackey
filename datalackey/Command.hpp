@@ -13,6 +13,7 @@
 #include "SimpleValue.hpp"
 #include <vector>
 #include <string>
+#include <memory>
 
 
 // Base class for commands.
@@ -29,7 +30,7 @@ public:
     const std::string& Name() const { return name; }
 
     virtual void Perform(const SimpleValue& Id,
-        std::vector<SimpleValue*>& Arguments) = 0;
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments) = 0;
 };
 
 

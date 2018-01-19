@@ -13,7 +13,7 @@
 using json = nlohmann::json;
 
 
-bool StorageDataSinkJSON::pass_to_storage() {
+bool StorageDataSinkJSON::start_item() {
     std::string name;
     try {
         json s = json::parse(key.cbegin(), key.cend());
@@ -29,14 +29,39 @@ bool StorageDataSinkJSON::pass_to_storage() {
     StringValue label(name);
     if (renamer != nullptr)
         label = (*renamer)[label];
-    if (!label.String().empty()) {
-        storage.Store(label, Format(), value);
-        Message(notifications, identifier,
-            "stored", label.String().c_str(), Format());
+    ignoring_item = label.String().empty();
+    if (!ignoring_item) {
+        group->StartItem(label);
+        value.Clear();
     }
-    key.clear();
-    value.Clear();
     return true;
+}
+
+void StorageDataSinkJSON::pass_item() {
+    if (ignoring_item)
+        return;
+    RawData::ConstIterator begin(value.CBegin());
+    RawData::ConstIterator end(value.CEnd());
+    group->Append(begin, end);
+    value.Clear();
+}
+
+void StorageDataSinkJSON::end_item() {
+    if (ignoring_item)
+        return;
+    pass_item();
+    group->Finish();
+}
+
+void StorageDataSinkJSON::end_group() {
+    if (open_dicts == 0 && group != nullptr && part != BadInput) {
+        std::vector<std::string> labels = group->Labels();
+        storage.Add(*group, &notifications);
+        for (std::string& s : labels)
+            Message(notifications, identifier, "stored", s.c_str(), Format());
+    }
+    delete group;
+    group = nullptr;
 }
 
 bool StorageDataSinkJSON::error_format() const {
@@ -44,10 +69,12 @@ bool StorageDataSinkJSON::error_format() const {
     return false;
 }
 
-StorageDataSinkJSON::StorageDataSinkJSON(Storage& S, const SimpleValue* Id,
-    Output& ProblemNotifications, const StringValueMapper* Renamer)
-    : storage(S), identifier(nullptr), notifications(ProblemNotifications),
-    renamer(Renamer), part(InHead), open_dicts(0), open_arrays(0),
+StorageDataSinkJSON::StorageDataSinkJSON(Storage& S,
+    const SimpleValue* Id, Output& ProblemNotifications,
+    const StringValueMapper* Renamer)
+    : storage(S), group(nullptr), identifier(nullptr),
+    notifications(ProblemNotifications), renamer(Renamer),
+    part(InHead), open_dicts(0), open_arrays(0),
     in_string(false), escaping(false)
 {
     if (Id != nullptr)
@@ -56,6 +83,7 @@ StorageDataSinkJSON::StorageDataSinkJSON(Storage& S, const SimpleValue* Id,
 
 StorageDataSinkJSON::~StorageDataSinkJSON() {
     delete identifier;
+    delete group;
 }
 
 const char *const StorageDataSinkJSON::Format() const {
@@ -73,6 +101,7 @@ bool StorageDataSinkJSON::Input(
             // No incoming leading white-space, only allow {.
             if (*curr == '{') {
                 ++open_dicts;
+                group = new DataGroup(Format());
                 part = InKey;
             } else {
                 part = BadInput;
@@ -88,6 +117,10 @@ bool StorageDataSinkJSON::Input(
                     escaping = true; // Next character is to be ignored.
                 } else if (*curr == '"') {
                     in_string = false; // Ending quote.
+                    if (!start_item()) {
+                        part = BadInput;
+                        return error_format();
+                    }
                     part = InColon;
                 }
                 continue;
@@ -134,7 +167,7 @@ bool StorageDataSinkJSON::Input(
                 } else if (*curr == '\\')
                     escaping = true; // Next character meaning ignored.
                 value.Append(*curr); // Accumulate the current value.
-                continue;
+                break;
             }
             switch (*curr) {
             case '[':
@@ -152,9 +185,8 @@ bool StorageDataSinkJSON::Input(
             case '}':
                 --open_dicts;
                 if (open_dicts == 0) {
-                    // We have the last value in the dictionary stored already.
-                    if (!pass_to_storage())
-                        return false;
+                    end_item();
+                    end_group();
                     // Expecting End(), anything else is an error.
                     part = InEnd;
                     continue; // Do not store the separator anywhere.
@@ -175,8 +207,7 @@ bool StorageDataSinkJSON::Input(
             case ',':
                 if (open_dicts == 1 && open_arrays == 0) {
                     // A comma that separates value from next key.
-                    // We have key and value stored already.
-                    pass_to_storage();
+                    end_item();
                     part = InKey;
                     continue; // Do not store the separator anywhere.
                 }
@@ -190,11 +221,14 @@ bool StorageDataSinkJSON::Input(
         case BadInput:
             return false; // Everything until End is called is suspect.
         }
+        if (value.Size() >= 16384)
+            pass_item();
     }
     return true;
 }
 
 bool StorageDataSinkJSON::End() {
+    end_group();
     // Re-set things needed to keep track of keys and values.
     part = InHead;
     open_dicts = open_arrays = 0;

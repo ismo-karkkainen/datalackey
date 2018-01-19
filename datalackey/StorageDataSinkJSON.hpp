@@ -14,6 +14,7 @@
 #include "Structure.hpp"
 #include "Output.hpp"
 #include "StringValueMapper.hpp"
+#include "DataGroup.hpp"
 #include <vector>
 
 
@@ -21,8 +22,9 @@ class StorageDataSinkJSON : public StorageDataSink {
 private:
     enum Part { InHead, InKey, InColon, InValue, InEnd, BadInput };
     Storage& storage;
+    DataGroup* group;
     std::vector<char> key;
-    RawData value;
+    RawData value; // For accumulating data before passing it to group.
     SimpleValue* identifier;
     Output& notifications;
     const StringValueMapper* renamer;
@@ -31,8 +33,12 @@ private:
     int open_dicts, open_arrays;
     bool in_string;
     bool escaping;
+    bool ignoring_item;
 
-    bool pass_to_storage();
+    bool start_item();
+    void pass_item();
+    void end_item();
+    void end_group();
     bool error_format() const;
 
 public:

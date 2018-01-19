@@ -10,6 +10,7 @@
 #include "Value_t.hpp"
 #include "Notifications.hpp"
 #include "NullValue.hpp"
+#include "ProcessInput.hpp"
 #include <memory>
 
 
@@ -22,51 +23,63 @@ GetCommand::~GetCommand() {
 }
 
 void GetCommand::Perform(
-    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
         Error(out, Id, "argument", "missing");
         return;
     }
-    // Check if everything can be made available and if not, return an error.
-    std::vector<StringValue*> ready, loading;
-    std::vector<SimpleValue*> missing, invalid;
-    std::vector<std::shared_ptr<const RawData>> present;
+    // Filter out invalid values.
+    std::vector<std::shared_ptr<SimpleValue>> invalid;
+    std::vector<std::shared_ptr<ProcessInput>> results;
     for (auto arg : Arguments) {
-        StringValue* label = dynamic_cast<StringValue*>(arg);
-        if (label == nullptr) {
+        if (dynamic_cast<StringValue*>(arg.get()) == nullptr) {
             invalid.push_back(arg);
             continue;
         }
-        auto rd = storage.ReadyData(*label, format.c_str());
-        if (rd) {
-            ready.push_back(label);
-            present.push_back(rd);
-        } else if (storage.Preload(*label, format.c_str()))
-            loading.push_back(label);
-        else
-            missing.push_back(arg);
+        results.push_back(
+            std::shared_ptr<ProcessInput>(new ProcessInput(arg, arg)));
     }
     if (!invalid.empty())
         ListMessage(out, Id, "invalid", invalid);
+    // Try to get the data.
+    storage.Prepare(format.c_str(), results);
+    // Report the ones that were not present.
+    std::vector<std::shared_ptr<SimpleValue>> missing;
+    for (auto res : results)
+        if (!res->Data())
+            missing.push_back(res->SharedLabel());
     if (!missing.empty())
         ListMessage(out, Id, "missing", missing);
+    // Write out remaining results.
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
     *writer << Dictionary; // Start data dictionary.
-    for (size_t k = 0; k < ready.size(); ++k) {
-        Feed(*writer, *ready[k]);
+    std::vector<std::shared_ptr<SimpleValue>> failed;
+    for (size_t k = 0; k < results.size(); ++k) {
+        std::shared_ptr<DataOwner> data = results[k]->Data();
+        if (!data)
+            continue;
+        if (!data->StartRead()) {
+            failed.push_back(results[k]->SharedLabel());
+            results[k] = nullptr;
+            continue;
+        }
+        Feed(*writer, *(results[k]->Name()));
         *writer << RawItem;
-        writer->Write(present[k]->CBegin(), present[k]->CEnd());
-        present[k] = nullptr; // No longer needed here.
-    }
-    for (auto s : loading) {
-        Feed(*writer, *s);
-        *writer << RawItem;
-        auto data = storage.Data(*s, format.c_str());
-        writer->Write(data->CBegin(), data->CEnd());
+        // Failure after this messes up the whole thing.
+        while (std::shared_ptr<const RawData> block = data->Read(1048576))
+            writer->Write(block->CBegin(), block->CEnd());
+        data->FinishRead();
+        if (data->Error())
+            failed.push_back(results[k]->SharedLabel());
+        results[k] = nullptr;
     }
     *writer << End << End; // Close data dictionary and message array.
+    // If there were any failures, report them but the chances of the controller
+    // getting these in any sensible manner are slim, maybe with one-line JSON.
+    if (!failed.empty())
+        ListMessage(out, Id, "failed", failed);
 }

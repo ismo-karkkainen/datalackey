@@ -19,7 +19,6 @@
 #include "ProcessesCommand.hpp"
 #include "RunCommand.hpp"
 #include "TerminateCommand.hpp"
-#include "WaitCommand.hpp"
 #include "NoOperationCommand.hpp"
 #include "MemoryStorage.hpp"
 #include "StorageDataSinkJSON.hpp"
@@ -48,10 +47,9 @@ static int HandleArguments(int argc, char** argv) {
     opt::Usage("Command result output channel.");
     opt::AddValue(0, 1, formats);
     opt::Usage("Channel data format.");
-    opt::Add('m', "memory");
-    opt::Usage("Store data in memory. Give at least one of the following.");
-    opt::AddValue(0, 0, std::numeric_limits<int>::max());
-    opt::Usage("Megabytes of memory always allowed to use. 0 for no limit.");
+    opt::AddFlag('m', "memory", false);
+    opt::Usage("Store data in memory.");
+    opt::Add('f', "free");
     opt::AddValue(1024, 0, std::numeric_limits<int>::max());
     opt::Usage(
         "Megabytes of total memory attempted to keep free. 0 for no limit.");
@@ -71,9 +69,11 @@ int main(int argc, char** argv) {
         return rv;
 
     Storage* storage = nullptr;
-    if (opt::Given("memory"))
-        storage = new MemoryStorage(static_cast<size_t>(opt::Int("memory", 1)),
-            static_cast<size_t>(opt::Int("memory", 2)));
+    if (opt::Bool("memory", 0)) {
+        MemoryStorage* ms = new MemoryStorage();
+        DataGroup::SetDataOwnerGenerator(*ms);
+        storage = ms;
+    }
     assert(storage != nullptr);
 
     OutputChannel* out_channel = nullptr;
@@ -128,8 +128,6 @@ int main(int argc, char** argv) {
     command_handler->AddCommand(&run);
     TerminateCommand terminate("terminate", *out, *procs);
     command_handler->AddCommand(&terminate);
-    WaitCommand wait("wait", *out, *procs);
-    command_handler->AddCommand(&wait);
     NoOperationCommand noop("no-op", *out);
     command_handler->AddCommand(&noop);
 

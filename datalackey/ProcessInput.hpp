@@ -1,0 +1,49 @@
+//
+//  ProcessInput.hpp
+//  datalackey
+//
+//  Created by Ismo Kärkkäinen on 10.1.18.
+//  Copyright © 2018 Ismo Kärkkäinen. All rights reserved.
+//
+
+#ifndef ProcessInput_hpp
+#define ProcessInput_hpp
+
+#include "RawData.hpp"
+#include "SimpleValue.hpp"
+#include "StringValue.hpp"
+#include "DataOwner.hpp"
+#include "Encoder.hpp"
+#include <memory>
+
+
+class ProcessInput {
+private:
+    std::shared_ptr<SimpleValue> label;
+    StringValue* plabel;
+    std::shared_ptr<DataOwner> data;
+    std::shared_ptr<SimpleValue> name;
+    StringValue* pname;
+
+public:
+    // Both are expected to be StringValues.
+    ProcessInput(std::shared_ptr<SimpleValue>& Label,
+        std::shared_ptr<SimpleValue>& Name);
+    // First can be anything, the second is expected to be StringValue.
+    ProcessInput(std::shared_ptr<SimpleValue>& Value, Encoder* E,
+        std::shared_ptr<SimpleValue>& Name);
+
+    // For setting data from label.
+    const StringValue* Label() const { return plabel; }
+    void SetData(std::shared_ptr<DataOwner> Data) { data = Data; }
+
+    // For passing data onwards.
+    const StringValue* Name() const { return pname; }
+    std::shared_ptr<DataOwner> Data() { return data; }
+
+    // Needed in case of errors.
+    std::shared_ptr<SimpleValue>& SharedLabel() { return label; }
+};
+
+
+#endif /* ProcessInput_hpp */

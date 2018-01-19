@@ -19,7 +19,7 @@ RunCommand::~RunCommand() {
 }
 
 void RunCommand::Perform(
-    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (Arguments.empty()) {
         Error(out, Id, "argument", "missing");

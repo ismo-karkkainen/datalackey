@@ -23,6 +23,7 @@ class Output;
 #include <vector>
 #include <utility>
 #include <mutex>
+#include <set>
 
 
 // This receives the data that OutputItem produces.
@@ -81,8 +82,10 @@ private:
     void AllocateChannel(OutputItemBuffer* PreviousWriter = nullptr);
 
 public:
-    Output(const Encoder& E, OutputChannel& Main);
+    Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages = true);
     ~Output();
+
+    void NoGlobalMessages();
 
     const char *const Format() const { return encoder.Format(); }
 
@@ -94,5 +97,27 @@ public:
     // For communication from OutputItemBuffer objects.
     void Ended(OutputItemBuffer& IB);
 };
+
+
+// For storing pointers to all output objects.
+class OutputCollection {
+private:
+    std::set<Output*> collection;
+    std::mutex mutex;
+
+    friend class Output;
+
+    void Add(Output* O);
+    void Remove(Output* O);
+
+public:
+    std::mutex& Mutex() { return mutex; } // Lock first.
+    std::vector<Output*> Outputs() const { // Presumes previous is locked.
+        return std::vector<Output*>(collection.begin(), collection.end());
+    }
+};
+
+extern OutputCollection GloballyMessageableOutputs;
+
 
 #endif /* Output_hpp */

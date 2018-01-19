@@ -10,16 +10,18 @@
 #include "LocalProcess.hpp"
 #include "Notifications.hpp"
 #include "NullValue.hpp"
-#include "Time.hpp"
+#include "ProcessInput.hpp"
+#include "JSONEncoder.hpp"
 #include <set>
 #include <map>
 #include <cstdlib>
 #include <unistd.h>
-#include <sys/errno.h>
+#include <cerrno>
 #include <string.h>
 #include <cassert>
 #include <ctime>
 #include <memory>
+
 extern char **environ;
 
 
@@ -76,23 +78,9 @@ bool LocalProcesses::Terminate(const SimpleValue& Id) {
     return true;
 }
 
-bool LocalProcesses::Wait(const SimpleValue& Id) {
-    std::unique_ptr<SimpleValue> sv(Id.Clone());
-    std::unique_lock<std::mutex> lock(processes_mutex);
-    auto proc = processes.find(sv.get());
-    if (proc == processes.end())
-        return false;
-    while (proc != processes.end() && !proc->second->Finished()) {
-        lock.unlock();
-        Nap(10000000); // 10 ms.
-        lock.lock();
-        proc = processes.find(sv.get());
-    }
-    return true;
-}
-
 static bool has_count(size_t Index, size_t Count, const std::string& command,
-    std::vector<SimpleValue*>& Parameters, Output& Out, const SimpleValue& Id)
+    std::vector<std::shared_ptr<SimpleValue>>& Parameters,
+    Output& Out, const SimpleValue& Id)
 {
     if (Parameters.size() < Index + Count) {
         Error(Out, Id, "argument", "missing", command.c_str());
@@ -102,9 +90,10 @@ static bool has_count(size_t Index, size_t Count, const std::string& command,
 }
 
 static bool is_string(size_t Index, const std::string& command,
-    std::vector<SimpleValue*>& Parameters, Output& Out, const SimpleValue& Id)
+    std::vector<std::shared_ptr<SimpleValue>>& Parameters,
+    Output& Out, const SimpleValue& Id)
 {
-    if (!IsStringValue(Parameters[Index])) {
+    if (!IsStringValue(Parameters[Index].get())) {
         Error(Out, Id, "argument", "not-string", command.c_str());
         return false;
     }
@@ -112,18 +101,19 @@ static bool is_string(size_t Index, const std::string& command,
 }
 
 static bool is_string_or_null(size_t Index, const std::string& command,
-    std::vector<SimpleValue*>& Parameters, Output& Out, const SimpleValue& Id)
+    std::vector<std::shared_ptr<SimpleValue>>& Parameters,
+    Output& Out, const SimpleValue& Id)
 {
-    if (IsStringValue(Parameters[Index]))
+    if (IsStringValue(Parameters[Index].get()))
         return true;
-    if (IsNullValue(Parameters[Index]))
+    if (IsNullValue(Parameters[Index].get()))
         return true;
     Error(Out, Id, "argument", "not-string", "not-null", command.c_str());
     return false;
 }
 
-void LocalProcesses::Run(Output& Out,
-    const SimpleValue& Id, std::vector<SimpleValue*>& Parameters)
+void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
+    std::vector<std::shared_ptr<SimpleValue>>& Parameters)
 {
     std::unique_lock<std::mutex> lock(processes_mutex);
     SimpleValue* sv = Id.Clone();
@@ -137,16 +127,16 @@ void LocalProcesses::Run(Output& Out,
 
     std::map<std::string,std::string> env2value; // env
     std::vector<std::string> input; // one channel in
-    std::vector<std::pair<SimpleValue*,std::string>> value_name;
     std::vector<std::vector<std::string>> outputs; // multiple channel out
     std::string program_name;
     std::vector<std::string> program_args; // program
+    bool controller = false;
 
     // Temporary storage.
     bool clear_env = false;
-    std::vector<std::pair<StringValue,StringValue>> label_name;
     std::string prefix, postfix;
-    std::vector<std::pair<StringValue,SimpleValue*>> name_label;
+    std::vector<std::pair<StringValue,std::shared_ptr<SimpleValue>>> name_label;
+    std::vector<std::tuple<bool,std::shared_ptr<SimpleValue>,std::shared_ptr<SimpleValue>>> raw_ins;
 
     size_t k = 0;
     while (k < Parameters.size()) {
@@ -177,18 +167,14 @@ void LocalProcesses::Run(Output& Out,
                 !is_string(k + 1, command, Parameters, Out, Id) ||
                 !is_string(k + 2, command, Parameters, Out, Id))
                 return;
-            // Cannot verify data presence yet since format not yet known.
-            label_name.push_back(std::make_pair<StringValue,StringValue>(
-                StringValue(Parameters[k + 1]->String()),
-                StringValue(Parameters[k + 2]->String())));
+            raw_ins.push_back(std::tuple<bool,std::shared_ptr<SimpleValue>,std::shared_ptr<SimpleValue>>(false, Parameters[k + 1], Parameters[k + 2]));
             k += 3;
         } else if (command == "direct") {
             // direct value-(string|integer|null) name
             if (!has_count(k, 3, command, Parameters, Out, Id) ||
                 !is_string(k + 2, command, Parameters, Out, Id))
                 return;
-            value_name.push_back(std::pair<SimpleValue*,std::string>(
-                Parameters[k + 1], Parameters[k + 2]->String()));
+            raw_ins.push_back(std::tuple<bool,std::shared_ptr<SimpleValue>,std::shared_ptr<SimpleValue>>(true, Parameters[k + 1], Parameters[k + 2]));
             k += 3;
         } else if (command == "output") {
             // output name label|null
@@ -196,8 +182,9 @@ void LocalProcesses::Run(Output& Out,
                 !is_string(k + 1, command, Parameters, Out, Id) ||
                 !is_string_or_null(k + 2, command, Parameters, Out, Id))
                 return;
-            name_label.push_back(std::pair<StringValue,SimpleValue*>(
-                StringValue(Parameters[k + 1]->String()), Parameters[k + 2]));
+            name_label.push_back(
+                std::pair<StringValue,std::shared_ptr<SimpleValue>>(
+                    StringValue(Parameters[k + 1]->String()), Parameters[k + 2]));
             k += 3;
         } else if (command == "output-prefix") {
             // output-prefix prefix-for-unknown
@@ -268,6 +255,18 @@ void LocalProcesses::Run(Output& Out,
                 Error(Out, Id, "argument", "unknown", command.c_str());
                 return;
             }
+        } else if (command == "type") {
+            if (!has_count(k, 2, command, Parameters, Out, Id) ||
+                !is_string(k + 1, command, Parameters, Out, Id))
+                return;
+            if (Parameters[k + 1]->String() == "controller")
+                controller = true;
+            else if (Parameters[k + 1]->String() == "worker")
+                controller = false;
+            else {
+                Error(Out, Id, "argument", "unknown", command.c_str());
+                return;
+            }
         } else if (command == "program") {
             // program executable args...
             if (!has_count(k, 2, command, Parameters, Out, Id) ||
@@ -283,18 +282,53 @@ void LocalProcesses::Run(Output& Out,
         }
     }
 
-    // Check that file exists and is an executable.
-    errno = 0;
-    if (access(program_name.c_str(), X_OK)) {
-        int err = errno;
-        assert(err != EINVAL);
-        Error(Out, Id, "program", program_name.c_str(), strerror(err));
-        return;
+    StringValueMapperSimple* renamer = nullptr;
+    if (!name_label.empty() || !prefix.empty() || !postfix.empty()) {
+        renamer = new StringValueMapperSimple(prefix, postfix);
+        for (auto& nl : name_label) {
+            if (!renamer->Map(nl.first, nl.second)) {
+                Error(Out, Id, "argument", "duplicate", "channel", "out");
+                delete renamer;
+                return;
+            }
+        }
     }
 
-    if (input.empty() && !(label_name.empty() && value_name.empty())) {
-        Error(Out, Id, "argument", "missing", "channel", "in");
-        return;
+    std::vector<std::shared_ptr<ProcessInput>> input_values;
+    Encoder* enc = nullptr;
+    if (!input.empty()) {
+        if (input[0] == "JSON")
+            enc = new JSONEncoder();
+        assert(enc != nullptr);
+    }
+    std::set<std::string> seen_names; // Book-keeping for duplicate names.
+    for (size_t k = 0; k < raw_ins.size(); ++k) {
+        bool direct;
+        std::shared_ptr<SimpleValue> label_value;
+        std::shared_ptr<SimpleValue> name;
+        std::tie(direct, label_value, name) = raw_ins[k];
+        if (direct) {
+            input_values.push_back(std::shared_ptr<ProcessInput>(
+                new ProcessInput(label_value, enc, name)));
+        } else {
+            input_values.push_back(std::shared_ptr<ProcessInput>(
+                new ProcessInput(label_value, name)));
+        }
+        auto result = seen_names.insert(input_values.back()->Name()->String());
+        if (!result.second) {
+            Error(Out, Id, "input/direct", "name", "duplicate",
+                input_values.back()->Name()->String().c_str());
+            return;
+        }
+    }
+    delete enc;
+
+    if (!input_values.empty()) {
+        if (input.empty()) {
+            Error(Out, Id, "argument", "missing", "channel", "in");
+            return;
+        }
+        storage.Prepare(input[0].c_str(), input_values);
     }
 
     if (outputs.empty() &&
@@ -304,30 +338,13 @@ void LocalProcesses::Run(Output& Out,
         return;
     }
 
-    std::set<std::string> seen_names; // Book-keeping for duplicate names.
-    std::shared_ptr<std::vector<std::tuple<StringValue,std::shared_ptr<const RawData>,std::string>>> label_data_name(new std::vector<std::tuple<StringValue,std::shared_ptr<const RawData>,std::string>>());
-    // Check data presence and name duplicates.
-    for (auto& pair : label_name) {
-        auto result = seen_names.insert(pair.second);
-        if (!result.second) {
-            Error(Out, Id, "input", "name", "duplicate");
-            return;
-        }
-        StringValue s(pair.first);
-        std::shared_ptr<const RawData> data(storage.ReadyData(s, input[0]));
-        if (!data && !storage.Preload(s, input[0])) {
-            Error(Out, Id, "input", "not-found", s.String().c_str());
-            return;
-        }
-        label_data_name->push_back(std::make_tuple(s, data, pair.second));
-    }
-    // Check that direct names have no duplicates.
-    for (auto& pair : value_name) {
-        auto result = seen_names.insert(pair.second);
-        if (!result.second) {
-            Error(Out, Id, "direct", "name", "duplicate");
-            return;
-        }
+    // Check that file exists and is an executable.
+    errno = 0;
+    if (access(program_name.c_str(), X_OK)) {
+        int err = errno;
+        assert(err != EINVAL);
+        Error(Out, Id, "program", program_name.c_str(), strerror(err));
+        return;
     }
 
     if (!clear_env) {
@@ -347,21 +364,9 @@ void LocalProcesses::Run(Output& Out,
         }
     }
 
-    StringValueMapperSimple* renamer = nullptr;
-    if (!name_label.empty() || !prefix.empty() || !postfix.empty()) {
-        renamer = new StringValueMapperSimple(prefix, postfix);
-        for (auto& nl : name_label) {
-            if (!renamer->Map(nl.first, nl.second)) {
-                Error(Out, Id, "argument", "duplicate", "channel", "out");
-                delete renamer;
-                return;
-            }
-        }
-    }
-
-    Process* p = new LocalProcess(this, Out, storage, Id,
-        program_name, program_args, env2value, input, label_data_name,
-        value_name, outputs, renamer);
+    Process* p = new LocalProcess(this, Out, controller, storage, Id,
+        program_name, program_args, env2value, input, input_values,
+        outputs, renamer);
     if (!p->Run()) {
         // p has reported the error.
         delete p;

@@ -13,6 +13,8 @@
 #include "NullValue.hpp"
 #include <json.hpp>
 #include <cmath>
+#include <vector>
+#include <memory>
 
 using json = nlohmann::json;
 
@@ -70,25 +72,24 @@ bool CommandHandlerJSON::End() {
     auto iter = handlers.find(command);
     if (iter == handlers.end())
         return error(identifier, "command", "unknown");
-    std::vector<SimpleValue*> args;
+    std::vector<std::shared_ptr<SimpleValue>> args;
     for (size_t k = 2; k < cmd.size(); ++k) {
         if (cmd[k].is_string())
-            args.push_back(new StringValue(cmd[k].get<std::string>()));
+            args.push_back(std::shared_ptr<SimpleValue>(
+                new StringValue(cmd[k].get<std::string>())));
         else if (cmd[k].is_number()) {
             double d(cmd[k].get<double>()), i;
             if (0.0 != std::modf(d, &i))
                 return error(identifier, "argument", "not-integer");
-            args.push_back(new NumberValue(cmd[k].get<long long int>()));
+            args.push_back(std::shared_ptr<SimpleValue>(
+                new NumberValue(cmd[k].get<long long int>())));
         } else if (cmd[k].is_null()) {
-            args.push_back(new NullValue());
+            args.push_back(std::shared_ptr<SimpleValue>(new NullValue()));
         } else
             return error(identifier,
                 "argument", "not-string", "not-integer", "not-null");
     }
-    // Callee changes args item to nullptr if it takes ownership.
     iter->second->Perform(*identifier, args);
-    for (auto item : args)
-        delete item;
     delete identifier;
     return true;
 }

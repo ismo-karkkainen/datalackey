@@ -11,6 +11,7 @@
 
 #include "Output.hpp"
 #include "SimpleValue.hpp"
+#include <memory>
 
 
 // If Id type is NullValue there is no output, except for Feed.
@@ -49,7 +50,14 @@ void Message(Output& Out, const SimpleValue& Id, int last,
 void Feed(OutputItem& Writer, const SimpleValue& Id);
 
 void ListMessage(Output& Out, const SimpleValue& Id, const char *const one,
-    std::vector<SimpleValue*>& List);
+    std::vector<std::shared_ptr<SimpleValue>>& List);
+void ListMessage(Output& Out, const SimpleValue& Id, const char *const one,
+    std::vector<std::string>& List);
+
+void ListMessage(Output& Out, const char *const one,
+    std::vector<std::shared_ptr<SimpleValue>>& List);
+void ListMessage(Output& Out, const char *const one,
+    std::vector<std::string>& List);
 
 
 #endif /* Notifications_hpp */

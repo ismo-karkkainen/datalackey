@@ -2,158 +2,106 @@
 //  MemoryStorage.cpp
 //  datalackey
 //
-//  Created by Ismo Kärkkäinen on 24.7.17.
-//  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
+//  Created by Ismo Kärkkäinen on 10.1.18.
+//  Copyright © 2018 Ismo Kärkkäinen. All rights reserved.
 //
 
 #include "MemoryStorage.hpp"
-#include <limits>
+#include "Notifications.hpp"
+#include "MemoryOwner.hpp"
 #include <cassert>
-#include <ctime>
 
-/*
-static const int keychar_count = 36;
-static const char keychars[keychar_count] = "0123456789abcdefghijklmnopqrstuwvxyz";
 
-size_t MemoryStorage::id() {
-    while (true) {
-        size_t c = counter++;
-        std::string cand;
-        do {
-            cand += keychars[c % keychar_count];
-            c /= keychar_count;
-        } while (c);
-        auto iter = store.find(cand);
-        if (iter == store.end())
-            return cand;
-    }
-    // If this becomes an eternal loop, we have more items and memory than
-    // size_t can hold. Whee!!!
-}
-*/
-
-MemoryStorage::FormatData::FormatData(const char *const Format)
-    : format(Format), data(nullptr), receiver(new ConversionResult())
-{ }
-
-MemoryStorage::FormatData::FormatData(const char *const Format, RawData& Data)
-    : format(Format), data(nullptr), receiver(nullptr)
+MemoryStorage::Value::Value(
+    const std::string& Format, std::shared_ptr<DataOwner> Data)
 {
-    RawData* rd = new RawData();
-    rd->Swap(Data);
-    data = std::shared_ptr<const RawData>(rd);
+    values.push_back(std::pair<std::string,std::shared_ptr<DataOwner>>(
+        Format, Data));
 }
 
-std::pair<std::shared_ptr<const RawData>,std::shared_ptr<ConversionResult>>
-MemoryStorage::FormatData::CheckDataConversion() {
-    if (!receiver) {
-        return std::make_pair(data, nullptr);
-    }
-    std::shared_ptr<ConversionResult> tmp = receiver;
-    std::lock_guard<std::mutex> lock(tmp->Mutex());
-    if (!data) {
-        if (receiver->Result()) {
-            data = std::shared_ptr<const RawData>(receiver->Result());
-            receiver = nullptr;
-            return std::make_pair(data, std::shared_ptr<ConversionResult>());
+std::shared_ptr<DataOwner> MemoryStorage::Value::Find(const std::string& Format)
+{
+    bool throwaway = false;
+    for (auto iter : values)
+        if (iter.first == Format) {
+            if (iter.second->Finished())
+                return std::shared_ptr<DataOwner>(
+                    new MemoryOwner(*dynamic_cast<MemoryOwner*>(
+                        iter.second.get())));
+            throwaway = true;
+            break;
         }
-        return std::make_pair(std::shared_ptr<const RawData>(), receiver);
+
+    // Before CBOR is implemented, we can never get here.
+    assert(false);
+    return std::shared_ptr<DataOwner>();
+
+    // If not throwaway then we have to create a MemoryOwner and push it
+    // with format to values. Then pass it to conversion object on construction.
+    // We have to create a conversion object and return it.
+
+    // Find suitable source format.
+    // if not throwaway, create normal MemoryOwner and push with Format.
+    // Take source format, its DataOwner, non-throwaway, targte format and
+    // generate converter and return it.
+
+    // However, a conversion has to be "finished" since it must be readable
+    // from the requester. So the above case applies when we have conversion
+    // result storing object feeding to what we found. We cannot have an object
+    // that feeds to itself since the requester has to have something finished.
+    // So a single converter is always finished but never here. Here is the
+    // conversion storage as by-product. For purposes of freeing stuff the
+    // object here should not know about the converter so that it will be
+    // freed. Or converter tells object here to free reference to converter
+    // when reading is finished (i.e. we read the last block).
+
+    // Asking for same is presumably rare and pointer storage is small and
+    // looking for the conversion is fast, now at least.
+    // Note that there is no guarantee that the conversion will ever be
+    // finished unless we do it explicitly disregarding what requester wants
+    // and perform conversion until the end in any case. For memory storage
+    // we could allow arbitrary number of readers as long as they wait for more
+    // data and that implies locking the source to the degree that writes and
+    // reads do not overlap (but reads can overlap).
+    // For file storage read before write is finished ought to be a no-no.
+    // For file storage a thread would have to start converting immediately.
+    // Maybe same for memory storage for simplicity.
+    // For file storage we also have only one reader in turn. Separate reader
+    // object that holds a smart pointer to owner?
+    // Actually they can all be derived from DataOwner.
+
+    // Separate writer and reader objects to handle data owner contents?
+    // Might help for FileOwner but anything purely in memory returns pointer
+    // to everything so there is nothing for reader.
+
+    // If the multiple reads for file become a problem, orchestrate reads
+    // through DataOwners that share file content data. Or just non-owning
+    // read-only object.
+}
+
+void MemoryStorage::Value::Own(bool OwnData) {
+    for (auto iter : values) {
+        iter.second->Own(OwnData);
     }
-    assert(0); // Should never reach this.
 }
 
 
-MemoryStorage::Values::Values(const char *const Format, RawData& Data) {
-    data.push_back(std::shared_ptr<FormatData>(new FormatData(Format, Data)));
-}
-
-MemoryStorage::Values::~Values() {
-}
-
-bool MemoryStorage::Values::IsPresent(const std::string& Format) {
-    for (size_t k = 0; k < data.size(); ++k)
-        if (data[k]->format == Format) {
-            auto dc = data[k]->CheckDataConversion();
-            return dc.second == nullptr;
-        }
+bool MemoryStorage::del(const StringValue& L) {
+    auto iter = label2data.find(L);
+    if (iter != label2data.end()) {
+        std::unique_lock<std::mutex> value_lock(iter->second->Mutex());
+        iter->second->Own(true);
+        value_lock.unlock();
+        label2data.erase(iter);
+        return true;
+    }
     return false;
 }
 
-std::vector<std::string> MemoryStorage::Values::AvailableFormats() const {
-    std::vector<std::string> results;
-    for (size_t k = 0; k < data.size(); ++k)
-        if (data[k]->data) // Ignore data that is being converted.
-            results.push_back(data[k]->format);
-    return results;
+MemoryStorage::MemoryStorage() {
 }
 
-std::shared_ptr<const RawData> MemoryStorage::Values::Get(
-    const std::string& Format)
-{
-    for (size_t k = 0; k < data.size(); ++k)
-        if (data[k]->format == Format) {
-            auto dc = data[k]->CheckDataConversion();
-            return dc.first;
-        }
-    return nullptr;
-}
-
-std::shared_ptr<const RawData> MemoryStorage::Values::Get(
-    const std::string& Format) const
-{
-    for (size_t k = 0; k < data.size(); ++k)
-        if (data[k]->format == Format)
-            return data[k]->data;
-    return nullptr;
-}
-
-std::pair<bool,std::shared_ptr<ConversionResult>>
-MemoryStorage::Values::Receiver(const std::string& Format) {
-    for (size_t k = 0; k < data.size(); ++k)
-        if (data[k]->format == Format) {
-            auto dc = data[k]->CheckDataConversion();
-            return std::make_pair(false, dc.second);
-        }
-    // There was no matching format.
-    data.push_back(std::shared_ptr<FormatData>(new FormatData(Format.c_str())));
-    return std::make_pair(true, data.back()->receiver);
-}
-
-std::shared_ptr<const RawData> MemoryStorage::find_source(
-    std::shared_ptr<MemoryStorage::Values>& Value,
-    const std::string& Destination, std::string& SourceFormat)
-{
-    auto available = Value->AvailableFormats();
-    auto order = converter.PreferredConversionSourceFormats(Destination);
-    for (size_t idx = 0; idx < order.size(); ++idx)
-        for (size_t n = 0; n < available.size(); ++n) {
-            if (order[idx] != available[n])
-                continue;
-            SourceFormat = order[idx];
-            return Value->Get(order[idx]);
-        }
-    return nullptr;
-}
-
-std::pair<std::shared_ptr<MemoryStorage::Values>,std::unique_lock<std::mutex>>
-MemoryStorage::get(const StringValue& L)
-{
-    std::unique_lock<std::mutex> lock(label2data_mutex);
-    auto iter = label2data.find(L);
-    if (iter != label2data.end())
-        return std::make_pair(
-            iter->second, std::unique_lock<std::mutex>(iter->second->Mutex()));
-    lock.unlock();
-    return std::make_pair(std::shared_ptr<MemoryStorage::Values>(),
-        std::unique_lock<std::mutex>());
-}
-
-MemoryStorage::MemoryStorage(size_t UsedMegabyteLimit, size_t FreeMegabyteLimit)
-    : used_limit(UsedMegabyteLimit), free_limit(FreeMegabyteLimit)
-{ }
-
-MemoryStorage::~MemoryStorage() {
-}
+MemoryStorage::~MemoryStorage() { }
 
 bool MemoryStorage::IsValid() const {
     return true;
@@ -165,121 +113,63 @@ std::vector<std::tuple<StringValue,std::string,size_t>> MemoryStorage::List() co
     std::lock_guard<std::mutex> lock(label2data_mutex);
     for (auto iter : label2data) {
         std::lock_guard<std::mutex> value_lock(iter.second->Mutex());
-        std::vector<std::string> avail = iter.second->AvailableFormats();
-        for (auto format : avail) {
-            std::shared_ptr<const RawData> data = iter.second->Get(format);
-            results.push_back(
-                std::make_tuple(iter.first, format, data->Size()));
+        const auto avail = iter.second->Values();
+        for (const auto format_data : avail) {
+            results.push_back(std::make_tuple(
+                iter.first, format_data.first, format_data.second->Size()));
         }
     }
     return results;
 }
 
-void MemoryStorage::Store(const StringValue& L, const char *const Format,
-    RawData& Data)
-{
-    std::shared_ptr<MemoryStorage::Values> val(
-        new MemoryStorage::Values(Format, Data));
+bool MemoryStorage::Delete(const StringValue& L, Output* AlreadyNotified) {
     std::lock_guard<std::mutex> lock(label2data_mutex);
-    label2data[L] = val;
-}
-
-bool MemoryStorage::Delete(const StringValue& L) {
-    std::lock_guard<std::mutex> lock(label2data_mutex);
-    auto iter = label2data.find(L);
-    if (iter != label2data.end()) {
-        label2data.erase(iter);
+    if (del(L)) {
+        std::lock_guard<std::mutex> lock(GloballyMessageableOutputs.Mutex());
+        for (Output* out : GloballyMessageableOutputs.Outputs())
+            if (out != AlreadyNotified)
+                Message(*out, "deleted", L.String().c_str());
         return true;
     }
     return false;
 }
 
-void MemoryStorage::Clean() {
-    // Nothing to do as user can not mess up with memory.
-}
-
-bool MemoryStorage::Preload(const StringValue& L, const char *const Format)
-{
-    auto vl = get(L);
-    if (!vl.first)
-        return false; // There is no such label.
-    std::shared_ptr<MemoryStorage::Values>& v = vl.first;
-    std::string fmt(Format);
-    if (v->IsPresent(fmt))
-        return true;
-    auto cr = v->Receiver(fmt);
-    if (!cr.first)
-        return true; // Already being converted.
-    std::string source_format;
-    std::shared_ptr<const RawData> source = find_source(v, fmt, source_format);
-    if (source) {
-        converter.Convert(source, source_format, Format, cr.second);
-        return true;
-    }
-    // No way to get source, now anyway. Could only happen if chain is needed.
-    return false;
-}
-
-bool MemoryStorage::IsReady(const StringValue& L, const char *const Format)
-{
-    std::string fmt(Format);
-    auto vl = get(L);
-    return vl.first && vl.first->IsPresent(fmt);
-}
-
-std::shared_ptr<const RawData> MemoryStorage::Data(const StringValue& L,
-    const char *const Format)
-{
-    std::string fmt(Format);
-    auto vl = get(L);
-    if (!vl.first)
-        return std::shared_ptr<const RawData>(); // No such label.
-    std::shared_ptr<MemoryStorage::Values>& v = vl.first;
-    std::shared_ptr<const RawData> rd = v->Get(fmt);
-    if (rd)
-        return rd;
-    auto cr = v->Receiver(fmt);
-    // If this is first request or conversion has not started, convert now.
-    std::unique_lock<std::mutex> lock(cr.second->Mutex());
-    if (cr.first || !cr.second->Started()) {
-        std::string src_format;
-        std::shared_ptr<const RawData> source = find_source(v, fmt, src_format);
-        vl.second.unlock();
-        if (!source)
-            return nullptr; // Cannot get value.
-        cr.second->Start();
-        lock.unlock();
-        RawData* rd = converter.Convert(source, src_format, Format);
-        lock.lock();
-        cr.second->Set(rd);
-        lock.unlock();
-        vl.second.lock();
-        return v->Get(fmt);
+void MemoryStorage::Add(DataGroup& G, Output* AlreadyNotified) {
+    std::vector<std::string> labels;
+    std::unique_lock<std::mutex> lock(label2data_mutex);
+    while (true) {
+        auto label_data = G.Get();
+        if (label_data.second == nullptr)
+            return;
+        del(label_data.first);
+        label_data.second->Own(false);
+        label2data[label_data.first] = std::shared_ptr<Value>(
+            new MemoryStorage::Value(G.Format(), label_data.second));
+        labels.push_back(label_data.first);
     }
     lock.unlock();
-    // Wait for conversion to finish. Then return the result.
-    vl.second.unlock();
-    while (!rd) {
-        struct timespec ts;
-        ts.tv_sec = 0;
-        ts.tv_nsec = 10000000;
-        nanosleep(&ts, nullptr);
-        vl.second.lock();
-        rd = v->Get(fmt);
-        vl.second.unlock();
-    }
-    return rd;
+    std::lock_guard<std::mutex> msg_lock(GloballyMessageableOutputs.Mutex());
+    for (Output* out : GloballyMessageableOutputs.Outputs())
+        if (out != AlreadyNotified)
+            ListMessage(*out, "stored", labels);
 }
 
-std::shared_ptr<const RawData> MemoryStorage::ReadyData(
-    const StringValue& L, const char *const Format)
+void MemoryStorage::Prepare(const char *const Format,
+    std::vector<std::shared_ptr<ProcessInput>>& Inputs)
 {
     std::string fmt(Format);
-    auto vl = get(L);
-    if (!vl.first)
-        return std::shared_ptr<const RawData>(); // No such label.
-    std::shared_ptr<const RawData> rd = vl.first->Get(fmt);
-    if (rd)
-        return rd;
-    return std::shared_ptr<const RawData>(); // Data not ready.
+    std::lock_guard<std::mutex> lock(label2data_mutex);
+    for (auto iter : Inputs) {
+        if (iter->Label() == nullptr)
+            continue; // This one has direct value and is ok already.
+        auto source = label2data.find(*(iter->Label()));
+        if (source == label2data.end())
+            continue; // Missing data will trigger caller to report error.
+        std::lock_guard<std::mutex> value_lock(source->second->Mutex());
+        iter->SetData(source->second->Find(fmt));
+    }
+}
+
+DataOwner* MemoryStorage::Generate() {
+    return new MemoryOwner();
 }

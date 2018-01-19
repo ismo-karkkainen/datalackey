@@ -21,7 +21,8 @@ public:
     ListCommand(const char *const Name, Output& Out, const Storage& S);
     ~ListCommand();
 
-    void Perform(const SimpleValue& Id, std::vector<SimpleValue*>& Arguments);
+    void Perform(const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 #endif /* ListCommand_hpp */

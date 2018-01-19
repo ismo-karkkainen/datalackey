@@ -12,19 +12,19 @@
 #include "StringValueMapper.hpp"
 #include <string>
 #include <map>
+#include <memory>
 
 
 class StringValueMapperSimple : public StringValueMapper {
 private:
-    std::map<StringValue, StringValue*> map;
+    std::map<StringValue, std::shared_ptr<StringValue>> map;
     std::string prefix, postfix;
 
 public:
     StringValueMapperSimple(
         const std::string& Prefix, const std::string& Postfix);
-    ~StringValueMapperSimple();
 
-    bool Map(const StringValue& From, const SimpleValue* To);
+    bool Map(const StringValue& From, std::shared_ptr<SimpleValue>& To);
 
     StringValue operator[](const StringValue& Value) const;
 };

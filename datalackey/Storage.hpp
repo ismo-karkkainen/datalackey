@@ -9,21 +9,17 @@
 #ifndef Storage_hpp
 #define Storage_hpp
 
-#include "RawData.hpp"
 #include "StringValue.hpp"
+#include "DataGroup.hpp"
+#include "ProcessInput.hpp"
+#include "Output.hpp"
 #include <memory>
-#include <string>
 #include <vector>
 #include <tuple>
 
 
 // Base class for Storage classes.
 class Storage {
-    // Make id number.
-    // Convert number to char string and split to directories.
-    // Get unique file name.
-    // Save data when changed.
-
 public:
     virtual ~Storage();
 
@@ -32,38 +28,13 @@ public:
     // Return label, format, size in bytes.
     virtual std::vector<std::tuple<StringValue,std::string,size_t>> List() const = 0;
 
-    virtual void Store(const StringValue& L, const char *const Format,
-        RawData& Value) = 0;
-    void Store(const StringValue& L, const std::string& Format,
-        RawData& Value);
-    virtual bool Delete(const StringValue& L) = 0;
-    virtual void Clean() = 0;
+    virtual bool Delete(const StringValue& L, Output* AlreadyNotified = nullptr) = 0;
 
-    // Pre-load a value.
-    virtual bool Preload(const StringValue& L, const char *const Format) = 0;
-    bool Preload(const StringValue& L, const std::string& Format);
+    virtual void Add(DataGroup& G, Output* AlreadyNotified = nullptr) = 0;
 
-    virtual bool IsReady(const StringValue& L, const char *const Format) = 0;
-    bool IsReady(const StringValue& L, const std::string& Format);
-
-    // Return the value.
-    virtual std::shared_ptr<const RawData> Data(const StringValue& L,
-        const char *const Format) = 0;
-    std::shared_ptr<const RawData> Data(const StringValue& L,
-        const std::string& Format);
-
-    // Return the value only if ready, no conversion done or started.
-    virtual std::shared_ptr<const RawData> ReadyData(const StringValue& L,
-        const char *const Format) = 0;
-    std::shared_ptr<const RawData> ReadyData(const StringValue& L,
-        const std::string& Format);
+    virtual void Prepare(const char *const Format,
+        std::vector<std::shared_ptr<ProcessInput>>& Inputs) = 0;
 };
 
 
 #endif /* Storage_hpp */
-
-/*
- Varasto tarvitaan aina tai ainakin hakemiston tarkistus joten varasto pitää 
- alustaa sen verran mutta datan lataus voisi olla vain tarvittaessa.
- - Varaston pitäisi pitää huolta, että vain yksi prosessi pääsee käsittelemään.
- */

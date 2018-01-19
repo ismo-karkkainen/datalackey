@@ -23,7 +23,7 @@ VersionCommand::~VersionCommand() {
 }
 
 void VersionCommand::Perform(
-    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     // An array with output identifier and labels.
     if (!Arguments.empty()) {

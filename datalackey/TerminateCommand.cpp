@@ -20,14 +20,14 @@ TerminateCommand::~TerminateCommand() {
 }
 
 void TerminateCommand::Perform(
-    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     // An array with process identifiers.
     if (Arguments.empty()) {
         Error(out, Id, "argument", "missing");
         return;
     }
-    std::vector<SimpleValue*> terminated, missing;
+    std::vector<std::shared_ptr<SimpleValue>> terminated, missing;
     for (auto arg : Arguments) {
         if (processes.Terminate(*arg))
             terminated.push_back(arg);

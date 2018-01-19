@@ -20,6 +20,7 @@
 #include "Output.hpp"
 #include "Storage.hpp"
 #include "StringValueMapperSimple.hpp"
+#include "ProcessInput.hpp"
 #include <vector>
 #include <string>
 #include <unistd.h>
@@ -55,15 +56,14 @@ private:
     // Values obtained via constructor.
     Processes* owner;
     Output& out;
+    bool controller;
     Storage& storage;
     SimpleValue* id;
     std::string program_name;
     std::vector<std::string> args;
     std::vector<std::string> env;
     std::vector<std::string> input_info;
-    std::queue<
-        std::tuple<StringValue, std::shared_ptr<const RawData>, std::string>>
-            label_data_name;
+    std::vector<std::shared_ptr<ProcessInput>>& inputs;
     std::vector<std::vector<std::string>> outputs_info;
     StringValueMapperSimple* renamer;
 
@@ -80,20 +80,19 @@ private:
     std::thread* worker;
     bool running, terminate;
 
-    void real_runner();
+    bool real_runner();
     void runner();
 
 public:
     // Probably does simple conversions.
     // Top-level pointer ownership transfers.
     LocalProcess(Processes* Owner,
-        Output& StatusOut, Storage& S, const SimpleValue& Id,
+        Output& StatusOut, bool Controller, Storage& S, const SimpleValue& Id,
         const std::string& ProgramName,
         const std::vector<std::string>& Arguments,
         const std::map<std::string,std::string>& Environment,
         const std::vector<std::string>& InputInfo,
-        std::shared_ptr<std::vector<std::tuple<StringValue, std::shared_ptr<const RawData>, std::string>>> LabelDataName,
-        const std::vector<std::pair<SimpleValue*,std::string>>& ValueName,
+        std::vector<std::shared_ptr<ProcessInput>>& Inputs,
         const std::vector<std::vector<std::string>>& OutputsInfo,
         StringValueMapperSimple* Renamer);
 

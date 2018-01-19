@@ -19,18 +19,18 @@ DeleteCommand::~DeleteCommand() {
 }
 
 void DeleteCommand::Perform(
-    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
         Error(out, Id, "argument", "missing");
         return;
     }
-    std::vector<SimpleValue*> deleted, missing, invalid;
+    std::vector<std::shared_ptr<SimpleValue>> deleted, missing, invalid;
     for (auto arg : Arguments) {
-        StringValue* label(dynamic_cast<StringValue*>(arg));
+        StringValue* label(dynamic_cast<StringValue*>(arg.get()));
         if (label != nullptr) {
-            if (storage.Delete(*label))
+            if (storage.Delete(*label, &out))
                 deleted.push_back(arg);
             else
                 missing.push_back(arg);

@@ -120,14 +120,58 @@ void Feed(OutputItem& Writer, const SimpleValue& Id) {
     assert(false);
 }
 
-void ListMessage(Output& Out, const SimpleValue& Id, const char *const one,
-    std::vector<SimpleValue*>& List)
+static void ListMessage(Output& Out, const SimpleValue* Id,
+    const char *const one, std::vector<std::shared_ptr<SimpleValue>>& List)
 {
-    std::unique_ptr<OutputItem> writer(Out.Writable(IsNullValue(&Id)));
+    std::unique_ptr<OutputItem> writer(
+        Out.Writable(Id != nullptr && IsNullValue(Id)));
     *writer << Array;
-    Feed(*writer, Id);
+    if (Id == nullptr)
+        *writer << Structure::Null;
+    else
+        Feed(*writer, *Id);
     *writer << ValueRef<std::string>(one);
     for (auto arg : List)
         Feed(*writer, *arg);
     *writer << End;
+}
+
+static void ListMessage(Output& Out, const SimpleValue* Id,
+    const char *const one, std::vector<std::string>& List)
+{
+    std::unique_ptr<OutputItem> writer(
+        Out.Writable(Id != nullptr && IsNullValue(Id)));
+    *writer << Array;
+    if (Id == nullptr)
+        *writer << Structure::Null;
+    else
+        Feed(*writer, *Id);
+    *writer << ValueRef<std::string>(one);
+    for (auto arg : List)
+        *writer << ValueRef<std::string>(arg);
+    *writer << End;
+}
+
+void ListMessage(Output& Out, const SimpleValue& Id, const char *const one,
+    std::vector<std::shared_ptr<SimpleValue>>& List)
+{
+    ListMessage(Out, &Id, one, List);
+}
+
+void ListMessage(Output& Out, const SimpleValue& Id, const char *const one,
+    std::vector<std::string>& List)
+{
+    ListMessage(Out, &Id, one, List);
+}
+
+void ListMessage(Output& Out, const char *const one,
+    std::vector<std::shared_ptr<SimpleValue>>& List)
+{
+    ListMessage(Out, nullptr, one, List);
+}
+
+void ListMessage(Output& Out, const char *const one,
+    std::vector<std::string>& List)
+{
+    ListMessage(Out, nullptr, one, List);
 }

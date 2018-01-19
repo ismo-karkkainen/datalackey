@@ -18,7 +18,7 @@ NoOperationCommand::~NoOperationCommand() {
 }
 
 void NoOperationCommand::Perform(
-    const SimpleValue& Id, std::vector<SimpleValue*>& Arguments)
+    const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     Message(out, Id);
 }

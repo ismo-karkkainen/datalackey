@@ -16,8 +16,6 @@ echo ':'
 echo '"value"'
 echo '}'
 echo '{ "label2": 13 }'
-echo '[ "message in a\\\\nscript"'
-echo ']'
 echo '{ "label3": 31 }'
 EOF
 chmod a+x _script.sh
@@ -35,7 +33,6 @@ rm -f _script.sh
 cat > $EXP <<EOF
 [1,"stored","mapped","JSON"]
 [1,"stored","pre-label2-post","JSON"]
-[1,["message in a\\nscript"]]
 [1,"stored","pre-label3-post","JSON"]
 [1,"exit",0]
 [1,"finished"]

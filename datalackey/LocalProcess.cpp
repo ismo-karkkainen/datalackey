@@ -18,7 +18,7 @@
 #include "MessageRawJSON.hpp"
 #include "InputScannerDiscard.hpp"
 #include "InputScannerRawMessage.hpp"
-#include "MessagePassThrough.hpp"
+#include "CommandHandlerJSON.hpp"
 #include "Value_t.hpp"
 #include "Number_t.hpp"
 #include "NumberValue.hpp"
@@ -98,7 +98,7 @@ LocalProcess::ChildState LocalProcess::get_child_state(ChildState Previous) {
     return Previous; // Something missed in switch?
 }
 
-void LocalProcess::real_runner() {
+bool LocalProcess::real_runner() {
     // Create pipes for standard I/O, as needed.
     bool uses_stdin = false;
     if (!input_info.empty()) {
@@ -110,14 +110,14 @@ void LocalProcess::real_runner() {
     for (int k = 0; k < 2; ++k) {
         if (-1 == pipe(stdouterr_child[k])) {
             Error(out, *id, "failure", "pipe");
-            return;
+            return false;
         }
     }
     if (uses_stdin) {
         errno = 0;
         if (-1 == pipe(stdin_child)) {
             Error(out, *id, "failure", "pipe");
-            return;
+            return false;
         }
         fcntl(stdin_child[1], F_SETNOSIGPIPE);
         child_input = new FileDescriptorOutput(stdin_child[1]);
@@ -133,21 +133,21 @@ void LocalProcess::real_runner() {
         if (settings[1] == "stdout") {
             if (used_std[0]) {
                 Error(out, *id, "duplicate", "stdout");
-                return;
+                return false;
             }
             ic = new FileDescriptorInput(stdouterr_child[0][0]);
             used_std[0] = true;
         } else if (settings[1] == "stderr") {
             if (used_std[1]) {
                 Error(out, *id, "duplicate", "stderr");
-                return;
+                return false;
             }
             ic = new FileDescriptorInput(stdouterr_child[1][0]);
             used_std[1] = true;
         }
         if (settings[0] == "JSON") {
             if (!strcmp(out.Format(), "JSON")) {
-                mh = new MessagePassThrough(out, *id);
+                mh = new CommandHandlerJSON(out);
                 sds = new StorageDataSinkJSON(storage, id, out, renamer);
                 is = new InputScannerJSON(*ic, *mh, *sds, out, id);
             } else
@@ -169,9 +169,11 @@ void LocalProcess::real_runner() {
         if (used_std[k])
             continue;
         InputChannel* ic = new FileDescriptorInput(stdouterr_child[k][0]);
-        MessageHandler* mh = new MessagePassThrough(out, *id);
+        // Input is discarded so only matching format matters.
+        MessageHandler* mh = nullptr;
         StorageDataSink* sds = nullptr;
         if (!strcmp(out.Format(), "JSON")) {
+            mh = new MessageRawJSON(out, *id);
             sds = new StorageDataSinkJSON(storage, id, out);
         } else
             assert(false);
@@ -198,7 +200,7 @@ void LocalProcess::real_runner() {
                 Error(out, *id, "no-processes");
             else if (err == ENOMEM)
                 Error(out, *id, "no-memory");
-            return;
+            return false;
         }
         if (stdin_child[0] != -1)
             close(stdin_child[0]);
@@ -211,7 +213,8 @@ void LocalProcess::real_runner() {
     } else {
         // In child process.
         // Connect pipe ends to standard I/O.
-        int addrs[3] = { stdin_child[0], stdouterr_child[0][1], stdouterr_child[1][1] };
+        int addrs[3] = {
+            stdin_child[0], stdouterr_child[0][1], stdouterr_child[1][1] };
         for (int k = 0; k < 3; ++k) {
             if (addrs[k] != -1) {
                 close(k);
@@ -222,7 +225,8 @@ void LocalProcess::real_runner() {
         }
         // Start new process.
         errno = 0;
-        execve(program_name.c_str(), (char *const *)argv_ptrs, (char *const *)env_ptrs);
+        execve(program_name.c_str(), (char *const *)argv_ptrs,
+            (char *const *)env_ptrs);
         // The call above failed if we reach this point.
         int err = errno;
         switch (err) {
@@ -242,22 +246,31 @@ void LocalProcess::real_runner() {
         }
         exit(54); // Something else.
     }
-    if (child_input_enc != nullptr) { // If we are sending anything.
-        child_feed = new Output(*child_input_enc, *child_input);
-        child_writer = child_feed->Writable();
-        *child_writer << Dictionary;
-    }
+    if (child_input_enc != nullptr)
+        child_feed = new Output(*child_input_enc, *child_input, controller);
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
     // This is data to be sent. It is passed in pieces to prioritize reading.
+    size_t input_index = 0;
+    if (!inputs.empty()) {
+        if (!inputs[0]->Data()->StartRead()) {
+            Error(out, *id, "input", "error");
+            return true;
+        }
+        child_writer = child_feed->Writable();
+        *child_writer << Dictionary;
+    }
     std::shared_ptr<const RawData> rd;
     size_t written = 0;
     // The value below is a good guess. On some OSes it could be queried and
     // the pipe buffer sizes set depending on how much data we appear to have.
     size_t slice_size = 32768; // Max amount written at once.
     while (child_state != None || scanning) {
+        ChildState prev = child_state;
         child_state = get_child_state(child_state);
-        // Scan for child output. Is there anything if child quit?
+        if (prev != child_state && child_state == None && child_feed != nullptr)
+            child_feed->NoGlobalMessages();
+        // Scan for child output.
         scanning = false;
         for (auto& output : child_output) {
             if (!output)
@@ -271,7 +284,7 @@ void LocalProcess::real_runner() {
         }
         if (scanning)
             continue; // Child may be blocked sending data so avoid write now.
-        if (child_state == Running && !label_data_name.empty()) {
+        if (child_state == Running && input_index < inputs.size()) {
             // Feed a bit of data.
             if (rd) { // We have data so send next slice.
                 size_t left = rd->Size() - written;
@@ -281,38 +294,39 @@ void LocalProcess::real_runner() {
                     rd->CBegin() + written, rd->CBegin() + written + left);
                 if (written + left == rd->Size()) // Reached end.
                     rd = nullptr;
+                written += left;
             } else { // We need new data to send.
-                // Get new data and either write all or first slice.
-                StringValue s("");
-                std::string n;
-                std::tie(s, rd, n) = label_data_name.front();
-                label_data_name.pop();
-                if (!rd)
-                    rd = storage.ReadyData(s, input_info[0].c_str());
-                if (rd) { // Has data, pass on.
-                    *child_writer << ValueRef<std::string>(n)
-                        << RawItem;
-                    written = rd->Size();
-                    if (slice_size < written)
-                        written = slice_size;
-                    child_writer->Write(rd->CBegin(), rd->CBegin() + written);
-                    if (written == rd->Size())
-                        rd = nullptr;
-                } else {
-                    // Puts back to the queue for check later.
-                    label_data_name.push(std::make_tuple(s, rd, n));
+                written = 0;
+                rd = inputs[input_index]->Data()->Read(1048768);
+                if (rd == nullptr) {
+                    inputs[input_index]->Data()->FinishRead();
+                    if (inputs[input_index]->Data()->Error()) {
+                        Error(out, *id, "input", "error");
+                        return true;
+                    }
+                    inputs[input_index] = nullptr;
+                    ++input_index;
+                    if (input_index < inputs.size()) {
+                        if (!inputs[input_index]->Data()->StartRead()) {
+                            Error(out, *id, "input", "error");
+                            return true;
+                        }
+                        *child_writer << ValueRef<std::string>(
+                            inputs[input_index]->Name()->String())
+                            << RawItem;
+                    } else {
+                        *child_writer << End;
+                        delete child_writer;
+                        child_writer = nullptr;
+                    }
                 }
-            }
-            if (!rd && label_data_name.empty()) {
-                *child_writer << End;
-                delete child_writer;
-                child_writer = nullptr;
             }
             continue;
         }
         // Child is alive, scanned nothing, wrote nothing.
         Nap(20000000); // 20 ms.
     }
+    return false;
 }
 
 void LocalProcess::runner() {
@@ -320,7 +334,11 @@ void LocalProcess::runner() {
     stdouterr_child[0][0] = stdouterr_child[0][1] =
         stdouterr_child[1][0] = stdouterr_child[1][1] = -1;
     running = true;
-    real_runner();
+    if (real_runner()) {
+        kill(); // We failed to send all input.
+    }
+    if (child_feed)
+        child_feed->NoGlobalMessages();
     running = false;
     child_output.clear();
     delete child_writer;
@@ -339,54 +357,24 @@ void LocalProcess::runner() {
 }
 
 LocalProcess::LocalProcess(Processes* Owner,
-    Output& StatusOut, Storage& S, const SimpleValue& Id,
+    Output& StatusOut, bool Controller, Storage& S, const SimpleValue& Id,
     const std::string& ProgramName,
     const std::vector<std::string>& Arguments,
     const std::map<std::string,std::string>& Environment,
     const std::vector<std::string>& InputInfo,
-    std::shared_ptr<std::vector<std::tuple<StringValue, std::shared_ptr<const RawData>, std::string>>> LabelDataName,
-    const std::vector<std::pair<SimpleValue*,std::string>>& ValueName,
+    std::vector<std::shared_ptr<ProcessInput>>& Inputs,
     const std::vector<std::vector<std::string>>& OutputsInfo,
     StringValueMapperSimple* Renamer)
     : child_input_enc(nullptr), child_input(nullptr), child_feed(nullptr),
     child_writer(nullptr),
-    owner(Owner), out(StatusOut), storage(S), id(Id.Clone()),
-    program_name(ProgramName), args(Arguments), input_info(InputInfo),
+    owner(Owner), out(StatusOut), controller(Controller), storage(S),
+    id(Id.Clone()), program_name(ProgramName), args(Arguments),
+    input_info(InputInfo), inputs(Inputs),
     outputs_info(OutputsInfo), renamer(Renamer),
     pid(0), worker(nullptr), running(false), terminate(false)
 {
     for (auto iter : Environment)
         env.push_back(iter.first + "=" + iter.second);
-
-    // Turn input values into data and put into queue with stored data.
-    if (!input_info.empty()) {
-        Encoder* enc = nullptr;
-        if (input_info[0] == "JSON")
-            enc = new JSONEncoder();
-        else
-            assert(false);
-        for (auto& vn : ValueName) {
-            std::shared_ptr<RawData> value(new RawData());
-            if (IsStringValue(vn.first))
-                enc->Encode(*value, ValueRef<std::string>(vn.first->String()));
-            else {
-                if (IsNumberValue(vn.first))
-                    enc->Encode(
-                        *value, NumberRef<long long int>(vn.first->Number()));
-                else {
-                    if (IsNullValue(vn.first))
-                        enc->Encode(*value, Null);
-                    else
-                        assert(false);
-                }
-            }
-            label_data_name.push(
-                std::make_tuple(StringValue(), value, vn.second));
-        }
-        delete enc;
-        for (auto& ldn : *LabelDataName)
-            label_data_name.push(ldn);
-    }
 }
 
 LocalProcess::~LocalProcess() {

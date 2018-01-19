@@ -14,20 +14,15 @@ StringValueMapperSimple::StringValueMapperSimple(
     : prefix(Prefix), postfix(Postfix)
 { }
 
-StringValueMapperSimple::~StringValueMapperSimple() {
-    for (auto iter : map)
-        delete iter.second;
-}
-
 bool StringValueMapperSimple::Map(
-    const StringValue& From, const SimpleValue* To)
+    const StringValue& From, std::shared_ptr<SimpleValue>& To)
 {
-    StringValue* sv = nullptr;
-    if (IsStringValue(To))
-        sv = dynamic_cast<StringValue*>(To->Clone());
-    auto result = map.insert(std::pair<StringValue,StringValue*>(From, sv));
-    if (!result.second)
-        delete sv;
+    std::shared_ptr<StringValue> sv;
+    if (IsStringValue(To.get()))
+        sv = std::shared_ptr<StringValue>(
+            dynamic_cast<StringValue*>(To->Clone()));
+    auto result = map.insert(
+        std::pair<StringValue,std::shared_ptr<StringValue>>(From, sv));
     return result.second;
 }
 

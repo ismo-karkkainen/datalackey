@@ -17,7 +17,8 @@ public:
     NoOperationCommand(const char *const Name, Output& Out);
     ~NoOperationCommand();
 
-    void Perform(const SimpleValue& Id, std::vector<SimpleValue*>& Arguments);
+    void Perform(const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 #endif /* NoOperationCommand_hpp */
