@@ -16,11 +16,9 @@ class MemoryOwner : public DataOwner {
 private:
     std::shared_ptr<const RawData> data;
     bool finished;
-    bool read;
 
 public:
     MemoryOwner();
-    MemoryOwner(const MemoryOwner& M);
     ~MemoryOwner();
 
     bool Owner() const;
@@ -33,9 +31,9 @@ public:
     void Finish();
 
     size_t Size() const;
-    bool StartRead();
-    std::shared_ptr<const RawData> Read(size_t SuggestedBlockSize);
-    void FinishRead();
+    std::shared_ptr<const RawData> FullData();
+
+    std::shared_ptr<DataReader> Reader(std::shared_ptr<DataOwner>& Owner);
 };
 
 

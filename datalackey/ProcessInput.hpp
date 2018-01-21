@@ -21,7 +21,7 @@ class ProcessInput {
 private:
     std::shared_ptr<SimpleValue> label;
     StringValue* plabel;
-    std::shared_ptr<DataOwner> data;
+    std::shared_ptr<DataReader> data;
     std::shared_ptr<SimpleValue> name;
     StringValue* pname;
 
@@ -35,11 +35,11 @@ public:
 
     // For setting data from label.
     const StringValue* Label() const { return plabel; }
-    void SetData(std::shared_ptr<DataOwner> Data) { data = Data; }
+    void SetData(std::shared_ptr<DataReader> Data) { data = Data; }
 
     // For passing data onwards.
     const StringValue* Name() const { return pname; }
-    std::shared_ptr<DataOwner> Data() { return data; }
+    std::shared_ptr<DataReader> Data() { return data; }
 
     // Needed in case of errors.
     std::shared_ptr<SimpleValue>& SharedLabel() { return label; }

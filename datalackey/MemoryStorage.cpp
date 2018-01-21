@@ -19,22 +19,21 @@ MemoryStorage::Value::Value(
         Format, Data));
 }
 
-std::shared_ptr<DataOwner> MemoryStorage::Value::Find(const std::string& Format)
+std::shared_ptr<DataReader> MemoryStorage::Value::Find(
+    const std::string& Format)
 {
     bool throwaway = false;
     for (auto iter : values)
         if (iter.first == Format) {
             if (iter.second->Finished())
-                return std::shared_ptr<DataOwner>(
-                    new MemoryOwner(*dynamic_cast<MemoryOwner*>(
-                        iter.second.get())));
+                return iter.second->Reader(iter.second);
             throwaway = true;
             break;
         }
 
     // Before CBOR is implemented, we can never get here.
     assert(false);
-    return std::shared_ptr<DataOwner>();
+    return std::shared_ptr<DataReader>();
 
     // If not throwaway then we have to create a MemoryOwner and push it
     // with format to values. Then pass it to conversion object on construction.

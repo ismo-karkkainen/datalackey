@@ -28,7 +28,7 @@ private:
         Value(const std::string& Format, std::shared_ptr<DataOwner> Data);
 
         std::mutex& Mutex() { return mutex; }
-        std::shared_ptr<DataOwner> Find(const std::string& Format);
+        std::shared_ptr<DataReader> Find(const std::string& Format);
         const std::vector<std::pair<std::string,std::shared_ptr<DataOwner>>>
             Values() const { return values; }
         void Own(bool OwnData);

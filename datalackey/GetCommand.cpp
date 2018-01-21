@@ -59,20 +59,14 @@ void GetCommand::Perform(
     *writer << Dictionary; // Start data dictionary.
     std::vector<std::shared_ptr<SimpleValue>> failed;
     for (size_t k = 0; k < results.size(); ++k) {
-        std::shared_ptr<DataOwner> data = results[k]->Data();
+        std::shared_ptr<DataReader> data = results[k]->Data();
         if (!data)
             continue;
-        if (!data->StartRead()) {
-            failed.push_back(results[k]->SharedLabel());
-            results[k] = nullptr;
-            continue;
-        }
         Feed(*writer, *(results[k]->Name()));
         *writer << RawItem;
         // Failure after this messes up the whole thing.
         while (std::shared_ptr<const RawData> block = data->Read(1048576))
             writer->Write(block->CBegin(), block->CEnd());
-        data->FinishRead();
         if (data->Error())
             failed.push_back(results[k]->SharedLabel());
         results[k] = nullptr;

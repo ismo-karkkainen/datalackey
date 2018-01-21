@@ -10,6 +10,7 @@
 #define DataOwner_hpp
 
 #include "RawData.hpp"
+#include "DataReader.hpp"
 #include <memory>
 
 
@@ -17,7 +18,9 @@
 class DataOwner {
 public:
     DataOwner& operator=(const DataOwner&) = delete;
+    DataOwner(const DataOwner&) = delete;
 
+    DataOwner();
     virtual ~DataOwner();
 
     virtual bool Owner() const = 0;
@@ -30,9 +33,10 @@ public:
     virtual void Finish() = 0; // Can not append after this.
 
     virtual size_t Size() const = 0;
-    virtual bool StartRead() = 0;
-    virtual std::shared_ptr<const RawData> Read(size_t SuggestedBlockSize) = 0;
-    virtual void FinishRead() = 0;
+    virtual std::shared_ptr<const RawData> FullData() = 0;
+
+    virtual std::shared_ptr<DataReader> Reader(
+        std::shared_ptr<DataOwner>& Owner) = 0;
 };
 
 

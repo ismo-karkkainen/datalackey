@@ -253,10 +253,6 @@ bool LocalProcess::real_runner() {
     // This is data to be sent. It is passed in pieces to prioritize reading.
     size_t input_index = 0;
     if (!inputs.empty()) {
-        if (!inputs[0]->Data()->StartRead()) {
-            Error(out, *id, "input", "error");
-            return true;
-        }
         child_writer = child_feed->Writable();
         *child_writer << Dictionary;
     }
@@ -297,9 +293,8 @@ bool LocalProcess::real_runner() {
                 written += left;
             } else { // We need new data to send.
                 written = 0;
-                rd = inputs[input_index]->Data()->Read(1048768);
+                rd = inputs[input_index]->Data()->Read(1048576);
                 if (rd == nullptr) {
-                    inputs[input_index]->Data()->FinishRead();
                     if (inputs[input_index]->Data()->Error()) {
                         Error(out, *id, "input", "error");
                         return true;
@@ -307,13 +302,10 @@ bool LocalProcess::real_runner() {
                     inputs[input_index] = nullptr;
                     ++input_index;
                     if (input_index < inputs.size()) {
-                        if (!inputs[input_index]->Data()->StartRead()) {
-                            Error(out, *id, "input", "error");
-                            return true;
-                        }
                         *child_writer << ValueRef<std::string>(
                             inputs[input_index]->Name()->String())
                             << RawItem;
+                        rd = inputs[input_index]->Data()->Read(1048576);
                     } else {
                         *child_writer << End;
                         delete child_writer;

@@ -7,6 +7,7 @@
 //
 
 #include "RawDataOwner.hpp"
+#include "MemoryReader.hpp"
 #include <cassert>
 
 
@@ -50,23 +51,16 @@ size_t RawDataOwner::Size() const {
     return data->Size();
 }
 
-bool RawDataOwner::StartRead() {
+std::shared_ptr<const RawData> RawDataOwner::FullData() {
     assert(finished);
-    read = false;
-    return true;
-}
-
-std::shared_ptr<const RawData> RawDataOwner::Read(size_t SuggestedBlockSize) {
-    assert(finished);
-    if (read)
-        return nullptr;
-    read = true;
     return data;
 }
 
-void RawDataOwner::FinishRead() {
+std::shared_ptr<DataReader> RawDataOwner::Reader(
+    std::shared_ptr<DataOwner>& Owner)
+{
     assert(finished);
-    read = false;
+    return std::shared_ptr<DataReader>(new MemoryReader(Owner));
 }
 
 RawData* RawDataOwner::Raw() {

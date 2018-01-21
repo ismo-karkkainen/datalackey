@@ -7,15 +7,12 @@
 //
 
 #include "MemoryOwner.hpp"
+#include "MemoryReader.hpp"
 #include <cassert>
 
 
 MemoryOwner::MemoryOwner()
-    : data(new RawData()), finished(false), read(false)
-{ }
-
-MemoryOwner::MemoryOwner(const MemoryOwner& M)
-    : data(M.data), finished(true), read(false)
+    : data(new RawData()), finished(false)
 { }
 
 MemoryOwner::~MemoryOwner() { }
@@ -54,21 +51,14 @@ size_t MemoryOwner::Size() const {
     return data->Size();
 }
 
-bool MemoryOwner::StartRead() {
+std::shared_ptr<const RawData> MemoryOwner::FullData() {
     assert(finished);
-    read = false;
-    return true;
-}
-
-std::shared_ptr<const RawData> MemoryOwner::Read(size_t SuggestedBlockSize) {
-    assert(finished);
-    if (read)
-        return nullptr;
-    read = true;
     return data;
 }
 
-void MemoryOwner::FinishRead() {
+std::shared_ptr<DataReader> MemoryOwner::Reader(
+    std::shared_ptr<DataOwner>& Owner)
+{
     assert(finished);
-    read = false;
+    return std::shared_ptr<DataReader>(new MemoryReader(Owner));
 }

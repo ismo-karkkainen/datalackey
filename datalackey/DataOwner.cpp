@@ -9,6 +9,8 @@
 #include "DataOwner.hpp"
 
 
+DataOwner::DataOwner() { }
+
 DataOwner::~DataOwner() { }
 
 DataOwnerGenerator::~DataOwnerGenerator() { }

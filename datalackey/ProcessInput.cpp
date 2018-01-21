@@ -33,7 +33,6 @@ ProcessInput::ProcessInput(std::shared_ptr<SimpleValue>& Value, Encoder* E,
     assert(pname != nullptr);
     Encoder* enc = E->Clone();
     RawDataOwner* rdo = new RawDataOwner();
-    data = std::shared_ptr<DataOwner>(rdo);
     if (IsStringValue(Value.get()))
         enc->Encode(*rdo->Raw(), ValueRef<std::string>(Value->String()));
     else {
@@ -47,4 +46,6 @@ ProcessInput::ProcessInput(std::shared_ptr<SimpleValue>& Value, Encoder* E,
         }
     }
     delete enc;
+    std::shared_ptr<DataOwner> shared(rdo);
+    SetData(rdo->Reader(shared));
 }

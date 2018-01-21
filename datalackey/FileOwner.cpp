@@ -7,6 +7,7 @@
 //
 
 #include "FileOwner.hpp"
+#include "FileReader.hpp"
 #include "Time.hpp"
 #include <unistd.h>
 #include <fcntl.h>
@@ -114,44 +115,11 @@ size_t FileOwner::Size() const {
     return length;
 }
 
-bool FileOwner::StartRead() {
-    assert(finished);
-    if (in_error || !present)
-        return false;
-    // Some other thread may have the file open for reading. Hence wait for it
-    // to finish before reading. Access is via this object and having multiple
-    // reader objects would most likely be an overkill.
-    // There is the storage level with cached data that can provide the same
-    // data to multiple threads passing the data onwards.
-    while (fd != -1)
-        Nap(10000000); // 10 ms.
-    fd = open(full.c_str(), O_RDONLY | O_CLOEXEC);
-    return fd != -1; // If ever false should report to book-keeping.
+std::shared_ptr<const RawData> FileOwner::FullData() {
+    return nullptr;
 }
 
-std::shared_ptr<const RawData> FileOwner::Read(size_t SuggestedBlockSize) {
-    assert(finished);
-    if (in_error || !present || fd == -1)
-        return nullptr;
-    off_t pos = lseek(fd, 0, SEEK_CUR);
-    if (length == pos)
-        return nullptr;
-    if (length - pos < 2 * SuggestedBlockSize)
-        SuggestedBlockSize = length - pos;
-    RawData* result = new RawData();
-    char* buffer = result->Get(SuggestedBlockSize);
-    int got = read(fd, buffer, SuggestedBlockSize);
-    if (got != SuggestedBlockSize) {
-        delete result;
-        result = nullptr;
-        in_error = true;
-    }
-    return std::shared_ptr<const RawData>(result);
-}
-
-void FileOwner::FinishRead() {
-    assert(finished);
-    if (fd != -1)
-        close(fd);
-    fd = -1;
+std::shared_ptr<DataReader> FileOwner::Reader(std::shared_ptr<DataOwner>& Owner)
+{
+    return std::shared_ptr<DataReader>(new FileReader(Owner));
 }

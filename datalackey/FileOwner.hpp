@@ -23,9 +23,6 @@ private:
     bool make_dirs(const std::string& Root, const std::string& dir);
     bool append(RawData::ConstIterator From, RawData::ConstIterator To);
 
-    //friend FileReader;
-    int file_descriptor() const;
-
 public:
     // Opens an existing file.
     FileOwner(const std::string& Root, const std::string& Filename, bool Owned);
@@ -43,9 +40,8 @@ public:
     void Finish();
 
     size_t Size() const;
-    bool StartRead();
-    std::shared_ptr<const RawData> Read(size_t SuggestedBlockSize);
-    void FinishRead();
+    std::shared_ptr<const RawData> FullData();
+    std::shared_ptr<DataReader> Reader(std::shared_ptr<DataOwner>& Owner);
 };
 
 
