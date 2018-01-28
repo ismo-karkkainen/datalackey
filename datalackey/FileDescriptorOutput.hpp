@@ -21,9 +21,9 @@ public:
     FileDescriptorOutput(int FileDescriptor);
     ~FileDescriptorOutput();
 
-    OutputChannel& operator<<(const RawData& Buffer);
-    void Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
+    size_t Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
     void Flush();
+    void Close();
     bool Failed() const;
 };
 

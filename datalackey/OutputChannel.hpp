@@ -17,11 +17,13 @@
 class OutputChannel {
 public:
     virtual ~OutputChannel();
-    virtual OutputChannel& operator<<(const RawData& Buffer) = 0;
-    virtual void Write(
+
+    // Returns how much was written.
+    virtual size_t Write(
         RawData::ConstIterator& Start, RawData::ConstIterator& End) = 0;
     virtual void Flush() = 0;
-    // Return true if previous write operation failed.
+    virtual void Close() = 0;
+    // Return true if previous write operation failed. Also if closed.
     virtual bool Failed() const = 0;
 };
 

@@ -13,10 +13,13 @@
 #include "Storage.hpp"
 #include "Process.hpp"
 #include "SimpleValue.hpp"
+#include "ProcessInput.hpp"
 #include <map>
 #include <memory>
 #include <stack>
 #include <thread>
+#include <vector>
+#include <utility>
 
 
 class LocalProcesses : public Processes {
@@ -29,6 +32,10 @@ private:
     std::stack<SimpleValue*> to_delete;
     mutable std::mutex to_delete_mutex;
 
+    std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> feed(
+        Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Parameters, Encoder* E);
+
 public:
     LocalProcesses(Storage& S);
     ~LocalProcesses();
@@ -39,6 +46,8 @@ public:
     std::vector<std::tuple<SimpleValue*,pid_t>> List() const;
     bool Terminate(const SimpleValue& Id);
     void Run(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Parameters);
+    void Feed(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Parameters);
 
     void HasFinished(const SimpleValue& Id);

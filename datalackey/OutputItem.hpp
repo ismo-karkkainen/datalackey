@@ -14,7 +14,7 @@
 #include "RawData.hpp"
 
 
-// Base class for writer and discarder classes.
+// Base class for internal buffer writer and discarder classes.
 class OutputItem {
 public:
     virtual ~OutputItem();

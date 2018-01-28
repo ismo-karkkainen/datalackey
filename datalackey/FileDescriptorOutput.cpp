@@ -8,6 +8,7 @@
 
 #include "FileDescriptorOutput.hpp"
 #include <unistd.h>
+#include <cerrno>
 
 FileDescriptorOutput::FileDescriptorOutput(int FileDescriptor)
     : failed(false), fd(FileDescriptor)
@@ -15,26 +16,30 @@ FileDescriptorOutput::FileDescriptorOutput(int FileDescriptor)
 
 FileDescriptorOutput::~FileDescriptorOutput() { }
 
-OutputChannel& FileDescriptorOutput::operator<<(const RawData& Buffer) {
-    if (!failed) {
-        if (-1 == write(fd, Buffer.Raw(), Buffer.Size()))
-            failed = true;
-    }
-    return *this;
-}
-
-void FileDescriptorOutput::Write(
+size_t FileDescriptorOutput::Write(
     RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
     if (!failed) {
-        if (-1 == write(fd, &(*Start), End - Start))
-            failed = true;
+        errno = 0;
+        ssize_t result = write(fd, &(*Start), End - Start);
+        int err = errno;
+        if (result == -1) {
+            failed = err != EAGAIN;
+            return 0;
+        }
+        return result;
     }
+    return 0;
 }
 
 void FileDescriptorOutput::Flush() {
     if (!failed)
         fsync(fd);
+}
+
+void FileDescriptorOutput::Close() {
+    close(fd);
+    failed = true;
 }
 
 bool FileDescriptorOutput::Failed() const {

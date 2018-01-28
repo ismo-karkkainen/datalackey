@@ -18,6 +18,7 @@
 #include "LocalProcesses.hpp"
 #include "ProcessesCommand.hpp"
 #include "RunCommand.hpp"
+#include "FeedCommand.hpp"
 #include "TerminateCommand.hpp"
 #include "NoOperationCommand.hpp"
 #include "MemoryStorage.hpp"
@@ -126,6 +127,8 @@ int main(int argc, char** argv) {
     command_handler->AddCommand(&processes);
     RunCommand run("run", *out, *procs);
     command_handler->AddCommand(&run);
+    FeedCommand feed("feed", *out, *procs);
+    command_handler->AddCommand(&feed);
     TerminateCommand terminate("terminate", *out, *procs);
     command_handler->AddCommand(&terminate);
     NoOperationCommand noop("no-op", *out);

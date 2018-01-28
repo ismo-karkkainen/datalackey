@@ -15,7 +15,7 @@
 class RawData {
 private:
     std::vector<char> buffer;
-    // Keep track of how much we have used previously for smarter clearing.
+    // Keep track of how much we have used previously for smarter clearing?
 public:
     typedef decltype (buffer) Buffer;
     typedef decltype (buffer.begin()) Iterator;

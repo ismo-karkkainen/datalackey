@@ -102,8 +102,6 @@ bool LocalProcess::real_runner() {
     // Create pipes for standard I/O, as needed.
     bool uses_stdin = false;
     if (!input_info.empty()) {
-        if (input_info[0] == "JSON")
-            child_input_enc = new JSONEncoder();
         if (input_info[1] == "stdin")
             uses_stdin = true;
     }
@@ -120,6 +118,8 @@ bool LocalProcess::real_runner() {
             return false;
         }
         fcntl(stdin_child[1], F_SETNOSIGPIPE);
+        int flags = fcntl(stdin_child[1], F_GETFL);
+        fcntl(stdin_child[1], F_SETFL, flags | O_NONBLOCK);
         child_input = new FileDescriptorOutput(stdin_child[1]);
     }
     // Create output handling objects for each output.
@@ -247,25 +247,14 @@ bool LocalProcess::real_runner() {
         exit(54); // Something else.
     }
     if (child_input_enc != nullptr)
-        child_feed = new Output(*child_input_enc, *child_input, controller);
+        child_feed = new Output(*child_input_enc, *child_input, notify_data);
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
-    // This is data to be sent. It is passed in pieces to prioritize reading.
-    size_t input_index = 0;
-    if (!inputs.empty()) {
-        child_writer = child_feed->Writable();
-        *child_writer << Dictionary;
-    }
-    std::shared_ptr<const RawData> rd;
-    size_t written = 0;
-    // The value below is a good guess. On some OSes it could be queried and
-    // the pipe buffer sizes set depending on how much data we appear to have.
-    size_t slice_size = 32768; // Max amount written at once.
     while (child_state != None || scanning) {
         ChildState prev = child_state;
         child_state = get_child_state(child_state);
         if (prev != child_state && child_state == None && child_feed != nullptr)
-            child_feed->NoGlobalMessages();
+            child_feed->NoGlobalMessages(); // Not reading anymore.
         // Scan for child output.
         scanning = false;
         for (auto& output : child_output) {
@@ -278,45 +267,8 @@ bool LocalProcess::real_runner() {
             scanning = true;
             output->scanner->Scan();
         }
-        if (scanning)
-            continue; // Child may be blocked sending data so avoid write now.
-        if (child_state == Running && input_index < inputs.size()) {
-            // Feed a bit of data.
-            if (rd) { // We have data so send next slice.
-                size_t left = rd->Size() - written;
-                if (slice_size < left)
-                    left = slice_size;
-                child_writer->Write(
-                    rd->CBegin() + written, rd->CBegin() + written + left);
-                if (written + left == rd->Size()) // Reached end.
-                    rd = nullptr;
-                written += left;
-            } else { // We need new data to send.
-                written = 0;
-                rd = inputs[input_index]->Data()->Read(1048576);
-                if (rd == nullptr) {
-                    if (inputs[input_index]->Data()->Error()) {
-                        Error(out, *id, "input", "error");
-                        return true;
-                    }
-                    inputs[input_index] = nullptr;
-                    ++input_index;
-                    if (input_index < inputs.size()) {
-                        *child_writer << ValueRef<std::string>(
-                            inputs[input_index]->Name()->String())
-                            << RawItem;
-                        rd = inputs[input_index]->Data()->Read(1048576);
-                    } else {
-                        *child_writer << End;
-                        delete child_writer;
-                        child_writer = nullptr;
-                    }
-                }
-            }
-            continue;
-        }
-        // Child is alive, scanned nothing, wrote nothing.
-        Nap(20000000); // 20 ms.
+        if (!scanning)
+            Nap(20000000); // 20 ms.
     }
     return false;
 }
@@ -336,7 +288,6 @@ void LocalProcess::runner() {
     delete child_writer;
     delete child_feed;
     delete child_input;
-    delete child_input_enc;
     if (stdin_child[1] != -1)
         close(stdin_child[1]);
     if (stdouterr_child[0][0] != -1)
@@ -349,24 +300,27 @@ void LocalProcess::runner() {
 }
 
 LocalProcess::LocalProcess(Processes* Owner,
-    Output& StatusOut, bool Controller, Storage& S, const SimpleValue& Id,
+    Output& StatusOut, bool NotifyData, Storage& S, const SimpleValue& Id,
     const std::string& ProgramName,
     const std::vector<std::string>& Arguments,
     const std::map<std::string,std::string>& Environment,
     const std::vector<std::string>& InputInfo,
-    std::vector<std::shared_ptr<ProcessInput>>& Inputs,
     const std::vector<std::vector<std::string>>& OutputsInfo,
-    StringValueMapperSimple* Renamer)
+    StringValueMapper* Renamer)
     : child_input_enc(nullptr), child_input(nullptr), child_feed(nullptr),
     child_writer(nullptr),
-    owner(Owner), out(StatusOut), controller(Controller), storage(S),
+    owner(Owner), out(StatusOut), notify_data(NotifyData), storage(S),
     id(Id.Clone()), program_name(ProgramName), args(Arguments),
-    input_info(InputInfo), inputs(Inputs),
+    input_info(InputInfo),
     outputs_info(OutputsInfo), renamer(Renamer),
     pid(0), worker(nullptr), running(false), terminate(false)
 {
     for (auto iter : Environment)
         env.push_back(iter.first + "=" + iter.second);
+    if (!input_info.empty()) {
+        if (input_info[0] == "JSON")
+            child_input_enc = new JSONEncoder();
+    }
 }
 
 LocalProcess::~LocalProcess() {
@@ -377,6 +331,13 @@ LocalProcess::~LocalProcess() {
     }
     delete renamer;
     delete id;
+    delete child_input_enc;
+}
+
+Encoder* LocalProcess::Encoder() const {
+    if (child_input_enc != nullptr)
+        return child_input_enc->Clone();
+    return nullptr;
 }
 
 bool LocalProcess::Run() {
@@ -395,6 +356,15 @@ bool LocalProcess::Run() {
         return false;
     }
     return true;
+}
+
+void LocalProcess::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
+    std::lock_guard<std::mutex> lock(input_sets_mutex);
+    // Input values in one set are surrounded by nullptrs.
+    inputs.push(std::shared_ptr<ProcessInput>());
+    for (auto input : Inputs)
+        inputs.push(input);
+    inputs.push(std::shared_ptr<ProcessInput>());
 }
 
 bool LocalProcess::Terminate() {

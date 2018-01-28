@@ -46,7 +46,7 @@ private:
     };
     // Created during child process start-up.
     std::vector<std::shared_ptr<ChildOutput>> child_output;
-    Encoder* child_input_enc;
+    class Encoder* child_input_enc;
     OutputChannel* child_input;
     int stdin_child[2];
     int stdouterr_child[2][2];
@@ -56,16 +56,18 @@ private:
     // Values obtained via constructor.
     Processes* owner;
     Output& out;
-    bool controller;
+    bool notify_data;
     Storage& storage;
     SimpleValue* id;
     std::string program_name;
     std::vector<std::string> args;
     std::vector<std::string> env;
     std::vector<std::string> input_info;
-    std::vector<std::shared_ptr<ProcessInput>>& inputs;
     std::vector<std::vector<std::string>> outputs_info;
-    StringValueMapperSimple* renamer;
+    StringValueMapper* renamer;
+
+    std::queue<std::shared_ptr<ProcessInput>> inputs;
+    std::mutex input_sets_mutex;
 
     bool kill();
 
@@ -84,21 +86,22 @@ private:
     void runner();
 
 public:
-    // Probably does simple conversions.
-    // Top-level pointer ownership transfers.
+    // Renamer pointer ownership transfers.
     LocalProcess(Processes* Owner,
-        Output& StatusOut, bool Controller, Storage& S, const SimpleValue& Id,
+        Output& StatusOut, bool NotifyData, Storage& S, const SimpleValue& Id,
         const std::string& ProgramName,
         const std::vector<std::string>& Arguments,
         const std::map<std::string,std::string>& Environment,
         const std::vector<std::string>& InputInfo,
-        std::vector<std::shared_ptr<ProcessInput>>& Inputs,
         const std::vector<std::vector<std::string>>& OutputsInfo,
-        StringValueMapperSimple* Renamer);
+        StringValueMapper* Renamer);
 
     ~LocalProcess();
 
+    class Encoder* Encoder() const;
+
     bool Run();
+    void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs);
     bool Terminate();
     bool Finished() const;
 

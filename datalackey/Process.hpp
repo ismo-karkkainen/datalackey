@@ -9,6 +9,8 @@
 #ifndef Process_hpp
 #define Process_hpp
 
+#include "Encoder.hpp"
+#include "ProcessInput.hpp"
 #include <unistd.h>
 
 
@@ -17,7 +19,11 @@ class Process {
 public:
     virtual ~Process();
 
+    // Returns a clone of the encoder in use, or nullptr if no input specified.
+    virtual Encoder* Encoder() const = 0;
+
     virtual bool Run() = 0;
+    virtual void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) = 0;
     virtual bool Terminate() = 0;
     virtual bool Finished() const = 0;
 

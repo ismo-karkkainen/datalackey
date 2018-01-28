@@ -16,13 +16,16 @@
 #include "OutputChannel.hpp"
 #include "RawData.hpp"
 #include "OutputItem.hpp"
+#include "ProcessInput.hpp"
 
 class Output;
 
 #include "InputScanner.hpp"
 #include <vector>
-#include <utility>
 #include <mutex>
+#include <queue>
+#include <thread>
+#include <condition_variable>
 #include <set>
 
 
@@ -30,27 +33,25 @@ class Output;
 class OutputItemBuffer {
 private:
     bool ended;
-    OutputChannel* channel;
     Output& master;
     RawData buffer;
 
     OutputItemBuffer(Output& Master);
+    OutputItemBuffer(const OutputItemBuffer&) = delete;
+    OutputItemBuffer& operator=(const OutputItemBuffer&) = delete;
     ~OutputItemBuffer();
-    void SetChannel(OutputChannel* OC);
-
-    size_t Size() const { return buffer.Size(); }
-    bool Ended() const { return ended; }
 
     friend class Output;
 
 public:
-    RawData* IntermediateBuffer();
-    // Normal output.
+    RawData* Buffer() { return &buffer; }
+
     OutputItemBuffer& operator<<(const RawData& Data);
-    // Pass-through from input.
     void Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
+
     void End(); // Indicates there will be no more data.
 };
+
 
 // User hands output to this and then deletes when not needed anymore.
 class OutputItemWriter : public OutputItem {
@@ -61,6 +62,8 @@ private:
 
     // Owns Encoder.
     OutputItemWriter(Encoder* E, OutputItemBuffer& B);
+    OutputItemWriter(const OutputItemWriter&) = delete;
+    OutputItemWriter& operator=(const OutputItemWriter&) = delete;
 
     friend class Output;
 
@@ -71,15 +74,23 @@ public:
     void Write(RawData::ConstIterator Start, RawData::ConstIterator End);
 };
 
+
 class Output {
 private:
-    std::mutex mutex;
+    mutable std::mutex mutex;
     const Encoder& encoder;
-    std::vector<OutputItemBuffer*> buffers;
-    OutputChannel& main;
-    OutputItemBuffer* writer;
+    std::set<OutputItemBuffer*> buffers;
 
-    void AllocateChannel(OutputItemBuffer* PreviousWriter = nullptr);
+    OutputChannel& channel;
+    bool terminate;
+    std::thread* channel_feeder;
+    std::condition_variable output_added;
+    std::queue<std::shared_ptr<ProcessInput>> inputs;
+    std::queue<OutputItemBuffer*> ended_buffers;
+    bool eof;
+    mutable std::mutex input_sets_mutex;
+
+    void feeder();
 
 public:
     Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages = true);
@@ -90,16 +101,18 @@ public:
     const char *const Format() const { return encoder.Format(); }
 
     OutputItem* Writable(bool Discarder = false);
+    void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs);
+    void End() { eof = true; }
 
     // True when there is no expected output anywhere at the moment.
-    bool Finished() const { return buffers.empty(); }
+    bool Finished() const;
 
     // For communication from OutputItemBuffer objects.
     void Ended(OutputItemBuffer& IB);
 };
 
 
-// For storing pointers to all output objects.
+// For storing pointers to all output objects that want notifications.
 class OutputCollection {
 private:
     std::set<Output*> collection;
@@ -112,7 +125,7 @@ private:
 
 public:
     std::mutex& Mutex() { return mutex; } // Lock first.
-    std::vector<Output*> Outputs() const { // Presumes previous is locked.
+    std::vector<Output*> Outputs() const { // Previous locked for use duration.
         return std::vector<Output*>(collection.begin(), collection.end());
     }
 };
