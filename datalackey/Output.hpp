@@ -77,6 +77,10 @@ public:
 
 class Output {
 private:
+    static Output* first;
+
+    Output* controller_output;
+
     mutable std::mutex mutex;
     const Encoder& encoder;
     std::set<OutputItemBuffer*> buffers;
@@ -90,13 +94,18 @@ private:
     bool eof;
     mutable std::mutex input_sets_mutex;
 
+    bool failed;
+
+    void clear_buffers();
     void feeder();
 
 public:
-    Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages = true);
+    Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages = true,
+        Output* ControllerOutput = nullptr);
     ~Output();
 
     void NoGlobalMessages();
+    Output* ControllerOutput() { return controller_output; }
 
     const char *const Format() const { return encoder.Format(); }
 
@@ -104,6 +113,8 @@ public:
     void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs);
     void End() { eof = true; }
 
+    // Failure on reading input data or write failure.
+    bool Failed() const { return failed; }
     // True when there is no expected output anywhere at the moment.
     bool Finished() const;
 

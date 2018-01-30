@@ -17,10 +17,12 @@ EOF
 chmod a+x _script.sh
 
 echo "[1,\"run\",\"program\",\"./_script.sh\",$S]" |
-$DL -m -i stdin JSON -o stdout JSON > $OUT
+$DL -m -i stdin JSON -o stdout JSON |
+sed 's/"running",.*]$/"running",pid]/' > $OUT
 rm -f _script.sh
 
 cat > $EXP <<EOF
+[1,"running",pid]
 [1,"signal",$S]
 [1,"finished"]
 EOF

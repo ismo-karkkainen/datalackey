@@ -13,11 +13,22 @@
 #include "Time.hpp"
 #include "Notifications.hpp"
 #include "JSONEncoder.hpp"
+#include "NullEncoder.hpp"
+#include "NullOutput.hpp"
 #include "StorageDataSinkJSON.hpp"
 #include "InputScannerJSON.hpp"
 #include "MessageRawJSON.hpp"
 #include "InputScannerDiscard.hpp"
 #include "InputScannerRawMessage.hpp"
+#include "ListCommand.hpp"
+#include "GetCommand.hpp"
+#include "DeleteCommand.hpp"
+#include "VersionCommand.hpp"
+#include "ProcessesCommand.hpp"
+#include "RunCommand.hpp"
+#include "FeedCommand.hpp"
+#include "TerminateCommand.hpp"
+#include "NoOperationCommand.hpp"
 #include "CommandHandlerJSON.hpp"
 #include "Value_t.hpp"
 #include "Number_t.hpp"
@@ -98,7 +109,7 @@ LocalProcess::ChildState LocalProcess::get_child_state(ChildState Previous) {
     return Previous; // Something missed in switch?
 }
 
-bool LocalProcess::real_runner() {
+void LocalProcess::real_runner() {
     // Create pipes for standard I/O, as needed.
     bool uses_stdin = false;
     if (!input_info.empty()) {
@@ -108,20 +119,23 @@ bool LocalProcess::real_runner() {
     for (int k = 0; k < 2; ++k) {
         if (-1 == pipe(stdouterr_child[k])) {
             Error(out, *id, "failure", "pipe");
-            return false;
+            return;
         }
     }
     if (uses_stdin) {
         errno = 0;
         if (-1 == pipe(stdin_child)) {
             Error(out, *id, "failure", "pipe");
-            return false;
+            return;
         }
         fcntl(stdin_child[1], F_SETNOSIGPIPE);
         int flags = fcntl(stdin_child[1], F_GETFL);
         fcntl(stdin_child[1], F_SETFL, flags | O_NONBLOCK);
         child_input = new FileDescriptorOutput(stdin_child[1]);
+    } else {
+        child_input = new NullOutput();
     }
+    child_feed = new Output(*child_input_enc, *child_input, notify_data, &out);
     // Create output handling objects for each output.
     child_output.reserve(outputs_info.size() < 2 ? 2 : outputs_info.size());
     bool used_std[2] = { false, false };
@@ -133,29 +147,46 @@ bool LocalProcess::real_runner() {
         if (settings[1] == "stdout") {
             if (used_std[0]) {
                 Error(out, *id, "duplicate", "stdout");
-                return false;
+                return;
             }
             ic = new FileDescriptorInput(stdouterr_child[0][0]);
             used_std[0] = true;
         } else if (settings[1] == "stderr") {
             if (used_std[1]) {
                 Error(out, *id, "duplicate", "stderr");
-                return false;
+                return;
             }
             ic = new FileDescriptorInput(stdouterr_child[1][0]);
             used_std[1] = true;
         }
         if (settings[0] == "JSON") {
-            if (!strcmp(out.Format(), "JSON")) {
-                mh = new CommandHandlerJSON(out);
-                sds = new StorageDataSinkJSON(storage, id, out, renamer);
-                is = new InputScannerJSON(*ic, *mh, *sds, out, id);
+            if (child_feed->Format() == nullptr ||
+                !strcmp(child_feed->Format(), "JSON"))
+            {
+                CommandHandler* ch = new CommandHandlerJSON(*child_feed);
+                ch->AddCommand(new ListCommand("list", *child_feed, storage));
+                ch->AddCommand(new GetCommand(
+                    "get", *child_feed, storage, child_input_enc->Format()));
+                ch->AddCommand(new DeleteCommand(
+                    "delete", *child_feed, storage));
+                ch->AddCommand(new VersionCommand("version", *child_feed));
+                ch->AddCommand(new ProcessesCommand(
+                    "processes", *child_feed, *owner));
+                ch->AddCommand(new RunCommand("run", *child_feed, *owner));
+                ch->AddCommand(new FeedCommand("feed", *child_feed, *owner));
+                ch->AddCommand(new TerminateCommand(
+                    "terminate", *child_feed, *owner));
+                ch->AddCommand(new NoOperationCommand("no-op", *child_feed));
+                mh = ch;
+                sds = new StorageDataSinkJSON(
+                    storage, id, *child_feed, renamer);
+                is = new InputScannerJSON(*ic, *mh, *sds, *child_feed, id);
             } else
                 assert(false);
         } else if (settings[0] == "raw") {
             if (!strcmp(out.Format(), "JSON")) {
                 mh = new MessageRawJSON(out, *id);
-                sds = new StorageDataSinkJSON(storage, id, out);
+                sds = new StorageDataSinkJSON(storage, id, *child_feed);
             } else
                 assert(false);
             is = new InputScannerRawMessage(*ic, *mh, *sds);
@@ -200,7 +231,7 @@ bool LocalProcess::real_runner() {
                 Error(out, *id, "no-processes");
             else if (err == ENOMEM)
                 Error(out, *id, "no-memory");
-            return false;
+            return;
         }
         if (stdin_child[0] != -1)
             close(stdin_child[0]);
@@ -246,8 +277,7 @@ bool LocalProcess::real_runner() {
         }
         exit(54); // Something else.
     }
-    if (child_input_enc != nullptr)
-        child_feed = new Output(*child_input_enc, *child_input, notify_data);
+    Message(out, *id, pid, "running");
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
     while (child_state != None || scanning) {
@@ -270,7 +300,6 @@ bool LocalProcess::real_runner() {
         if (!scanning)
             Nap(20000000); // 20 ms.
     }
-    return false;
 }
 
 void LocalProcess::runner() {
@@ -278,9 +307,7 @@ void LocalProcess::runner() {
     stdouterr_child[0][0] = stdouterr_child[0][1] =
         stdouterr_child[1][0] = stdouterr_child[1][1] = -1;
     running = true;
-    if (real_runner()) {
-        kill(); // We failed to send all input.
-    }
+    real_runner();
     if (child_feed)
         child_feed->NoGlobalMessages();
     running = false;
@@ -320,6 +347,9 @@ LocalProcess::LocalProcess(Processes* Owner,
     if (!input_info.empty()) {
         if (input_info[0] == "JSON")
             child_input_enc = new JSONEncoder();
+    } else {
+        child_input_enc = new NullEncoder();
+        notify_data = false;
     }
 }
 
@@ -335,9 +365,7 @@ LocalProcess::~LocalProcess() {
 }
 
 Encoder* LocalProcess::Encoder() const {
-    if (child_input_enc != nullptr)
-        return child_input_enc->Clone();
-    return nullptr;
+    return child_input_enc->Clone();
 }
 
 bool LocalProcess::Run() {

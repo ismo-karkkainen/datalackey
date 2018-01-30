@@ -36,7 +36,7 @@ public:
     CommandHandler(Output& Out);
     ~CommandHandler();
 
-    // Ownership does not transfer. Best to destroy this object before these.
+    // Ownership transfers.
     void AddCommand(Command* C);
 };
 

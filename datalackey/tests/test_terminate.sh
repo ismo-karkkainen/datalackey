@@ -24,10 +24,12 @@ sleep 1
 echo '[2,"terminate",1]'
 sleep 1
 echo '[3,"processes"]'
-) | $DL -m -i stdin JSON -o stdout JSON > $OUT
+) | $DL -m -i stdin JSON -o stdout JSON |
+sed 's/"running",.*]$/"running",pid]/' > $OUT
 rm -f _script.sh
 
 cat > $EXP <<EOF
+[1,"running",pid]
 [2,"terminated",1]
 [1,"signal",9]
 [1,"finished"]

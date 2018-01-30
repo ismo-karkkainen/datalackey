@@ -150,7 +150,7 @@ std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
             return std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>>(false,std::vector<std::shared_ptr<ProcessInput>>());;
         }
     }
-    if (enc)
+    if (enc && enc->Format() != nullptr)
         storage.Prepare(enc->Format(), input_values);
     std::vector<std::shared_ptr<SimpleValue>> missing;
     for (auto input : input_values)

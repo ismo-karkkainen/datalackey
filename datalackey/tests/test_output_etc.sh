@@ -27,13 +27,15 @@ echo '[2,"list"]'
 echo '[3,"get","mapped"]'
 echo '[4,"delete","pre-label2-post"]'
 echo '[5,"list"]'
-) | $DL -m -i stdin JSON -o stdout JSON > $OUT
+) | $DL -m -i stdin JSON -o stdout JSON |
+sed 's/"running",.*]$/"running",pid]/' > $OUT
 rm -f _script.sh
 
 cat > $EXP <<EOF
-[1,"stored","mapped","JSON"]
-[1,"stored","pre-label2-post","JSON"]
-[1,"stored","pre-label3-post","JSON"]
+[1,"running",pid]
+[1,"stored","mapped"]
+[1,"stored","pre-label2-post"]
+[1,"stored","pre-label3-post"]
 [1,"exit",0]
 [1,"finished"]
 [2,{"mapped":{"JSON":7},"pre-label2-post":{"JSON":2},"pre-label3-post":{"JSON":2}}]

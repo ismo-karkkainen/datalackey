@@ -24,7 +24,8 @@ sleep 1
 echo '[null,"terminate",null]'
 sleep 2
 echo '[null,"processes"]'
-) | $DL -m -i stdin JSON -o stdout JSON > $OUT
+) | $DL -m -i stdin JSON -o stdout JSON |
+sed 's/"running",.*]$/"running",pid]/' > $OUT
 rm -f _script.sh
 
 cat > $EXP <<EOF

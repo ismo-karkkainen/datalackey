@@ -115,24 +115,18 @@ int main(int argc, char** argv) {
     LocalProcesses* procs = new LocalProcesses(*storage);
 
     // Add commands.
-    ListCommand list("list", *out, *storage);
-    command_handler->AddCommand(&list);
-    GetCommand get("get", *out, *storage, enc->Format());
-    command_handler->AddCommand(&get);
-    DeleteCommand del("delete", *out, *storage);
-    command_handler->AddCommand(&del);
-    VersionCommand version("version", *out);
-    command_handler->AddCommand(&version);
-    ProcessesCommand processes("processes", *out, *procs);
-    command_handler->AddCommand(&processes);
-    RunCommand run("run", *out, *procs);
-    command_handler->AddCommand(&run);
-    FeedCommand feed("feed", *out, *procs);
-    command_handler->AddCommand(&feed);
-    TerminateCommand terminate("terminate", *out, *procs);
-    command_handler->AddCommand(&terminate);
-    NoOperationCommand noop("no-op", *out);
-    command_handler->AddCommand(&noop);
+    command_handler->AddCommand(new ListCommand("list", *out, *storage));
+    command_handler->AddCommand(
+        new GetCommand("get", *out, *storage, enc->Format()));
+    command_handler->AddCommand(new DeleteCommand("delete", *out, *storage));
+    command_handler->AddCommand(new VersionCommand("version", *out));
+    command_handler->AddCommand(
+        new ProcessesCommand("processes", *out, *procs));
+    command_handler->AddCommand(new RunCommand("run", *out, *procs));
+    command_handler->AddCommand(new FeedCommand("feed", *out, *procs));
+    command_handler->AddCommand(
+        new TerminateCommand("terminate", *out, *procs));
+    command_handler->AddCommand(new NoOperationCommand("no-op", *out));
 
     while (!scanner->Ended() || !procs->Finished() || !out->Finished()) {
         bool did_something = scanner->Scan();

@@ -9,6 +9,7 @@
 #include "Output.hpp"
 #include "Value_t.hpp"
 #include "Structure.hpp"
+#include "Notifications.hpp"
 #include <cassert>
 
 
@@ -79,6 +80,19 @@ void OutputItemWriter::Write(
 OutputCollection GloballyMessageableOutputs;
 
 
+Output* Output::first = nullptr;
+
+
+void Output::clear_buffers() {
+    std::lock_guard<std::mutex> lock(input_sets_mutex);
+    while (!ended_buffers.empty()) {
+        delete ended_buffers.front();
+        ended_buffers.pop();
+    }
+    while (!inputs.empty())
+        inputs.pop();
+}
+
 void Output::feeder() {
     std::shared_ptr<ProcessInput> input;
     std::shared_ptr<const RawData> rd;
@@ -97,6 +111,11 @@ void Output::feeder() {
             RawData::ConstIterator start = data->CBegin() + written;
             RawData::ConstIterator end = data->CBegin() + written + left;
             written += channel.Write(start, end);
+            if (channel.Failed()) {
+                failed = true;
+                terminate = true;
+                written = data->Size();
+            }
             if (written == data->Size()) {
                 if (outbuf != nullptr && data == outbuf->Buffer()) {
                     delete outbuf;
@@ -106,28 +125,34 @@ void Output::feeder() {
                 } else
                     deco.Clear();
                 data = nullptr;
+                written = 0;
             }
             // Write bookkeeping happens here.
             continue;
         }
         if (input) { // Need new block to write.
-            written = 0;
             rd = input->Data()->Read(1048576); // Should depend on slice_size.
             if (rd) {
                 data = rd.get();
             } else {
                 if (input->Data()->Error()) {
-                    // Reporting should go to other programs.
-                    // If this is to main controller, then panic?
-                    terminate = true;
-                    channel.Close();
+                    // Since data is read we know there is label.
+                    if (controller_output != nullptr)
+                        Error(*controller_output,
+                            "read", input->Label()->String().c_str());
+                    if (Output::first != nullptr && Output::first != this &&
+                        Output::first != controller_output)
+                        Error(*Output::first,
+                            "read", input->Label()->String().c_str());
+                    failed = true;
+                    clear_buffers();
+                    return;
                 }
                 input = nullptr; // Finished this one.
             }
             continue;
         }
         if (in_input) { // Get next input from queue.
-            written = 0;
             lock.lock();
             input = inputs.front();
             inputs.pop();
@@ -164,7 +189,6 @@ void Output::feeder() {
             ended_buffers.pop();
             lock.unlock();
             data = outbuf->Buffer();
-            written = 0;
             continue;
         }
         if (!inputs.empty()) { // Has next batch of inputs to process.
@@ -178,13 +202,14 @@ void Output::feeder() {
             e->Encode(deco, RawItem);
             data = &deco;
             delete e;
-            written = 0;
             continue;
         }
         if (eof) { // Requested closing channel, any pending items?
             std::lock_guard<std::mutex> lock2(mutex);
-            if (buffers.empty())
+            if (buffers.empty()) {
                 channel.Close();
+                return;
+            }
         }
         // We had nothing to write. Wait for something to arrive.
         output_added.wait(lock);
@@ -192,29 +217,30 @@ void Output::feeder() {
     }
 }
 
-Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages)
-    : encoder(E), channel(Main), terminate(false), channel_feeder(nullptr),
-    eof(false)
+Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages,
+    Output* ControllerOutput)
+    : controller_output(ControllerOutput), encoder(E), channel(Main),
+    terminate(false), channel_feeder(nullptr), eof(false)
 {
     if (GlobalMessages && !channel.Failed())
         GloballyMessageableOutputs.Add(this);
     channel_feeder = new std::thread(&Output::feeder, this);
+    if (Output::first == nullptr)
+        Output::first = this;
 }
 
 Output::~Output() {
+    if (Output::first == this)
+        Output::first = nullptr;
     terminate = true;
     output_added.notify_one();
     channel_feeder->join();
     delete channel_feeder;
+    channel.Close();
     GloballyMessageableOutputs.Remove(this);
     for (auto buf : buffers)
         delete buf;
-    while (!ended_buffers.empty()) {
-        delete ended_buffers.front();
-        ended_buffers.pop();
-    }
-    while (!inputs.empty())
-        inputs.pop();
+    clear_buffers();
     // OutputChannel allocated and owned outside.
 }
 
@@ -254,7 +280,7 @@ void Output::Ended(OutputItemBuffer& IB) {
     std::unique_lock<std::mutex> lock(mutex);
     buffers.erase(&IB);
     lock.unlock();
-    if (channel.Failed()) {
+    if (channel.Failed() || failed) {
         delete &IB;
         return;
     }

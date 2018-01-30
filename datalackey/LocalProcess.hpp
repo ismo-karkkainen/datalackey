@@ -82,7 +82,7 @@ private:
     std::thread* worker;
     bool running, terminate;
 
-    bool real_runner();
+    void real_runner();
     void runner();
 
 public:

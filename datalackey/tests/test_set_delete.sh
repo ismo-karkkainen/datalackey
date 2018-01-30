@@ -13,7 +13,7 @@ echo '{"label":1234}[1,"list"][2,"delete","missing","label",null,4][3,"list"]' |
 $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[null,"stored","label","JSON"]
+[null,"stored","label"]
 [1,{"label":{"JSON":4}}]
 [2,"invalid",null,4]
 [2,"missing","missing"]

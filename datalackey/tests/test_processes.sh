@@ -26,6 +26,7 @@ echo '[3,"processes"]'
 rm -f _script.sh
 
 cat > $EXP <<EOF
+[1,"running",$(cat _pid.txt)]
 [2,{1:$(cat _pid.txt)}]
 [1,"exit",0]
 [1,"finished"]

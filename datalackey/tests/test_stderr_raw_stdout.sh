@@ -20,10 +20,12 @@ EOF
 chmod a+x _script.sh
 
 echo '[1,"run","channel","out","raw","stderr","program","./_script.sh"]' |
-$DL -m -i stdin JSON -o stdout JSON > $OUT
+$DL -m -i stdin JSON -o stdout JSON |
+sed 's/"running",.*]$/"running",pid]/' > $OUT
 rm -f _script.sh
 
 cat > $EXP <<EOF
+[1,"running",pid]
 [1,97,10]
 [1,97,98,10]
 [1,97,98,99,10]

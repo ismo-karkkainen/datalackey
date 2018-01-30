@@ -56,9 +56,10 @@ void StorageDataSinkJSON::end_item() {
 void StorageDataSinkJSON::end_group() {
     if (open_dicts == 0 && group != nullptr && part != BadInput) {
         std::vector<std::string> labels = group->Labels();
-        storage.Add(*group, &notifications);
-        for (std::string& s : labels)
-            Message(notifications, identifier, "stored", s.c_str(), Format());
+        if (notifications.ControllerOutput() != nullptr)
+            ListMessage(*notifications.ControllerOutput(),
+                *identifier, "stored", labels);
+        storage.Add(*group, notifications.ControllerOutput());
     }
     delete group;
     group = nullptr;

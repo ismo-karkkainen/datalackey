@@ -139,7 +139,7 @@ void MemoryStorage::Add(DataGroup& G, Output* AlreadyNotified) {
     while (true) {
         auto label_data = G.Get();
         if (label_data.second == nullptr)
-            return;
+            break;
         del(label_data.first);
         label_data.second->Own(false);
         label2data[label_data.first] = std::shared_ptr<Value>(

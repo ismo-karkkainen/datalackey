@@ -36,6 +36,8 @@ CommandHandler::CommandHandler(Output& Out)
 { }
 
 CommandHandler::~CommandHandler() {
+    for (auto iter : handlers)
+        delete iter.second;
 }
 
 void CommandHandler::AddCommand(Command* C) {
