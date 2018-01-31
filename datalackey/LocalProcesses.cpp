@@ -184,6 +184,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
 
     // Temporary storage.
     bool clear_env = false;
+    bool end_feed = false;
     std::string prefix, postfix;
     std::vector<std::pair<StringValue,std::shared_ptr<SimpleValue>>> name_label;
 
@@ -319,6 +320,10 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
                 Error(Out, Id, "argument", "unknown", command.c_str());
                 return;
             }
+            k += 2;
+        } else if (command == "end-feed") {
+            end_feed = true;
+            k += 1;
         } else if (command == "program") {
             // program executable args...
             if (!has_count(k, 2, command, Parameters, Out, Id) ||
@@ -398,6 +403,8 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         return;
     }
     p->Feed(inputs.second); // Valid, pass directly.
+    if (end_feed) // Ignore possible lack of channel in.
+        p->EndFeed();
     lock.lock();
     processes.insert(std::pair<SimpleValue*,Process*>(Id.Clone(), p));
 }
@@ -406,17 +413,44 @@ void LocalProcesses::Feed(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Parameters)
 {
     std::unique_lock<std::mutex> lock(processes_mutex);
-    SimpleValue* sv = Parameters[0]->Clone();
-    auto proc = processes.find(sv);
-    delete sv;
+    auto proc = processes.find(Parameters[0].get());
     if (proc == processes.end()) {
         Error(Out, Id, "process", "not-found");
         return;
     }
     lock.unlock();
+    if (proc->second->Closed()) {
+        Error(Out, Id, "input", "closed");
+        return;
+    }
     auto inputs = feed(Out, Id, Parameters, proc->second->Encoder());
     if (inputs.first)
         proc->second->Feed(inputs.second);
+}
+
+void LocalProcesses::EndFeed(Output& Out, const SimpleValue& Id,
+    std::vector<std::shared_ptr<SimpleValue>>& Parameters)
+{
+    std::vector<std::shared_ptr<SimpleValue>> not_found, ended, not_open;
+    std::unique_lock<std::mutex> lock(processes_mutex);
+    for (auto& param : Parameters) {
+        auto proc = processes.find(param.get());
+        if (proc != processes.end()) {
+            if (!proc->second->Closed()) {
+                proc->second->EndFeed();
+                ended.push_back(param);
+            } else
+                not_open.push_back(param);
+        } else
+            not_found.push_back(param);
+    }
+    lock.unlock();
+    if (!not_found.empty())
+        ListMessage(Out, Id, "missing", not_found);
+    if (!not_open.empty())
+        ListMessage(Out, Id, "not-open", not_open);
+    if (!ended.empty())
+        ListMessage(Out, Id, "ended", ended);
 }
 
 void LocalProcesses::HasFinished(const SimpleValue& Id) {

@@ -38,6 +38,9 @@ public:
     virtual void Feed(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Parameters) = 0;
 
+    virtual void EndFeed(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Parameters) = 0;
+
     // Running process reports it has finished using this.
     virtual void HasFinished(const SimpleValue& Id) = 0;
 };

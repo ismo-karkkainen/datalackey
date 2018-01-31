@@ -19,6 +19,7 @@
 #include "ProcessesCommand.hpp"
 #include "RunCommand.hpp"
 #include "FeedCommand.hpp"
+#include "EndFeedCommand.hpp"
 #include "TerminateCommand.hpp"
 #include "NoOperationCommand.hpp"
 #include "MemoryStorage.hpp"
@@ -124,6 +125,7 @@ int main(int argc, char** argv) {
         new ProcessesCommand("processes", *out, *procs));
     command_handler->AddCommand(new RunCommand("run", *out, *procs));
     command_handler->AddCommand(new FeedCommand("feed", *out, *procs));
+    command_handler->AddCommand(new EndFeedCommand("end-feed", *out, *procs));
     command_handler->AddCommand(
         new TerminateCommand("terminate", *out, *procs));
     command_handler->AddCommand(new NoOperationCommand("no-op", *out));

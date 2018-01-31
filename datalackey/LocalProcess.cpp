@@ -27,6 +27,7 @@
 #include "ProcessesCommand.hpp"
 #include "RunCommand.hpp"
 #include "FeedCommand.hpp"
+#include "EndFeedCommand.hpp"
 #include "TerminateCommand.hpp"
 #include "NoOperationCommand.hpp"
 #include "CommandHandlerJSON.hpp"
@@ -174,6 +175,8 @@ void LocalProcess::real_runner() {
                     "processes", *child_feed, *owner));
                 ch->AddCommand(new RunCommand("run", *child_feed, *owner));
                 ch->AddCommand(new FeedCommand("feed", *child_feed, *owner));
+                ch->AddCommand(new EndFeedCommand(
+                    "end-feed", *child_feed, *owner));
                 ch->AddCommand(new TerminateCommand(
                     "terminate", *child_feed, *owner));
                 ch->AddCommand(new NoOperationCommand("no-op", *child_feed));
@@ -283,8 +286,8 @@ void LocalProcess::real_runner() {
     while (child_state != None || scanning) {
         ChildState prev = child_state;
         child_state = get_child_state(child_state);
-        if (prev != child_state && child_state == None && child_feed != nullptr)
-            child_feed->NoGlobalMessages(); // Not reading anymore.
+        if (prev != child_state && child_state == None)
+            child_feed->NoGlobalMessages(); // Child not reading anymore.
         // Scan for child output.
         scanning = false;
         for (auto& output : child_output) {
@@ -308,8 +311,7 @@ void LocalProcess::runner() {
         stdouterr_child[1][0] = stdouterr_child[1][1] = -1;
     running = true;
     real_runner();
-    if (child_feed)
-        child_feed->NoGlobalMessages();
+    child_feed->NoGlobalMessages();
     running = false;
     child_output.clear();
     delete child_writer;
@@ -393,6 +395,15 @@ void LocalProcess::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
     for (auto input : Inputs)
         inputs.push(input);
     inputs.push(std::shared_ptr<ProcessInput>());
+}
+
+void LocalProcess::EndFeed() {
+    if (child_feed != nullptr)
+        child_feed->End();
+}
+
+bool LocalProcess::Closed()  {
+    return child_feed == nullptr || child_feed->Closed();
 }
 
 bool LocalProcess::Terminate() {

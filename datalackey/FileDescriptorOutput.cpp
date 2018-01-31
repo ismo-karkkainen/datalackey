@@ -19,7 +19,7 @@ FileDescriptorOutput::~FileDescriptorOutput() { }
 size_t FileDescriptorOutput::Write(
     RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
-    if (!failed) {
+    if (!failed && Start != End) {
         errno = 0;
         ssize_t result = write(fd, &(*Start), End - Start);
         int err = errno;
@@ -39,7 +39,6 @@ void FileDescriptorOutput::Flush() {
 
 void FileDescriptorOutput::Close() {
     close(fd);
-    failed = true;
 }
 
 bool FileDescriptorOutput::Failed() const {

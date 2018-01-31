@@ -24,6 +24,8 @@ public:
 
     virtual bool Run() = 0;
     virtual void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) = 0;
+    virtual void EndFeed() = 0;
+    virtual bool Closed() = 0;
     virtual bool Terminate() = 0;
     virtual bool Finished() const = 0;
 

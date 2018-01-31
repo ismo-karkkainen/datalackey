@@ -71,6 +71,7 @@ list(APPEND Processes datalackey/LocalProcesses.cpp)
 set(ProcessCommands datalackey/ProcessesCommand.cpp)
 list(APPEND ProcessCommands datalackey/RunCommand.cpp)
 list(APPEND ProcessCommands datalackey/FeedCommand.cpp)
+list(APPEND ProcessCommands datalackey/EndFeedCommand.cpp)
 list(APPEND ProcessCommands datalackey/TerminateCommand.cpp)
 
 set(JSONCommands datalackey/CommandHandlerJSON.cpp)

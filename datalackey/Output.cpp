@@ -136,14 +136,15 @@ void Output::feeder() {
                 data = rd.get();
             } else {
                 if (input->Data()->Error()) {
-                    // Since data is read we know there is label.
-                    if (controller_output != nullptr)
-                        Error(*controller_output,
-                            "read", input->Label()->String().c_str());
-                    if (Output::first != nullptr && Output::first != this &&
-                        Output::first != controller_output)
-                        Error(*Output::first,
-                            "read", input->Label()->String().c_str());
+                    if (this != Output::first) {
+                        std::lock_guard<std::mutex> lock(
+                            GloballyMessageableOutputs.Mutex());
+                        for (auto op : GloballyMessageableOutputs.Outputs()) {
+                            if (op == controller_output || op == Output::first)
+                                Error(*op,
+                                    "read", input->Label()->String().c_str());
+                        }
+                    }
                     failed = true;
                     clear_buffers();
                     return;
@@ -222,22 +223,26 @@ Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages,
     : controller_output(ControllerOutput), encoder(E), channel(Main),
     terminate(false), channel_feeder(nullptr), eof(false)
 {
-    if (GlobalMessages && !channel.Failed())
-        GloballyMessageableOutputs.Add(this);
-    channel_feeder = new std::thread(&Output::feeder, this);
-    if (Output::first == nullptr)
-        Output::first = this;
+    if (encoder.Format() == nullptr)
+        eof = true;
+    else {
+        channel_feeder = new std::thread(&Output::feeder, this);
+        if (Output::first == nullptr)
+            Output::first = this;
+        if (GlobalMessages)
+            GloballyMessageableOutputs.Add(this);
+    }
 }
 
 Output::~Output() {
-    if (Output::first == this)
-        Output::first = nullptr;
-    terminate = true;
-    output_added.notify_one();
-    channel_feeder->join();
-    delete channel_feeder;
-    channel.Close();
     GloballyMessageableOutputs.Remove(this);
+    if (channel_feeder != nullptr) {
+        terminate = true;
+        output_added.notify_one();
+        channel_feeder->join();
+        delete channel_feeder;
+    }
+    channel.Close();
     for (auto buf : buffers)
         delete buf;
     clear_buffers();

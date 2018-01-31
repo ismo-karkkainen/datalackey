@@ -79,6 +79,7 @@ class Output {
 private:
     static Output* first;
 
+    // Not necessarily valid, use GloballyMessageableOutputs.
     Output* controller_output;
 
     mutable std::mutex mutex;
@@ -112,6 +113,7 @@ public:
     OutputItem* Writable(bool Discarder = false);
     void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs);
     void End() { eof = true; }
+    bool Closed() const { return eof; }
 
     // Failure on reading input data or write failure.
     bool Failed() const { return failed; }
@@ -123,7 +125,7 @@ public:
 };
 
 
-// For storing pointers to all output objects that want notifications.
+// Stores pointers to output objects that want to or can receive notifications.
 class OutputCollection {
 private:
     std::set<Output*> collection;

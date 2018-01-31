@@ -102,6 +102,8 @@ public:
 
     bool Run();
     void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs);
+    void EndFeed();
+    bool Closed();
     bool Terminate();
     bool Finished() const;
 

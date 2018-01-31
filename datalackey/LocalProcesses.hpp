@@ -49,6 +49,8 @@ public:
         std::vector<std::shared_ptr<SimpleValue>>& Parameters);
     void Feed(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Parameters);
+    void EndFeed(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Parameters);
 
     void HasFinished(const SimpleValue& Id);
 };
