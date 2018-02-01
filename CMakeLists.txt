@@ -153,3 +153,11 @@ add_test(NAME label_chars COMMAND test_bad_label_output.sh bad $<TARGET_FILE:dat
 add_test(NAME label_array COMMAND test_bad_label_output.sh '[\ 4\ ]' $<TARGET_FILE:datalackey> )
 add_test(NAME label_object COMMAND test_bad_label_output.sh '{\ "a":\ 4\ }' $<TARGET_FILE:datalackey> )
 
+# Controller runs a program
+#
+add_executable(test_ctrl_notify_none.sh IMPORTED)
+set_property(TARGET test_ctrl_notify_none.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_ctrl_notify_none.sh)
+add_test(NAME ctrl_notify_none COMMAND test_ctrl_notify_none.sh $<TARGET_FILE:datalackey> )
+add_executable(test_ctrl_notify_data.sh IMPORTED)
+set_property(TARGET test_ctrl_notify_data.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/test_ctrl_notify_data.sh)
+add_test(NAME ctrl_notify_data COMMAND test_ctrl_notify_data.sh $<TARGET_FILE:datalackey> )

@@ -206,7 +206,7 @@ void LocalProcess::real_runner() {
         // Input is discarded so only matching format matters.
         MessageHandler* mh = nullptr;
         StorageDataSink* sds = nullptr;
-        if (!strcmp(out.Format(), "JSON")) {
+        if (out.Format() == nullptr || !strcmp(out.Format(), "JSON")) {
             mh = new MessageRawJSON(out, *id);
             sds = new StorageDataSinkJSON(storage, id, out);
         } else
@@ -240,13 +240,19 @@ void LocalProcess::real_runner() {
             close(stdin_child[0]);
         close(stdouterr_child[0][1]);
         close(stdouterr_child[1][1]);
+        stdin_child[0] = stdouterr_child[0][1] = stdouterr_child[1][1] = -1;
         delete[] argv_ptrs;
         delete[] env_ptrs;
         args.clear();
         env.clear();
     } else {
         // In child process.
-        // Connect pipe ends to standard I/O.
+        // The ends we do not need.
+        if (stdin_child[1] != -1)
+            close(stdin_child[1]);
+        close(stdouterr_child[0][0]);
+        close(stdouterr_child[1][0]);
+        // Connect pipe ends to standard I/O and close original pipe ends.
         int addrs[3] = {
             stdin_child[0], stdouterr_child[0][1], stdouterr_child[1][1] };
         for (int k = 0; k < 3; ++k) {
@@ -255,6 +261,7 @@ void LocalProcess::real_runner() {
                 int fd = dup2(addrs[k], k);
                 if (fd == -1)
                     exit(57 + k);
+                close(addrs[k]);
             }
         }
         // Start new process.
@@ -297,8 +304,8 @@ void LocalProcess::real_runner() {
                 output = nullptr;
                 continue;
             }
-            scanning = true;
-            output->scanner->Scan();
+            if (output->scanner->Scan() > 0)
+                scanning = true;
         }
         if (!scanning)
             Nap(20000000); // 20 ms.

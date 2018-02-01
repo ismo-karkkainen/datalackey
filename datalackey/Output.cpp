@@ -207,15 +207,14 @@ void Output::feeder() {
         }
         if (eof) { // Requested closing channel, any pending items?
             std::lock_guard<std::mutex> lock2(mutex);
-            if (buffers.empty()) {
-                channel.Close();
-                return;
-            }
+            if (buffers.empty())
+                break;
         }
         // We had nothing to write. Wait for something to arrive.
         output_added.wait(lock);
         lock.unlock();
     }
+    channel.Close();
 }
 
 Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages,
@@ -272,6 +271,11 @@ void Output::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
     // This indicates that the input ended.
     inputs.push(std::shared_ptr<ProcessInput>());
     lock.unlock();
+    output_added.notify_one();
+}
+
+void Output::End() {
+    eof = true;
     output_added.notify_one();
 }
 

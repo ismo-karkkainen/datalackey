@@ -56,9 +56,13 @@ void StorageDataSinkJSON::end_item() {
 void StorageDataSinkJSON::end_group() {
     if (open_dicts == 0 && group != nullptr && part != BadInput) {
         std::vector<std::string> labels = group->Labels();
-        if (notifications.ControllerOutput() != nullptr)
-            ListMessage(*notifications.ControllerOutput(),
-                *identifier, "stored", labels);
+        if (notifications.ControllerOutput() != nullptr) {
+            // Ensure that the pointer is still valid.
+            std::lock_guard<std::mutex> lg(GloballyMessageableOutputs.Mutex());
+            for (Output* out : GloballyMessageableOutputs.Outputs())
+                if (out == notifications.ControllerOutput())
+                    ListMessage(*out, *identifier, "stored", labels);
+        }
         storage.Add(*group, notifications.ControllerOutput());
     }
     delete group;

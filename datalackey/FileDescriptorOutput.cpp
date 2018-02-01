@@ -38,7 +38,10 @@ void FileDescriptorOutput::Flush() {
 }
 
 void FileDescriptorOutput::Close() {
-    close(fd);
+    // It was claimed we do not own fd but here we act as if we do.
+    if (fd != -1)
+        close(fd);
+    fd = -1;
 }
 
 bool FileDescriptorOutput::Failed() const {

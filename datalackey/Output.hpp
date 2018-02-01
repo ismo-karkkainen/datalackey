@@ -112,7 +112,7 @@ public:
 
     OutputItem* Writable(bool Discarder = false);
     void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs);
-    void End() { eof = true; }
+    void End();
     bool Closed() const { return eof; }
 
     // Failure on reading input data or write failure.
