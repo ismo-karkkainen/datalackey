@@ -28,7 +28,6 @@ sleep 2
 echo '[2,"get","label"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
-rm -f _script.sh _controller.sh
 
 cat > $EXP <<EOF
 [1,"running",pid]
@@ -38,4 +37,4 @@ cat > $EXP <<EOF
 [2,{"label":"value"}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh _controller.sh

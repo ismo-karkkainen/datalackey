@@ -339,6 +339,11 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         }
     }
 
+    if (notify_data && input.empty()) {
+        Error(Out, Id, "notify", "data", "no-input");
+        return;
+    }
+
     StringValueMapperSimple* renamer = nullptr;
     if (!name_label.empty() || !prefix.empty() || !postfix.empty()) {
         renamer = new StringValueMapperSimple(prefix, postfix);

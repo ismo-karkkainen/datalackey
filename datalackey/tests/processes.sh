@@ -23,7 +23,6 @@ ps -u $(whoami) | grep _script.sh | grep -v grep | awk '{ print $2 }' > _pid.txt
 sleep 2
 echo '[3,"processes"]'
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
-rm -f _script.sh
 
 cat > $EXP <<EOF
 [1,"running",$(cat _pid.txt)]
@@ -34,4 +33,4 @@ cat > $EXP <<EOF
 EOF
 rm -f _pid.txt
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh

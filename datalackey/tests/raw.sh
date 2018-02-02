@@ -22,7 +22,6 @@ chmod a+x _script.sh
 echo '[1,"run","channel","out","raw","stdout","program","./_script.sh"]' |
 $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
-rm -f _script.sh
 
 cat > $EXP <<EOF
 [1,"running",pid]
@@ -33,4 +32,4 @@ cat > $EXP <<EOF
 [1,"finished"]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh

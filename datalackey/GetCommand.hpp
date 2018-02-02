@@ -16,11 +16,9 @@
 class GetCommand : public Command {
 private:
     Storage& storage;
-    std::string format;
 
 public:
-    GetCommand(const char *const Name, Output& Out, Storage& S,
-        const char *const Format);
+    GetCommand(const char *const Name, Output& Out, Storage& S);
     ~GetCommand();
 
     void Perform(const SimpleValue& Id,

@@ -14,9 +14,8 @@
 #include <memory>
 
 
-GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S,
-    const char *const Format)
-: Command(Name, Out), storage(S), format(Format != nullptr ? Format : "")
+GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S)
+    : Command(Name, Out), storage(S)
 { }
 
 GetCommand::~GetCommand() {
@@ -43,12 +42,12 @@ void GetCommand::Perform(
     }
     if (!invalid.empty())
         ListMessage(out, Id, "invalid", invalid);
-    // Process without input can call this but it has no format so do nothing.
+    // Process without input can call this so do nothing.
     // (In theory should "output" the data but there is no format to use.)
-    if (format.empty())
+    if (out.Format() == nullptr)
         return;
     // Try to get the data.
-    storage.Prepare(format.c_str(), results);
+    storage.Prepare(out.Format(), results);
     // Report the ones that were not present.
     std::vector<std::shared_ptr<SimpleValue>> missing;
     for (auto res : results)

@@ -15,22 +15,7 @@
 #include "JSONEncoder.hpp"
 #include "NullEncoder.hpp"
 #include "NullOutput.hpp"
-#include "StorageDataSinkJSON.hpp"
-#include "InputScannerJSON.hpp"
-#include "MessageRawJSON.hpp"
-#include "InputScannerDiscard.hpp"
-#include "InputScannerRawMessage.hpp"
-#include "ListCommand.hpp"
-#include "GetCommand.hpp"
-#include "DeleteCommand.hpp"
-#include "VersionCommand.hpp"
-#include "ProcessesCommand.hpp"
-#include "RunCommand.hpp"
-#include "FeedCommand.hpp"
-#include "EndFeedCommand.hpp"
-#include "TerminateCommand.hpp"
-#include "NoOperationCommand.hpp"
-#include "CommandHandlerJSON.hpp"
+#include "Factories.hpp"
 #include "Value_t.hpp"
 #include "Number_t.hpp"
 #include "NumberValue.hpp"
@@ -142,9 +127,6 @@ void LocalProcess::real_runner() {
     bool used_std[2] = { false, false };
     for (auto& settings : outputs_info) {
         InputChannel* ic = nullptr;
-        MessageHandler* mh = nullptr;
-        StorageDataSink* sds = nullptr;
-        InputScanner* is = nullptr;
         if (settings[1] == "stdout") {
             if (used_std[0]) {
                 Error(out, *id, "duplicate", "stdout");
@@ -160,41 +142,13 @@ void LocalProcess::real_runner() {
             ic = new FileDescriptorInput(stdouterr_child[1][0]);
             used_std[1] = true;
         }
-        if (settings[0] == "JSON") {
-            if (child_feed->Format() == nullptr ||
-                !strcmp(child_feed->Format(), "JSON"))
-            {
-                CommandHandler* ch = new CommandHandlerJSON(*child_feed);
-                ch->AddCommand(new ListCommand("list", *child_feed, storage));
-                ch->AddCommand(new GetCommand(
-                    "get", *child_feed, storage, child_input_enc->Format()));
-                ch->AddCommand(new DeleteCommand(
-                    "delete", *child_feed, storage));
-                ch->AddCommand(new VersionCommand("version", *child_feed));
-                ch->AddCommand(new ProcessesCommand(
-                    "processes", *child_feed, *owner));
-                ch->AddCommand(new RunCommand("run", *child_feed, *owner));
-                ch->AddCommand(new FeedCommand("feed", *child_feed, *owner));
-                ch->AddCommand(new EndFeedCommand(
-                    "end-feed", *child_feed, *owner));
-                ch->AddCommand(new TerminateCommand(
-                    "terminate", *child_feed, *owner));
-                ch->AddCommand(new NoOperationCommand("no-op", *child_feed));
-                mh = ch;
-                sds = new StorageDataSinkJSON(
-                    storage, id, *child_feed, renamer);
-                is = new InputScannerJSON(*ic, *mh, *sds, *child_feed, id);
-            } else
-                assert(false);
-        } else if (settings[0] == "raw") {
-            if (!strcmp(out.Format(), "JSON")) {
-                mh = new MessageRawJSON(out, *id);
-                sds = new StorageDataSinkJSON(storage, id, *child_feed);
-            } else
-                assert(false);
-            is = new InputScannerRawMessage(*ic, *mh, *sds);
-        } else
-            assert(false);
+        // Output response of raw data goes to output of launcher.
+        MessageHandler* mh = MakeMessageHandler(settings[0].c_str(),
+            (settings[0] == "raw") ? out : *child_feed, storage, *owner, id);
+        StorageDataSink* sds = MakeStorageDataSink(
+            settings[0].c_str(), storage, renamer, *child_feed, id);
+        InputScanner* is = MakeInputScanner(
+            settings[0].c_str(), *ic, *mh, *sds, *child_feed, id);
         child_output.push_back(std::shared_ptr<ChildOutput>(
             new ChildOutput(ic, mh, sds, is)));
     }
@@ -203,15 +157,11 @@ void LocalProcess::real_runner() {
         if (used_std[k])
             continue;
         InputChannel* ic = new FileDescriptorInput(stdouterr_child[k][0]);
-        // Input is discarded so only matching format matters.
-        MessageHandler* mh = nullptr;
-        StorageDataSink* sds = nullptr;
-        if (out.Format() == nullptr || !strcmp(out.Format(), "JSON")) {
-            mh = new MessageRawJSON(out, *id);
-            sds = new StorageDataSinkJSON(storage, id, out);
-        } else
-            assert(false);
-        InputScanner* is = new InputScannerDiscard(*ic, *mh, *sds);
+        MessageHandler* mh =
+            MakeMessageHandler(out.Format(), out, storage, *owner, id);
+        StorageDataSink* sds =
+            MakeStorageDataSink(out.Format(), storage, renamer, out, id);
+        InputScanner* is = MakeInputScanner(nullptr, *ic, *mh, *sds, out, id);
         child_output.push_back(std::shared_ptr<ChildOutput>(
             new ChildOutput(ic, mh, sds, is)));
     }

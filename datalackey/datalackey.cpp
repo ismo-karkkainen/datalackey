@@ -10,21 +10,9 @@
 #include "FileDescriptorOutput.hpp"
 #include "Output.hpp"
 #include "FileDescriptorInput.hpp"
-#include "CommandHandlerJSON.hpp"
-#include "ListCommand.hpp"
-#include "GetCommand.hpp"
-#include "DeleteCommand.hpp"
-#include "VersionCommand.hpp"
+#include "Factories.hpp"
 #include "LocalProcesses.hpp"
-#include "ProcessesCommand.hpp"
-#include "RunCommand.hpp"
-#include "FeedCommand.hpp"
-#include "EndFeedCommand.hpp"
-#include "TerminateCommand.hpp"
-#include "NoOperationCommand.hpp"
 #include "MemoryStorage.hpp"
-#include "StorageDataSinkJSON.hpp"
-#include "InputScannerJSON.hpp"
 #include "Options.hpp"
 #include "Time.hpp"
 #include <cstring>
@@ -78,6 +66,8 @@ int main(int argc, char** argv) {
     }
     assert(storage != nullptr);
 
+    LocalProcesses* procs = new LocalProcesses(*storage);
+
     OutputChannel* out_channel = nullptr;
     std::string choice = opt::String("command-out", 1);
     if (choice == "stdout")
@@ -99,36 +89,16 @@ int main(int argc, char** argv) {
         in_channel = new FileDescriptorInput();
     assert(in_channel != nullptr);
 
-    StorageDataSink* sink = nullptr;
-    CommandHandler* command_handler = nullptr;
-    InputScanner* scanner = nullptr;
     choice = opt::String("command-in", 2);
-    if (choice == "JSON") {
-        sink = new StorageDataSinkJSON(*storage, nullptr, *out);
-        command_handler = new CommandHandlerJSON(*out);
-        scanner =
-            new InputScannerJSON(*in_channel, *command_handler, *sink, *out);
-    }
+    StorageDataSink* sink =
+        MakeStorageDataSink(choice.c_str(), *storage, nullptr, *out, nullptr);
     assert(sink != nullptr);
+    MessageHandler* command_handler =
+        MakeMessageHandler(choice.c_str(), *out, *storage, *procs, nullptr);
     assert(command_handler != nullptr);
+    InputScanner* scanner = MakeInputScanner(
+        choice.c_str(), *in_channel, *command_handler, *sink, *out, nullptr);
     assert(scanner != nullptr);
-
-    LocalProcesses* procs = new LocalProcesses(*storage);
-
-    // Add commands.
-    command_handler->AddCommand(new ListCommand("list", *out, *storage));
-    command_handler->AddCommand(
-        new GetCommand("get", *out, *storage, enc->Format()));
-    command_handler->AddCommand(new DeleteCommand("delete", *out, *storage));
-    command_handler->AddCommand(new VersionCommand("version", *out));
-    command_handler->AddCommand(
-        new ProcessesCommand("processes", *out, *procs));
-    command_handler->AddCommand(new RunCommand("run", *out, *procs));
-    command_handler->AddCommand(new FeedCommand("feed", *out, *procs));
-    command_handler->AddCommand(new EndFeedCommand("end-feed", *out, *procs));
-    command_handler->AddCommand(
-        new TerminateCommand("terminate", *out, *procs));
-    command_handler->AddCommand(new NoOperationCommand("no-op", *out));
 
     while (!scanner->Ended() || !procs->Finished() || !out->Finished()) {
         bool did_something = scanner->Scan();

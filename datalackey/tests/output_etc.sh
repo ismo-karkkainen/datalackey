@@ -30,7 +30,6 @@ echo '[4,"delete","pre-label2-post"]'
 echo '[5,"list"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
-rm -f _script.sh
 
 cat > $EXP <<EOF
 [1,"running",pid]
@@ -45,4 +44,4 @@ cat > $EXP <<EOF
 [5,{"mapped":{"JSON":7},"pre-label3-post":{"JSON":2}}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh

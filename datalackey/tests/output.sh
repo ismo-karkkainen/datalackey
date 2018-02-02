@@ -23,7 +23,6 @@ echo '[2,"list"]'
 echo '[3,"get","mapped"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
-rm -f _script.sh
 
 cat > $EXP <<EOF
 [1,"running",pid]
@@ -34,4 +33,4 @@ cat > $EXP <<EOF
 [3,{"mapped":"value"}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh

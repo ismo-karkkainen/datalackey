@@ -11,26 +11,23 @@ EXP="${B}_expected.txt"
 
 cat > _script.sh << EOF
 #!/bin/sh
-for w in "a" "ab" "abc"
+while true
 do
-    echo "\$w" 1>&2
-    sleep 1
+    echo
 done
 EOF
 chmod a+x _script.sh
 
-echo '[1,"run","channel","out","raw","stderr","program","./_script.sh"]' |
-$DL -m -i stdin JSON -o stderr JSON 2>&1 |
+(
+echo '[null,"run","program","./_script.sh"]'
+sleep 1
+echo '[null,"terminate",null]'
+sleep 2
+echo '[null,"processes"]'
+) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
-rm -f _script.sh
 
 cat > $EXP <<EOF
-[1,"running",pid]
-[1,97,10]
-[1,97,98,10]
-[1,97,98,99,10]
-[1,"exit",0]
-[1,"finished"]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
