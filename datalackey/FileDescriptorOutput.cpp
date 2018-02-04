@@ -24,7 +24,18 @@ size_t FileDescriptorOutput::Write(
         ssize_t result = write(fd, &(*Start), End - Start);
         int err = errno;
         if (result == -1) {
-            failed = err != EAGAIN;
+            switch (err) {
+            case EAGAIN:
+                break; // No space, ok.
+            case EBADF:
+                failed = true;
+                fd = -1;
+                break;
+            default:
+                failed = true;
+                Close(); // Output is messed up now.
+                break;
+            }
             return 0;
         }
         return result;
@@ -46,4 +57,8 @@ void FileDescriptorOutput::Close() {
 
 bool FileDescriptorOutput::Failed() const {
     return failed;
+}
+
+bool FileDescriptorOutput::Closed() const {
+    return fd == -1;
 }

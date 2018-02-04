@@ -145,6 +145,9 @@ add_test(NAME output_etc COMMAND output_etc.sh $<TARGET_FILE:datalackey> )
 add_executable(null_terminate.sh IMPORTED)
 set_property(TARGET null_terminate.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/null_terminate.sh)
 add_test(NAME null_terminate COMMAND null_terminate.sh $<TARGET_FILE:datalackey> )
+add_executable(feed_end.sh IMPORTED)
+set_property(TARGET feed_end.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/feed_end.sh)
+add_test(NAME feed_end COMMAND feed_end.sh $<TARGET_FILE:datalackey> )
 
 # Bad label output
 #

@@ -66,9 +66,6 @@ private:
     std::vector<std::vector<std::string>> outputs_info;
     StringValueMapper* renamer;
 
-    std::queue<std::shared_ptr<ProcessInput>> inputs;
-    std::mutex input_sets_mutex;
-
     bool kill();
 
     enum ChildState {

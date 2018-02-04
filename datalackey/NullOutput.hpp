@@ -13,13 +13,18 @@
 
 
 class NullOutput : public OutputChannel {
+private:
+    bool closed;
+
 public:
+    NullOutput();
     ~NullOutput();
 
     size_t Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
     void Flush();
     void Close();
     bool Failed() const;
+    bool Closed() const;
 };
 
 

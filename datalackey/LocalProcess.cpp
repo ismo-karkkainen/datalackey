@@ -240,6 +240,7 @@ void LocalProcess::real_runner() {
     Message(out, *id, pid, "running");
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
+    bool feed_open = !child_feed->Failed() && !child_feed->Closed();
     while (child_state != None || scanning) {
         ChildState prev = child_state;
         child_state = get_child_state(child_state);
@@ -256,6 +257,12 @@ void LocalProcess::real_runner() {
             }
             if (output->scanner->Scan() > 0)
                 scanning = true;
+        }
+        if (feed_open && child_feed->Closed()) {
+            if (child_feed->Failed())
+                Message(out, *id, "input", "failed");
+            Message(out, *id, "input", "closed");
+            feed_open = false;
         }
         if (!scanning)
             Nap(20000000); // 20 ms.
@@ -346,12 +353,8 @@ bool LocalProcess::Run() {
 }
 
 void LocalProcess::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
-    std::lock_guard<std::mutex> lock(input_sets_mutex);
-    // Input values in one set are surrounded by nullptrs.
-    inputs.push(std::shared_ptr<ProcessInput>());
-    for (auto input : Inputs)
-        inputs.push(input);
-    inputs.push(std::shared_ptr<ProcessInput>());
+    if (child_feed != nullptr)
+        child_feed->Feed(Inputs);
 }
 
 void LocalProcess::EndFeed() {
@@ -359,7 +362,7 @@ void LocalProcess::EndFeed() {
         child_feed->End();
 }
 
-bool LocalProcess::Closed()  {
+bool LocalProcess::Closed() {
     return child_feed == nullptr || child_feed->Closed();
 }
 

@@ -114,6 +114,7 @@ void Output::feeder() {
             if (channel.Failed()) {
                 failed = true;
                 terminate = true;
+                End();
                 written = data->Size();
             }
             if (written == data->Size()) {
@@ -176,7 +177,7 @@ void Output::feeder() {
             in_input = false;
             Encoder* e = encoder.Clone();
             e->Encode(deco, Dictionary);
-            e->Encode(deco, ValueRef<std::string>(input->Name()->String()));
+            e->Encode(deco, ValueRef<std::string>(std::string("")));
             e->Encode(deco, RawItem);
             deco.Clear();
             e->Encode(deco, Structure::End);
@@ -275,8 +276,10 @@ void Output::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
 }
 
 void Output::End() {
-    eof = true;
-    output_added.notify_one();
+    if (!eof) {
+        eof = true;
+        output_added.notify_one();
+    }
 }
 
 bool Output::Finished() const {

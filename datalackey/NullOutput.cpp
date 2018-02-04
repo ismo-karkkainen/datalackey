@@ -9,18 +9,30 @@
 #include "NullOutput.hpp"
 
 
+NullOutput::NullOutput()
+    : closed(false)
+{ }
+
 NullOutput::~NullOutput() { }
 
 size_t NullOutput::Write(
     RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
+    if (closed)
+        return 0;
     return End - Start;
 }
 
 void NullOutput::Flush() { }
 
-void NullOutput::Close() { }
+void NullOutput::Close() {
+    closed = true;
+}
 
 bool NullOutput::Failed() const {
     return false;
+}
+
+bool NullOutput::Closed() const {
+    return closed;
 }

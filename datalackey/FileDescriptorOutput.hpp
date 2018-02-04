@@ -25,6 +25,7 @@ public:
     void Flush();
     void Close();
     bool Failed() const;
+    bool Closed() const;
 };
 
 

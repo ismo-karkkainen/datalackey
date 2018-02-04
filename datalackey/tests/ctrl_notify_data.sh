@@ -38,6 +38,7 @@ cat > $EXP <<EOF
 [null,"stored","label"]
 [2,"ended",1]
 [1,"exit",0]
+[1,"input","closed"]
 [1,"finished"]
 [3,{"label":"value"}]
 EOF

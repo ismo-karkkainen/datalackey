@@ -25,6 +25,7 @@ public:
     virtual void Close() = 0;
     // Return true if previous write operation failed.
     virtual bool Failed() const = 0;
+    virtual bool Closed() const = 0;
 };
 
 
