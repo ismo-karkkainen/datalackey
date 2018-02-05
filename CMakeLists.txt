@@ -59,6 +59,7 @@ list(APPEND Sources datalackey/CommandHandler.cpp)
 list(APPEND Sources datalackey/ListCommand.cpp)
 list(APPEND Sources datalackey/GetCommand.cpp)
 list(APPEND Sources datalackey/DeleteCommand.cpp)
+list(APPEND Sources datalackey/RenameCommand.cpp)
 list(APPEND Sources datalackey/VersionCommand.cpp)
 list(APPEND Sources datalackey/NoOperationCommand.cpp)
 
@@ -124,6 +125,9 @@ add_test(NAME notify_data_err COMMAND notify_data_err.sh $<TARGET_FILE:datalacke
 add_executable(set_delete.sh IMPORTED)
 set_property(TARGET set_delete.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/set_delete.sh)
 add_test(NAME set_delete COMMAND set_delete.sh $<TARGET_FILE:datalackey> )
+add_executable(rename.sh IMPORTED)
+set_property(TARGET rename.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/rename.sh)
+add_test(NAME rename COMMAND rename.sh $<TARGET_FILE:datalackey> )
 
 # Message output from process tests.
 #

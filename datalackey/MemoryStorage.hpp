@@ -48,6 +48,8 @@ public:
     std::vector<std::tuple<StringValue,std::string,size_t>> List() const;
 
     bool Delete(const StringValue& L, Output* AlreadyNotified = nullptr);
+    bool Rename(const StringValue& Old, const StringValue& New,
+        Output* AlreadyNotified = nullptr);
 
     void Add(DataGroup& G, Output* AlreadyNotified = nullptr);
 

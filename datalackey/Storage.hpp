@@ -29,6 +29,8 @@ public:
     virtual std::vector<std::tuple<StringValue,std::string,size_t>> List() const = 0;
 
     virtual bool Delete(const StringValue& L, Output* AlreadyNotified = nullptr) = 0;
+    virtual bool Rename(const StringValue& Old, const StringValue& New,
+        Output* AlreadyNotified = nullptr) = 0;
 
     virtual void Add(DataGroup& G, Output* AlreadyNotified = nullptr) = 0;
 

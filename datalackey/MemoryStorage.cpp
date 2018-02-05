@@ -133,6 +133,26 @@ bool MemoryStorage::Delete(const StringValue& L, Output* AlreadyNotified) {
     return false;
 }
 
+bool MemoryStorage::Rename(const StringValue& Old, const StringValue& New,
+    Output* AlreadyNotified)
+{
+    std::unique_lock<std::mutex> lock(label2data_mutex);
+    auto old = label2data.find(Old);
+    if (old == label2data.end())
+        return false;
+    std::shared_ptr<Value> v = old->second;
+    label2data.erase(old);
+    del(New);
+    label2data[New] = v;
+    lock.unlock();
+    std::lock_guard<std::mutex> out_lock(GloballyMessageableOutputs.Mutex());
+    for (Output* out : GloballyMessageableOutputs.Outputs())
+        if (out != AlreadyNotified)
+            Message(*out,
+                "renamed", Old.String().c_str(), New.String().c_str());
+    return true;
+}
+
 void MemoryStorage::Add(DataGroup& G, Output* AlreadyNotified) {
     std::vector<std::string> labels;
     std::unique_lock<std::mutex> lock(label2data_mutex);

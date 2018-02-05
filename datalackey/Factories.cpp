@@ -10,6 +10,7 @@
 #include "ListCommand.hpp"
 #include "GetCommand.hpp"
 #include "DeleteCommand.hpp"
+#include "RenameCommand.hpp"
 #include "VersionCommand.hpp"
 #include "ProcessesCommand.hpp"
 #include "RunCommand.hpp"
@@ -35,6 +36,7 @@ MessageHandler* MakeMessageHandler(const char *const Format,
         ch->AddCommand(new ListCommand("list", Out, S));
         ch->AddCommand(new GetCommand("get", Out, S));
         ch->AddCommand(new DeleteCommand("delete", Out, S));
+        ch->AddCommand(new RenameCommand("rename", Out, S));
         ch->AddCommand(new NoOperationCommand("no-op", Out));
         ch->AddCommand(new VersionCommand("version", Out));
         ch->AddCommand(new RunCommand("run", Out, P));

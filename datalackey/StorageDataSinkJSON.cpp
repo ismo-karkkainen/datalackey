@@ -17,6 +17,7 @@ bool StorageDataSinkJSON::start_item() {
     std::string name;
     try {
         json s = json::parse(key.cbegin(), key.cend());
+        key.resize(0);
         if (!s.is_string()) {
             Error(notifications, identifier, "identifier", "not-string");
             return false;
