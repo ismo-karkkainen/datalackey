@@ -115,7 +115,7 @@ bool DirectoryStorage::del(const StringValue& L) {
     return false;
 }
 
-void DirectoryStorage::store() const {
+bool DirectoryStorage::store() const {
     json j(json::object());
     std::unique_lock<std::mutex> lock(label2data_mutex);
     for (auto& iter : label2data) {
@@ -133,8 +133,7 @@ void DirectoryStorage::store() const {
     lock.unlock();
     std::ofstream out(root + Catalog);
     out << j;
-    // Check if out.good and if not, we have a problem.
-    // Being called in destructor so not much to do.
+    return out.good();
 }
 
 DirectoryStorage::DirectoryStorage(
@@ -158,7 +157,10 @@ DirectoryStorage::DirectoryStorage(
             root.clear();
             break;
         }
-        return; // There is no catalog file to read. New storage.
+        // There is no catalog file to read. New storage.
+        if (!store())
+            root.clear(); // Try writing to find out we can.
+        return;
     }
     // fd is valid so read the catalog into label2data.
     struct stat info;
@@ -182,7 +184,7 @@ DirectoryStorage::DirectoryStorage(
     }
     catch (const std::exception& e) {
         root.clear();
-        // This should be reported somehow.
+        // This means we have invalid catalog and should report somehow.
         return;
     }
     buffer = nullptr;

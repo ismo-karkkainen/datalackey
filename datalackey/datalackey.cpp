@@ -16,6 +16,7 @@
 #include "DirectoryStorage.hpp"
 #include "Options.hpp"
 #include "Time.hpp"
+#include "File.hpp"
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -85,29 +86,15 @@ int main(int argc, char** argv) {
         std::string dir = opt::String("directory", 1);
         while (!dir.empty() && dir.back() == '/')
             dir.pop_back();
-        // Check existence and create ".datalackey" as needed.
-        errno = 0;
-        int fd = open(dir.c_str(), O_RDONLY | O_CLOEXEC);
-        if (fd == -1)
+        dir = AbsoluteDirectory(dir);
+        if (dir.empty())
             return 10;
-        struct stat info;
-        if (-1 == fstat(fd, &info))
-            return 11;
-        if ((info.st_mode & S_IFDIR) != S_IFDIR)
-            return 12;
-        close(fd);
+        // Check existence and create ".datalackey" as needed.
         dir.push_back('/');
         dir += ".datalackey";
-        fd = open(dir.c_str(), O_RDONLY | O_CLOEXEC);
-        if (fd == -1) {
+        if (AbsoluteDirectory(dir).empty()) {
             if (-1 == mkdir(dir.c_str(), dirmode))
-                return 13;
-        } else {
-            if (-1 == fstat(fd, &info))
-                return 14;
-            if ((info.st_mode & S_IFDIR) != S_IFDIR)
-                return 15;
-            close(fd);
+                return 11;
         }
         dir.push_back('/');
         DirectoryStorage* ds = new DirectoryStorage(dir, mode);

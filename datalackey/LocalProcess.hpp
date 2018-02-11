@@ -62,6 +62,7 @@ private:
     std::string program_name;
     std::vector<std::string> args;
     std::vector<std::string> env;
+    std::string directory;
     std::vector<std::string> input_info;
     std::vector<std::vector<std::string>> outputs_info;
     StringValueMapper* renamer;
@@ -89,6 +90,7 @@ public:
         const std::string& ProgramName,
         const std::vector<std::string>& Arguments,
         const std::map<std::string,std::string>& Environment,
+        const std::string& Directory,
         const std::vector<std::string>& InputInfo,
         const std::vector<std::vector<std::string>>& OutputsInfo,
         StringValueMapper* Renamer);

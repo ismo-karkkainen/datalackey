@@ -12,6 +12,7 @@
 #include "NullValue.hpp"
 #include "ProcessInput.hpp"
 #include "JSONEncoder.hpp"
+#include "File.hpp"
 #include <set>
 #include <map>
 #include <cstdlib>
@@ -181,6 +182,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     std::string program_name;
     std::vector<std::string> program_args; // program
     bool notify_data = false;
+    std::string directory;
 
     // Temporary storage.
     bool clear_env = false;
@@ -324,6 +326,12 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         } else if (command == "end-feed") {
             end_feed = true;
             k += 1;
+        } else if (command == "change-directory") {
+            if (!has_count(k, 2, command, Parameters, Out, Id) ||
+                !is_string(k + 1, command, Parameters, Out, Id))
+                return;
+            directory = Parameters[k + 1]->String();
+            k += 2;
         } else if (command == "program") {
             // program executable args...
             if (!has_count(k, 2, command, Parameters, Out, Id) ||
@@ -342,6 +350,16 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     if (notify_data && input.empty()) {
         Error(Out, Id, "notify", "data", "no-input");
         return;
+    }
+
+    if (!directory.empty()) {
+        std::string absolute = AbsoluteDirectory(directory);
+        if (absolute.empty()) {
+            Error(Out, Id,
+                "change-directory", directory.c_str(), strerror(errno));
+            return;
+        }
+        directory = absolute;
     }
 
     StringValueMapperSimple* renamer = nullptr;
@@ -370,14 +388,12 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         return;
     }
 
-    // Check that file exists and is an executable.
-    errno = 0;
-    if (access(program_name.c_str(), X_OK)) {
-        int err = errno;
-        assert(err != EINVAL);
-        Error(Out, Id, "program", program_name.c_str(), strerror(err));
+    std::string absolute = AbsoluteFile(program_name, true);
+    if (absolute.empty()) {
+        Error(Out, Id, "program", program_name.c_str(), strerror(errno));
         return;
     }
+    program_name = absolute;
 
     if (!clear_env) {
         // Copy environment to mapping but do not over-write values.
@@ -397,7 +413,8 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     }
 
     Process* p = new LocalProcess(this, Out, notify_data, storage, Id,
-        program_name, program_args, env2value, input, outputs, renamer);
+        program_name, program_args, env2value, directory,
+        input, outputs, renamer);
 
     // Checks if feed inputs are valid.
     auto inputs = feed(Out, Id, feed_params, p->Encoder());

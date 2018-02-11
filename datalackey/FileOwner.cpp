@@ -9,13 +9,12 @@
 #include "FileOwner.hpp"
 #include "FileReader.hpp"
 #include "Time.hpp"
+#include "File.hpp"
 #include <unistd.h>
 #include <fcntl.h>
 #include <cassert>
 #include <cerrno>
 #include <sys/stat.h>
-
-static const char Separator = '/';
 
 
 std::set<size_t> FileOwner::freed;
@@ -60,7 +59,7 @@ bool FileOwner::make_dirs(const std::string& Root, const std::string& dir) {
             if ((info.st_mode & S_IFDIR) != S_IFDIR)
                 return false;
         }
-        existing += Separator;
+        existing.push_back(Separator);
     }
     return true;
 }
@@ -142,6 +141,7 @@ FileOwner::FileOwner(const std::string& Root, mode_t FileMode)
         for (auto iter : FileOwner::used) {
             for (; k < iter ; ++k)
                 FileOwner::freed.insert(k);
+            k = iter + 1; // Do not insert the used value.
             if (FileOwner::freed.size() > 100)
                 break; // Let's say this is enough.
         }

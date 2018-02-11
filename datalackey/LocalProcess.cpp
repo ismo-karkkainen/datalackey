@@ -214,7 +214,10 @@ void LocalProcess::real_runner() {
                 close(addrs[k]);
             }
         }
-        // Start new process.
+        // Change directory.
+        if (!directory.empty() && -1 == chdir(directory.c_str()))
+            exit(53);
+        // Start the desired process.
         errno = 0;
         execve(program_name.c_str(), (char *const *)argv_ptrs,
             (char *const *)env_ptrs);
@@ -297,6 +300,7 @@ LocalProcess::LocalProcess(Processes* Owner,
     const std::string& ProgramName,
     const std::vector<std::string>& Arguments,
     const std::map<std::string,std::string>& Environment,
+    const std::string& Directory,
     const std::vector<std::string>& InputInfo,
     const std::vector<std::vector<std::string>>& OutputsInfo,
     StringValueMapper* Renamer)
@@ -304,7 +308,7 @@ LocalProcess::LocalProcess(Processes* Owner,
     child_writer(nullptr),
     owner(Owner), out(StatusOut), notify_data(NotifyData), storage(S),
     id(Id.Clone()), program_name(ProgramName), args(Arguments),
-    input_info(InputInfo),
+    directory(Directory), input_info(InputInfo),
     outputs_info(OutputsInfo), renamer(Renamer),
     pid(0), worker(nullptr), running(false), terminate(false)
 {

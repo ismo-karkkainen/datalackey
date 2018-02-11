@@ -48,7 +48,7 @@ private:
     mode_t file_mode;
     std::string root;
 
-    void store() const;
+    bool store() const;
 
 public:
     // Should have an output object to report failure to save catalog.
