@@ -9,7 +9,7 @@ DL=$1
 OUT="${B}_out.txt"
 EXP="${B}_expected.txt"
 
-echo '{"label":1234}[1,"list"][2,"delete","missing","label",null,4][3,"list"]' |
+echo '{"label":1234}[1,"storage-info"][2,"delete","missing","label",null,4][3,"list"]' |
 $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
@@ -18,7 +18,7 @@ cat > $EXP <<EOF
 [2,"invalid",null,4]
 [2,"missing","missing"]
 [2,"deleted","label"]
-[3,{}]
+[3]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP

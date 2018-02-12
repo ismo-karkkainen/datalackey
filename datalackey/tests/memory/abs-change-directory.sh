@@ -11,26 +11,26 @@ EXP="${B}_expected.txt"
 
 cat > _script.sh << EOF
 #!/bin/sh
-echo '{ "label": "value" }'
-sleep 1
+touch cwd
 EOF
 chmod a+x _script.sh
 
+SUBDIR=$(pwd)/subdir
+rm -rf "$SUBDIR"
+mkdir "$SUBDIR"
+
 (
-echo '[1,"run","channel","out","JSON","stdout","output","label","mapped","program","./_script.sh"]'
-sleep 2
-echo '[2,"storage-info"]'
-echo '[3,"get","mapped"]'
+echo '[1,"run","channel","out","JSON","stdout","change-directory",'
+echo "\"$SUBDIR\""
+echo ',"program","./_script.sh"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
 [1,"running",pid]
-[1,"stored","mapped"]
 [1,"exit",0]
 [1,"finished"]
-[2,{"mapped":{"JSON":7}}]
-[3,{"mapped":"value"}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
+test -f "$SUBDIR/cwd" &&
+diff -bq $OUT $EXP && rm -rf $OUT $EXP _script.sh "$SUBDIR"

@@ -23,7 +23,7 @@ chmod a+x _script.sh
 (
 echo '[1,"run","channel","out","JSON","stdout","output","label","mapped","program","./_script.sh"]'
 sleep 2
-echo '[2,"list"]'
+echo '[2,"storage-info"]'
 echo '[3,"get","mapped"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT

@@ -390,7 +390,10 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
 
     std::string absolute = AbsoluteFile(program_name, true);
     if (absolute.empty()) {
-        Error(Out, Id, "program", program_name.c_str(), strerror(errno));
+        if (errno)
+            Error(Out, Id, "program", program_name.c_str(), strerror(errno));
+        else
+            Error(Out, Id, "program", program_name.c_str());
         return;
     }
     program_name = absolute;

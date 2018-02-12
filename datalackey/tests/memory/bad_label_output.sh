@@ -13,7 +13,7 @@ EXP="${B}_expected.txt"
 (
 echo '{ $L: "value" }'
 printf '\0'
-echo '[2,"list"]'
+echo '[2,"storage-info"]'
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF

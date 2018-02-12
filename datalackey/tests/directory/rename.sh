@@ -15,12 +15,12 @@ mkdir "$STORE"
 
 (
 echo '{"label":123,"label2":4}'
-echo '[1,"list"]'
+echo '[1,"storage-info"]'
 echo '[2,"rename","label"]'
 echo '[3,"rename","label","label2"]'
-echo '[4,"list"]'
+echo '[4,"storage-info"]'
 echo '[5,"rename","label2","label3"]'
-echo '[6,"list"]'
+echo '[6,"storage-info"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 

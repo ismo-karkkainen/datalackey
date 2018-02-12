@@ -130,7 +130,8 @@ static void ListMessage(Output& Out, const SimpleValue* Id,
         *writer << Structure::Null;
     else
         Feed(*writer, *Id);
-    *writer << ValueRef<std::string>(one);
+    if (one != nullptr)
+        *writer << ValueRef<std::string>(one);
     for (auto arg : List)
         Feed(*writer, *arg);
     *writer << End;
@@ -146,7 +147,8 @@ static void ListMessage(Output& Out, const SimpleValue* Id,
         *writer << Structure::Null;
     else
         Feed(*writer, *Id);
-    *writer << ValueRef<std::string>(one);
+    if (one != nullptr)
+        *writer << ValueRef<std::string>(one);
     for (auto arg : List)
         *writer << ValueRef<std::string>(arg);
     *writer << End;

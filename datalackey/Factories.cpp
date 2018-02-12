@@ -13,6 +13,7 @@
 #include "RenameCommand.hpp"
 #include "VersionCommand.hpp"
 #include "ProcessesCommand.hpp"
+#include "StorageInfoCommand.hpp"
 #include "RunCommand.hpp"
 #include "FeedCommand.hpp"
 #include "EndFeedCommand.hpp"
@@ -34,6 +35,7 @@ MessageHandler* MakeMessageHandler(const char *const Format,
     if (Format == nullptr || !strcmp(Format, "JSON")) {
         CommandHandler* ch = new CommandHandlerJSON(Out);
         ch->AddCommand(new ListCommand("list", Out, S));
+        ch->AddCommand(new StorageInfoCommand("storage-info", Out, S));
         ch->AddCommand(new GetCommand("get", Out, S));
         ch->AddCommand(new DeleteCommand("delete", Out, S));
         ch->AddCommand(new RenameCommand("rename", Out, S));

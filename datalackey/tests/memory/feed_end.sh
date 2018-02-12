@@ -28,7 +28,7 @@ echo '[3,"feed",1,"input","label","in2"]'
 sleep 1
 echo '[4,"end-feed",1]'
 sleep 1
-echo '[5,"list"]'
+echo '[5,"storage-info"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 

@@ -33,10 +33,10 @@ sleep 1
 echo '[4,"end-feed",1]'
 sleep 1
 echo '[5,"list"]'
-) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
+) | $DL -d "$STORE" -i stdin JSON -o stdout JSON | sort |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
-cat > $EXP <<EOF
+cat << EOF | sort > $EXP
 [null,"stored","label"]
 [1,"running",pid]
 [1,"stored","fed-in1"]
@@ -45,7 +45,7 @@ cat > $EXP <<EOF
 [1,"exit",0]
 [1,"input","closed"]
 [1,"finished"]
-[5,{"fed-in1":{"JSON":3},"fed-in2":{"JSON":3},"label":{"JSON":3}}]
+[5,"fed-in1","fed-in2","label"]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

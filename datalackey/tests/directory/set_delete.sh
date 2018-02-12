@@ -13,7 +13,7 @@ STORE="$(pwd)/td"
 rm -rf "$STORE"
 mkdir "$STORE"
 
-echo '{"label":1234}[1,"list"][2,"delete","missing","label",null,4][3,"list"]' |
+echo '{"label":1234}[1,"storage-info"][2,"delete","missing","label",null,4][3,"storage-info"]' |
 $DL -d "$STORE" -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF

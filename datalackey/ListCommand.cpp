@@ -30,28 +30,16 @@ void ListCommand::Perform(
         return;
     }
     auto results = storage.List();
-    std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
-    *writer << Array; // Start message array.
-    Feed(*writer, Id);
-    *writer << Dictionary; // Start label dictionary.
+    std::vector<std::string> labels;
+    labels.reserve(results.size());
     StringValue label("");
     std::string format;
     size_t size;
-    if (!results.empty()) {
-        std::tie(label, format, size) = results[0];
-        *writer << ValueRef<std::string>(label) << Dictionary
-            << ValueRef<std::string>(format) << NumberRef<size_t>(size);
-        StringValue previous(label);
-        for (size_t k = 1; k < results.size(); ++k) {
-            std::tie(label, format, size) = results[k];
-            if (previous != label) {
-                // Close previous format:size dictionary and start new.
-                *writer << End << ValueRef<std::string>(label) << Dictionary;
-                previous = label;
-            }
-            *writer << ValueRef<std::string>(format) << NumberRef<size_t>(size);
-        }
-        *writer << End; // Close previous format:size dictionary.
+    for (size_t k = 0; k < results.size(); ++k) {
+        std::tie(label, format, size) = results[k];
+        format = label.String();
+        if (labels.empty() || labels.back() != format)
+            labels.push_back(format);
     }
-    *writer << End << End; // Close label dictionary and message array.
+    ListMessage(out, Id, nullptr, labels);
 }
