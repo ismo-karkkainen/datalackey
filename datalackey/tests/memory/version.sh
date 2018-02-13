@@ -13,8 +13,11 @@ EXP="${B}_expected.txt"
 echo '[1,"version"]' |
 $DL -m -i stdin JSON -o stdout JSON > $OUT
 
+VER=$(cat $VH | grep "Version " | sed 's/;//' | awk '{ printf("%s", $NF) }')
+INT=$(cat $VH | grep "Interface " | sed 's/;//' | awk '{ printf("%s", $NF) }')
+
 cat > $EXP <<EOF
-[1,{"version":$(cat $VH | grep "Version " | awk '{ printf("%s", $NF) }' | sed 's/;//')}]
+[1,{"version":$VER,"interface":$INT}]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP

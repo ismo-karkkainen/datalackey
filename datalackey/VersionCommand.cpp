@@ -35,6 +35,6 @@ void VersionCommand::Perform(
     Feed(*writer, Id);
     *writer << Dictionary
         << ValueRef<std::string>("version") << NumberRef<int>(Version)
-        // Maybe add a list of supported formats. And such.
-        << End << End;
+        << ValueRef<std::string>("interface") << NumberRef<int>(Interface)
+        << End << End; // Dictionary and array.
 }

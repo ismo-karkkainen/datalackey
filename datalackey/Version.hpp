@@ -10,5 +10,6 @@
 #define Version_hpp
 
 const int Version = 1;
+const int Interface = 1;
 
 #endif /* Version_hpp */

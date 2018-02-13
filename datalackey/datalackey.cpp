@@ -100,6 +100,8 @@ int main(int argc, char** argv) {
         DirectoryStorage* ds = new DirectoryStorage(dir, mode);
         DataGroup::SetDataOwnerGenerator(*ds);
         storage = ds;
+        if (!ds->IsValid())
+            return 12;
     } else if (opt::Bool("memory", 0)) {
         MemoryStorage* ms = new MemoryStorage();
         DataGroup::SetDataOwnerGenerator(*ms);
@@ -153,7 +155,7 @@ int main(int argc, char** argv) {
         bool did_something = scanner->Scan();
         did_something = procs->CleanFinished() || did_something;
         if (!did_something)
-            Nap(100000000);
+            Nap(20000000); // 20 ms.
     }
 
     delete procs;
