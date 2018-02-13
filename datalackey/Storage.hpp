@@ -25,9 +25,7 @@ public:
 
     virtual bool IsValid() const = 0;
 
-    // Return label, format, size in bytes.
-    virtual std::vector<std::tuple<StringValue,std::string,size_t>> List() const = 0;
-
+    virtual std::vector<std::string> List() const = 0;
     virtual bool Delete(const StringValue& L, Output* AlreadyNotified = nullptr) = 0;
     virtual bool Rename(const StringValue& Old, const StringValue& New,
         Output* AlreadyNotified = nullptr) = 0;
@@ -36,6 +34,9 @@ public:
 
     virtual void Prepare(const char *const Format,
         std::vector<std::shared_ptr<ProcessInput>>& Inputs) = 0;
+
+    // Return label, format, size in bytes.
+    virtual std::vector<std::tuple<StringValue,std::string,size_t>> Info() const = 0;
 };
 
 

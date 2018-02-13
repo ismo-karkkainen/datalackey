@@ -45,7 +45,7 @@ public:
 
     bool IsValid() const;
 
-    std::vector<std::tuple<StringValue,std::string,size_t>> List() const;
+    std::vector<std::string> List() const;
 
     bool Delete(const StringValue& L, Output* AlreadyNotified = nullptr);
     bool Rename(const StringValue& Old, const StringValue& New,
@@ -55,6 +55,8 @@ public:
 
     void Prepare(const char *const Format,
         std::vector<std::shared_ptr<ProcessInput>>& Inputs);
+
+    std::vector<std::tuple<StringValue,std::string,size_t>> Info() const;
 
     DataOwner* Generate();
 };

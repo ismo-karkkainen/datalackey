@@ -9,7 +9,7 @@
 #include "DirectoryStorage.hpp"
 #include "Notifications.hpp"
 #include "FileOwner.hpp"
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <dirent.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -210,18 +210,11 @@ bool DirectoryStorage::IsValid() const {
     return !root.empty();
 }
 
-std::vector<std::tuple<StringValue,std::string,size_t>> DirectoryStorage::List() const
-{
-    std::vector<std::tuple<StringValue,std::string,size_t>> results;
+std::vector<std::string> DirectoryStorage::List() const {
+    std::vector<std::string> results;
     std::lock_guard<std::mutex> lock(label2data_mutex);
-    for (auto iter : label2data) {
-        std::lock_guard<std::mutex> value_lock(iter.second->Mutex());
-        const auto avail = iter.second->Values();
-        for (const auto format_data : avail) {
-            results.push_back(std::make_tuple(
-                iter.first, format_data.first, format_data.second->Size()));
-        }
-    }
+    for (auto& iter : label2data)
+        results.push_back(iter.first.String());
     return results;
 }
 
@@ -291,6 +284,21 @@ void DirectoryStorage::Prepare(const char *const Format,
         std::lock_guard<std::mutex> value_lock(source->second->Mutex());
         iter->SetData(source->second->Find(fmt));
     }
+}
+
+std::vector<std::tuple<StringValue,std::string,size_t>> DirectoryStorage::Info() const
+{
+    std::vector<std::tuple<StringValue,std::string,size_t>> results;
+    std::lock_guard<std::mutex> lock(label2data_mutex);
+    for (auto& iter : label2data) {
+        std::lock_guard<std::mutex> value_lock(iter.second->Mutex());
+        const auto avail = iter.second->Values();
+        for (const auto format_data : avail) {
+            results.push_back(std::make_tuple(
+                iter.first, format_data.first, format_data.second->Size()));
+        }
+    }
+    return results;
 }
 
 DataOwner* DirectoryStorage::Generate() {

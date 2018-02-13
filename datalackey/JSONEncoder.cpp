@@ -7,6 +7,9 @@
 //
 
 #include "JSONEncoder.hpp"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 
 void JSONEncoder::add_separator(RawData& Buffer) {
@@ -87,14 +90,8 @@ bool JSONEncoder::Encode(RawData& Buffer, Structure S) {
 bool JSONEncoder::Encode(RawData& Buffer, const ValueReference& VR) {
     add_separator(Buffer);
     if (VR.IsChar() || VR.IsString()) {
-        Buffer.Append('"');
-        std::string s = VR.String();
-        for (auto c: s) {
-            if (c == '"' || c == '\\')
-                Buffer.Append('\\');
-            Buffer.Append(c);
-        }
-        Buffer.Append('"');
+        std::string encoded(json(VR.String()).dump());
+        Buffer.Append(encoded.cbegin(), encoded.cend());
     } else {
         Buffer.Append(VR.String().c_str());
     }

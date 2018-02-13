@@ -11,7 +11,7 @@
 #include "NumberValue.hpp"
 #include "StringValue.hpp"
 #include "NullValue.hpp"
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <cmath>
 #include <vector>
 #include <memory>

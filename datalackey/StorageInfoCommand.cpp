@@ -29,7 +29,7 @@ void StorageInfoCommand::Perform(
         Error(out, Id, "argument", "unexpected");
         return;
     }
-    auto results = storage.List();
+    auto results = storage.Info();
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
     Feed(*writer, Id);

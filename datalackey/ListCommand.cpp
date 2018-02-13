@@ -29,17 +29,6 @@ void ListCommand::Perform(
         Error(out, Id, "argument", "unexpected");
         return;
     }
-    auto results = storage.List();
-    std::vector<std::string> labels;
-    labels.reserve(results.size());
-    StringValue label("");
-    std::string format;
-    size_t size;
-    for (size_t k = 0; k < results.size(); ++k) {
-        std::tie(label, format, size) = results[k];
-        format = label.String();
-        if (labels.empty() || labels.back() != format)
-            labels.push_back(format);
-    }
-    ListMessage(out, Id, nullptr, labels);
+    auto result = storage.List();
+    ListMessage(out, Id, nullptr, result);
 }
