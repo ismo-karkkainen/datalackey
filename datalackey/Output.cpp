@@ -212,6 +212,7 @@ void Output::feeder() {
                 break;
         }
         // We had nothing to write. Wait for something to arrive.
+        channel.Flush();
         output_added.wait(lock);
         lock.unlock();
     }
@@ -221,7 +222,7 @@ void Output::feeder() {
 Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages,
     Output* ControllerOutput)
     : controller_output(ControllerOutput), encoder(E), channel(Main),
-    terminate(false), channel_feeder(nullptr), eof(false)
+    terminate(false), channel_feeder(nullptr), eof(false), failed(false)
 {
     if (encoder.Format() == nullptr)
         eof = true;

@@ -41,7 +41,6 @@ CommandHandler::~CommandHandler() {
 }
 
 void CommandHandler::AddCommand(Command* C) {
-    auto iter = handlers.find(C->Name());
-    assert(iter == handlers.end());
+    assert(handlers.find(C->Name()) == handlers.end());
     handlers[C->Name()] = C;
 }

@@ -1,12 +1,31 @@
 cmake_minimum_required(VERSION 3.5)
 project(datalackey CXX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    set(GenericOptions -std=c++14 -Wall)
+    set(ReleaseOptions -O2)
+    set(AlwaysSmallOptions -Os)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(GenericOptions -std=c++14 -Wall)
+    set(ReleaseOptions -O2)
+    set(AlwaysSmallOptions -Os)
+#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+#  # using Intel C++
+#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+#  # using Visual Studio C++
+else()
+    set(GenericOptions "")
+    set(ReleaseOptions "")
+endif()
+
+add_compile_options( ${GenericOptions} )
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
+    add_compile_options( ${ReleaseOptions} )
+endif()
 
 include_directories( /usr/local/include/ )
 include_directories( datalackey )
 link_directories( /usr/local/lib/ )
-#link_libraries( boost_system boost_filesystem )
 
 enable_testing()
 
@@ -83,6 +102,57 @@ list(APPEND Sources datalackey/Options.cpp)
 list(APPEND Sources datalackey/datalackey.cpp)
 
 add_executable( datalackey ${Sources} )
+
+list(APPEND AlwaysSmall ${Sources})
+list(REMOVE_ITEM AlwaysSmall datalackey/RawData.cpp)
+#list(REMOVE_ITEM AlwaysSmall datalackey/FileOwner.cpp) # File I/O
+list(REMOVE_ITEM AlwaysSmall datalackey/DataGroup.cpp)
+#list(REMOVE_ITEM AlwaysSmall datalackey/Storage.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/StorageDataSink.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/Literal.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/ValueReference.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/Encoder.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/NullEncoder.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/OutputChannel.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/NullOutput.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/OutputItem.cpp) # Base
+list(REMOVE_ITEM AlwaysSmall datalackey/Output.cpp)
+#list(REMOVE_ITEM AlwaysSmall datalackey/Notifications.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/FileDescriptorOutput.cpp) # File I/O
+#list(REMOVE_ITEM AlwaysSmall datalackey/MessageHandler.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/StorageDataSink.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/InputChannel.cpp) # Base
+list(REMOVE_ITEM AlwaysSmall datalackey/InputScanner.cpp)
+#list(REMOVE_ITEM AlwaysSmall datalackey/InputScannerRawMessage.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/InputScannerDiscard.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/FileDescriptorInput.cpp) # File I/O
+#list(REMOVE_ITEM AlwaysSmall datalackey/StringValueMapper.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/StringValueMapperSimple.cpp) # Simple
+list(REMOVE_ITEM AlwaysSmall datalackey/JSONEncoder.cpp)
+list(REMOVE_ITEM AlwaysSmall datalackey/StorageDataSinkJSON.cpp)
+list(REMOVE_ITEM AlwaysSmall datalackey/InputScannerJSON.cpp)
+list(REMOVE_ITEM AlwaysSmall datalackey/MessageRawJSON.cpp)
+#list(REMOVE_ITEM AlwaysSmall datalackey/Command.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/CommandHandler.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/ListCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/StorageInfoCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/GetCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/DeleteCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/RenameCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/VersionCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/NoOperationCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/ProcessInput.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/Process.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall datalackey/Processes.cpp) # Base
+list(REMOVE_ITEM AlwaysSmall datalackey/LocalProcess.cpp)
+list(REMOVE_ITEM AlwaysSmall datalackey/CommandHandlerJSON.cpp)
+#list(REMOVE_ITEM AlwaysSmall datalackey/Factories.cpp) # Simple
+list(REMOVE_ITEM AlwaysSmall datalackey/LocalProcesses.cpp)
+#message(${AlwaysSmall})
+
+set_source_files_properties(${AlwaysSmall} PROPERTIES COMPILE_FLAGS ${AlwaysSmallOptions})
+
+install(TARGETS datalackey RUNTIME DESTINATION libexec)
 
 #
 # Tests.
@@ -213,3 +283,6 @@ add_test(NAME d_relative_dir COMMAND d_relative_dir.sh $<TARGET_FILE:datalackey>
 add_executable(d_bad_dir.sh IMPORTED)
 set_property(TARGET d_bad_dir.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/directory/bad_dir.sh)
 add_test(NAME d_bad_dir COMMAND d_bad_dir.sh $<TARGET_FILE:datalackey> )
+add_executable(d_set_reload.sh IMPORTED)
+set_property(TARGET d_set_reload.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/directory/set_reload.sh)
+add_test(NAME d_set_reload COMMAND d_set_reload.sh $<TARGET_FILE:datalackey> )
