@@ -48,7 +48,7 @@ MessageHandler* MakeMessageHandler(const char *const Format,
         ch->AddCommand(new ProcessesCommand("processes", Out, P));
         return ch;
     }
-    if (!strcmp(Format, "raw")) {
+    if (!strcmp(Format, "bytes")) {
         return new MessageRawJSON(Out, *Identifier);
     }
     return nullptr;
@@ -60,7 +60,7 @@ StorageDataSink* MakeStorageDataSink(const char *const Format,
     if (Format == nullptr || !strcmp(Format, "JSON")) {
         return new StorageDataSinkJSON(S, Identifier, Out, M);
     }
-    if (!strcmp(Format, "raw")) {
+    if (!strcmp(Format, "bytes")) {
         // If raw output storage as data is ever made, change this.
         return new StorageDataSinkJSON(S, nullptr, Out);
     }
@@ -77,7 +77,7 @@ InputScanner* MakeInputScanner(const char *const Format,
     if (!strcmp(Format, "JSON")) {
         return new InputScannerJSON(IC, MH, SDS, Out, Identifier);
     }
-    if (!strcmp(Format, "raw")) {
+    if (!strcmp(Format, "bytes")) {
         return new InputScannerRawMessage(IC, MH, SDS);
     }
     return nullptr;

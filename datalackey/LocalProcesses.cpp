@@ -290,7 +290,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
                     !is_string(k + 1, command, Parameters, Out, Id))
                     return;
                 std::string format = Parameters[k]->String();
-                if (format != "JSON" && format != "raw") {
+                if (format != "JSON" && format != "bytes") {
                     Error(Out, Id, "argument", "unknown", command.c_str(),
                         direction.c_str());
                     return;

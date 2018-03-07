@@ -144,7 +144,7 @@ void LocalProcess::real_runner() {
         }
         // Output response of raw data goes to output of launcher.
         MessageHandler* mh = MakeMessageHandler(settings[0].c_str(),
-            (settings[0] == "raw") ? out : *child_feed, storage, *owner, id);
+            (settings[0] == "bytes") ? out : *child_feed, storage, *owner, id);
         StorageDataSink* sds = MakeStorageDataSink(
             settings[0].c_str(), storage, renamer, *child_feed, id);
         InputScanner* is = MakeInputScanner(
