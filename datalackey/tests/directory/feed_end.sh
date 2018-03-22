@@ -45,7 +45,7 @@ cat << EOF | sort > $EXP
 [1,"exit",0]
 [1,"input","closed"]
 [1,"finished"]
-[5,"fed-in1","fed-in2","label"]
+[5,"list","","fed-in1","fed-in2","label"]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

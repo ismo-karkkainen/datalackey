@@ -8,7 +8,7 @@
 
 #include "FeedCommand.hpp"
 #include "Value_t.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 
 
 FeedCommand::FeedCommand(const char *const Name, Output& Out, Processes& P)
@@ -22,7 +22,7 @@ void FeedCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (Arguments.empty()) {
-        Error(out, Id, "argument", "missing");
+        Message(out, Id, Name().c_str(), "error", "argument", "missing");
         return;
     }
     processes.Feed(out, Id, Arguments);

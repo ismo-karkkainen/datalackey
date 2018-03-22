@@ -8,8 +8,9 @@
 
 #include "ProcessesCommand.hpp"
 #include "Number_t.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include "NullValue.hpp"
+#include "Value_t.hpp"
 #include <memory>
 
 
@@ -25,14 +26,16 @@ void ProcessesCommand::Perform(
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
-        Error(out, Id, "argument", "unexpected");
+        Message(out, Id, Name().c_str(), "error", "argument", "unexpected");
         return;
     }
     auto results = processes.List();
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
-    *writer << Dictionary; // Start process id to PID dictionary.
+    *writer << ValueRef<std::string>(Name())
+        << ValueRef<std::string>("")
+        << Dictionary; // Start process id to PID dictionary.
     SimpleValue* id(nullptr);
     pid_t pid;
     for (size_t k = 0; k < results.size(); ++k) {

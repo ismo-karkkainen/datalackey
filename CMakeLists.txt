@@ -58,7 +58,7 @@ list(APPEND Sources datalackey/OutputChannel.cpp)
 list(APPEND Sources datalackey/NullOutput.cpp)
 list(APPEND Sources datalackey/OutputItem.cpp)
 list(APPEND Sources datalackey/Output.cpp)
-list(APPEND Sources datalackey/Notifications.cpp)
+list(APPEND Sources datalackey/Messages.cpp)
 list(APPEND Sources datalackey/FileDescriptorOutput.cpp)
 list(APPEND Sources datalackey/MessageHandler.cpp)
 list(APPEND Sources datalackey/StorageDataSink.cpp)
@@ -117,7 +117,7 @@ list(REMOVE_ITEM AlwaysSmall datalackey/DataGroup.cpp)
 #list(REMOVE_ITEM AlwaysSmall datalackey/NullOutput.cpp) # Simple
 #list(REMOVE_ITEM AlwaysSmall datalackey/OutputItem.cpp) # Base
 list(REMOVE_ITEM AlwaysSmall datalackey/Output.cpp)
-#list(REMOVE_ITEM AlwaysSmall datalackey/Notifications.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall datalackey/Messages.cpp) # Simple
 #list(REMOVE_ITEM AlwaysSmall datalackey/FileDescriptorOutput.cpp) # File I/O
 #list(REMOVE_ITEM AlwaysSmall datalackey/MessageHandler.cpp) # Base
 #list(REMOVE_ITEM AlwaysSmall datalackey/StorageDataSink.cpp) # Base
@@ -150,7 +150,7 @@ list(REMOVE_ITEM AlwaysSmall datalackey/CommandHandlerJSON.cpp)
 list(REMOVE_ITEM AlwaysSmall datalackey/LocalProcesses.cpp)
 #message(${AlwaysSmall})
 
-set_source_files_properties(${AlwaysSmall} PROPERTIES COMPILE_FLAGS ${AlwaysSmallOptions})
+#set_source_files_properties(${AlwaysSmall} PROPERTIES COMPILE_FLAGS ${AlwaysSmallOptions})
 
 install(TARGETS datalackey RUNTIME DESTINATION libexec)
 

@@ -34,7 +34,8 @@ private:
 
     std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> feed(
         Output& Out, const SimpleValue& Id,
-        std::vector<std::shared_ptr<SimpleValue>>& Parameters, Encoder* E);
+        std::vector<std::shared_ptr<SimpleValue>>& Parameters, Encoder* E,
+        const char *const cmd);
 
 public:
     LocalProcesses(Storage& S);

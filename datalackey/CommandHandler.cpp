@@ -7,29 +7,8 @@
 //
 
 #include "CommandHandler.hpp"
-#include "Notifications.hpp"
 #include <cassert>
 
-
-bool CommandHandler::error(const char *const one) {
-    Error(out, one);
-    return false;
-}
-
-bool CommandHandler::error(const char *const one, const char *const two,
-    const char *const three, const char* const four)
-{
-    Error(out, one, two, three, four);
-    return true;
-}
-
-bool CommandHandler::error(SimpleValue* Id, const char *const one,
-    const char *const two, const char *const three, const char* const four)
-{
-    Error(out, *Id, one, two, three, four);
-    delete Id; // For convenience since caller is returning on this call.
-    return true;
-}
 
 CommandHandler::CommandHandler(Output& Out)
     : out(Out)

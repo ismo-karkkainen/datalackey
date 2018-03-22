@@ -7,7 +7,7 @@
 //
 
 #include "MemoryStorage.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include "MemoryOwner.hpp"
 #include <cassert>
 
@@ -120,7 +120,7 @@ bool MemoryStorage::Delete(const StringValue& L, Output* AlreadyNotified) {
         std::lock_guard<std::mutex> lock(GloballyMessageableOutputs.Mutex());
         for (Output* out : GloballyMessageableOutputs.Outputs())
             if (out != AlreadyNotified)
-                Message(*out, "deleted", L.String().c_str());
+                Message(*out, "data", "deleted", L.String().c_str());
         return true;
     }
     return false;
@@ -141,7 +141,7 @@ bool MemoryStorage::Rename(const StringValue& Old, const StringValue& New,
     std::lock_guard<std::mutex> out_lock(GloballyMessageableOutputs.Mutex());
     for (Output* out : GloballyMessageableOutputs.Outputs())
         if (out != AlreadyNotified)
-            Message(*out,
+            Message(*out, "data",
                 "renamed", Old.String().c_str(), New.String().c_str());
     return true;
 }
@@ -163,7 +163,7 @@ void MemoryStorage::Add(DataGroup& G, Output* AlreadyNotified) {
     std::lock_guard<std::mutex> msg_lock(GloballyMessageableOutputs.Mutex());
     for (Output* out : GloballyMessageableOutputs.Outputs())
         if (out != AlreadyNotified)
-            ListMessage(*out, "stored", labels);
+            ListMessage(*out, "data", "stored", labels);
 }
 
 void MemoryStorage::Prepare(const char *const Format,

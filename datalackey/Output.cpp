@@ -9,7 +9,7 @@
 #include "Output.hpp"
 #include "Value_t.hpp"
 #include "Structure.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include <cassert>
 
 
@@ -141,9 +141,18 @@ void Output::feeder() {
                         std::lock_guard<std::mutex> lock(
                             GloballyMessageableOutputs.Mutex());
                         for (auto op : GloballyMessageableOutputs.Outputs()) {
-                            if (op == controller_output || op == Output::first)
-                                Error(*op,
-                                    "read", input->Label()->String().c_str());
+                            if (op == controller_output)
+                                Message(*op, controller_output_identifier,
+                                    "error", "read",
+                                    input->Label()->String().c_str());
+                            else if (op == Output::first)
+                                Message(*op, "error", "read",
+                                    input->Label()->String().c_str());
+                            // No idea what the command is. Run, feed, get?
+                            // Technically bad enough to warrant special
+                            // handling in controller. Identifier is that of
+                            // run command.
+                            // Must add format once supported.
                         }
                     }
                     failed = true;
@@ -220,8 +229,9 @@ void Output::feeder() {
 }
 
 Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages,
-    Output* ControllerOutput)
-    : controller_output(ControllerOutput), encoder(E), channel(Main),
+    Output* ControllerOutput, SimpleValue* Identifier)
+    : controller_output(ControllerOutput),
+    controller_output_identifier(Identifier), encoder(E), channel(Main),
     terminate(false), channel_feeder(nullptr), eof(false), failed(false)
 {
     if (encoder.Format() == nullptr)

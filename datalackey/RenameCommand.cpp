@@ -8,7 +8,7 @@
 
 #include "RenameCommand.hpp"
 #include "Value_t.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 
 
 RenameCommand::RenameCommand(const char *const Name, Output& Out, Storage& S)
@@ -23,11 +23,11 @@ void RenameCommand::Perform(
 {
     // An array with output identifier and label pairs.
     if (Arguments.empty()) {
-        Error(out, Id, "argument", "missing");
+        Message(out, Id, Name().c_str(), "error", "argument", "missing");
         return;
     }
     if (Arguments.size() % 2 != 0) {
-        Error(out, Id, "argument", "pairless");
+        Message(out, Id, Name().c_str(), "error", "argument", "pairless");
         return;
     }
     std::vector<std::shared_ptr<SimpleValue>> missing, invalid;
@@ -41,13 +41,13 @@ void RenameCommand::Perform(
         if (label == nullptr || target == nullptr)
             continue;
         if (storage.Rename(*label, *target, &out))
-            Message(out, Id,
+            Message(out, Id, Name().c_str(),
                 "renamed", label->String().c_str(), target->String().c_str());
         else
             missing.push_back(Arguments[k]);
     }
     if (!invalid.empty())
-        ListMessage(out, Id, "invalid", invalid);
+        ListMessage(out, Id, Name().c_str(), "invalid", invalid);
     if (!missing.empty())
-        ListMessage(out, Id, "missing", missing);
+        ListMessage(out, Id, Name().c_str(), "missing", missing);
 }

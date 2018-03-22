@@ -9,7 +9,7 @@
 #include "ListCommand.hpp"
 #include "Value_t.hpp"
 #include "Number_t.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include "NullValue.hpp"
 #include <memory>
 
@@ -26,9 +26,9 @@ void ListCommand::Perform(
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
-        Error(out, Id, "argument", "unexpected");
+        Message(out, Id, Name().c_str(), "error", "argument", "unexpected");
         return;
     }
     auto result = storage.List();
-    ListMessage(out, Id, nullptr, result);
+    ListMessage(out, Id, Name().c_str(), "", result);
 }

@@ -8,7 +8,7 @@
 
 #include "VersionCommand.hpp"
 #include "Version.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include "Value_t.hpp"
 #include "Number_t.hpp"
 #include "NullValue.hpp"
@@ -27,13 +27,15 @@ void VersionCommand::Perform(
 {
     // An array with output identifier and labels.
     if (!Arguments.empty()) {
-        Error(out, Id, "argument", "unexpected");
+        Message(out, Id, Name().c_str(), "error", "argument", "unexpected");
         return;
     }
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array;
     Feed(*writer, Id);
-    *writer << Dictionary
+    *writer << ValueRef<std::string>(Name())
+        << ValueRef<std::string>("")
+        << Dictionary
         << ValueRef<std::string>("version") << NumberRef<int>(Version)
         << ValueRef<std::string>("interface") << NumberRef<int>(Interface)
         << End << End; // Dictionary and array.

@@ -22,16 +22,6 @@ protected:
     std::map<std::string,Command*> handlers;
     Output& out;
 
-    // Returns false. Used on format error.
-    bool error(const char *const one);
-    // Return true. For content errors.
-    bool error(const char *const one, const char *const two,
-        const char *const three = nullptr, const char *const four = nullptr);
-    // Deletes identifier due to the use as convenience function.
-    bool error(SimpleValue* Id, const char *const one,
-        const char *const two = nullptr, const char *const three = nullptr,
-        const char *const four = nullptr);
-
 public:
     CommandHandler(Output& Out);
     ~CommandHandler();

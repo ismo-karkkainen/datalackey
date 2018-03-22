@@ -17,6 +17,7 @@
 #include "RawData.hpp"
 #include "OutputItem.hpp"
 #include "ProcessInput.hpp"
+#include "SimpleValue.hpp"
 
 class Output;
 
@@ -81,6 +82,7 @@ private:
 
     // Not necessarily valid, use GloballyMessageableOutputs.
     Output* controller_output;
+    SimpleValue* controller_output_identifier;
 
     mutable std::mutex mutex;
     const Encoder& encoder;
@@ -102,7 +104,7 @@ private:
 
 public:
     Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages = true,
-        Output* ControllerOutput = nullptr);
+        Output* ControllerOutput = nullptr, SimpleValue* Identifier = nullptr);
     ~Output();
 
     void NoGlobalMessages();

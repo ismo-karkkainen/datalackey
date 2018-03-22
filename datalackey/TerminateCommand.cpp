@@ -8,7 +8,7 @@
 
 #include "TerminateCommand.hpp"
 #include "Value_t.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 
 
 TerminateCommand::TerminateCommand(
@@ -24,7 +24,7 @@ void TerminateCommand::Perform(
 {
     // An array with process identifiers.
     if (Arguments.empty()) {
-        Error(out, Id, "argument", "missing");
+        Message(out, Id, Name().c_str(), "error", "argument", "missing");
         return;
     }
     std::vector<std::shared_ptr<SimpleValue>> terminated, missing;
@@ -35,7 +35,7 @@ void TerminateCommand::Perform(
             missing.push_back(arg);
     }
     if (!missing.empty())
-        ListMessage(out, Id, "missing", missing);
+        ListMessage(out, Id, Name().c_str(), "missing", missing);
     if (!terminated.empty())
-        ListMessage(out, Id, "terminated", terminated);
+        ListMessage(out, Id, Name().c_str(), "terminated", terminated);
 }

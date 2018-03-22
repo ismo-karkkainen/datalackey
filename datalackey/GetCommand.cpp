@@ -8,7 +8,7 @@
 
 #include "GetCommand.hpp"
 #include "Value_t.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include "NullValue.hpp"
 #include "ProcessInput.hpp"
 #include <memory>
@@ -26,7 +26,7 @@ void GetCommand::Perform(
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
-        Error(out, Id, "argument", "missing");
+        Message(out, Id, Name().c_str(), "error", "argument", "missing");
         return;
     }
     // Filter out invalid values.
@@ -41,7 +41,7 @@ void GetCommand::Perform(
             std::shared_ptr<ProcessInput>(new ProcessInput(arg, arg)));
     }
     if (!invalid.empty())
-        ListMessage(out, Id, "invalid", invalid);
+        ListMessage(out, Id, Name().c_str(), "invalid", invalid);
     // Process without input can call this so do nothing.
     // (In theory should "output" the data but there is no format to use.)
     if (out.Format() == nullptr)
@@ -54,12 +54,14 @@ void GetCommand::Perform(
         if (!res->Data())
             missing.push_back(res->SharedLabel());
     if (!missing.empty())
-        ListMessage(out, Id, "missing", missing);
+        ListMessage(out, Id, Name().c_str(), "missing", missing);
     // Write out remaining results.
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
-    *writer << Dictionary; // Start data dictionary.
+    *writer << ValueRef<std::string>(Name())
+        << ValueRef<std::string>("")
+        << Dictionary; // Start data dictionary.
     std::vector<std::shared_ptr<SimpleValue>> failed;
     for (size_t k = 0; k < results.size(); ++k) {
         std::shared_ptr<DataReader> data = results[k]->Data();
@@ -78,5 +80,5 @@ void GetCommand::Perform(
     // If there were any failures, report them but the chances of the controller
     // getting these in any sensible manner are slim, maybe with one-line JSON.
     if (!failed.empty())
-        ListMessage(out, Id, "failed", failed);
+        ListMessage(out, Id, Name().c_str(), "failed", failed);
 }

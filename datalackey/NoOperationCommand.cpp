@@ -7,7 +7,7 @@
 //
 
 #include "NoOperationCommand.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 
 
 NoOperationCommand::NoOperationCommand(const char *const Name, Output& Out)
@@ -20,5 +20,5 @@ NoOperationCommand::~NoOperationCommand() {
 void NoOperationCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    Message(out, Id);
+    Message(out, Id, Name().c_str(), "");
 }

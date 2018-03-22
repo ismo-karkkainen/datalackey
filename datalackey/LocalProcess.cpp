@@ -11,7 +11,7 @@
 #include "FileDescriptorInput.hpp"
 #include "FileDescriptorOutput.hpp"
 #include "Time.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include "JSONEncoder.hpp"
 #include "NullEncoder.hpp"
 #include "NullOutput.hpp"
@@ -76,14 +76,14 @@ LocalProcess::ChildState LocalProcess::get_child_state(ChildState Previous) {
         return Running;
     } else if (waited == pid) {
         if (WIFEXITED(status)) {
-            Message(out, *id, WEXITSTATUS(status), "exit");
+            Message(out, *id, "run", "exit", WEXITSTATUS(status));
             return None;
         } else if (WIFSIGNALED(status)) {
-            Message(out, *id, WTERMSIG(status), "signal");
+            Message(out, *id, "run", "signal", WTERMSIG(status));
             return None;
         } else if (WIFSTOPPED(status)) {
             if (Previous != Stopped)
-                Message(out, *id, WSTOPSIG(status), "stopped");
+                Message(out, *id, "run", "stopped", WSTOPSIG(status));
             return Stopped;
         }
     } else if (waited == -1) {
@@ -104,14 +104,14 @@ void LocalProcess::real_runner() {
     }
     for (int k = 0; k < 2; ++k) {
         if (-1 == pipe(stdouterr_child[k])) {
-            Error(out, *id, "failure", "pipe");
+            Message(out, *id, "run", "error", "pipe");
             return;
         }
     }
     if (uses_stdin) {
         errno = 0;
         if (-1 == pipe(stdin_child)) {
-            Error(out, *id, "failure", "pipe");
+            Message(out, *id, "run", "error", "pipe");
             return;
         }
         fcntl(stdin_child[1], F_SETNOSIGPIPE);
@@ -121,7 +121,8 @@ void LocalProcess::real_runner() {
     } else {
         child_input = new NullOutput();
     }
-    child_feed = new Output(*child_input_enc, *child_input, notify_data, &out);
+    child_feed = new Output(*child_input_enc, *child_input, notify_data,
+        &out, id);
     // Create output handling objects for each output.
     child_output.reserve(outputs_info.size() < 2 ? 2 : outputs_info.size());
     bool used_std[2] = { false, false };
@@ -129,14 +130,14 @@ void LocalProcess::real_runner() {
         InputChannel* ic = nullptr;
         if (settings[1] == "stdout") {
             if (used_std[0]) {
-                Error(out, *id, "duplicate", "stdout");
+                Message(out, *id, "run", "duplicate", "stdout");
                 return;
             }
             ic = new FileDescriptorInput(stdouterr_child[0][0]);
             used_std[0] = true;
         } else if (settings[1] == "stderr") {
             if (used_std[1]) {
-                Error(out, *id, "duplicate", "stderr");
+                Message(out, *id, "run", "duplicate", "stderr");
                 return;
             }
             ic = new FileDescriptorInput(stdouterr_child[1][0]);
@@ -181,9 +182,9 @@ void LocalProcess::real_runner() {
         int err = errno;
         if (pid == -1) {
             if (err == EAGAIN)
-                Error(out, *id, "no-processes");
+                Message(out, *id, "run", "error", "no-processes");
             else if (err == ENOMEM)
-                Error(out, *id, "no-memory");
+                Message(out, *id, "run", "error", "no-memory");
             return;
         }
         if (stdin_child[0] != -1)
@@ -240,7 +241,7 @@ void LocalProcess::real_runner() {
         }
         exit(54); // Something else.
     }
-    Message(out, *id, pid, "running");
+    Message(out, *id, "run", "running", pid);
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
     bool feed_open = !child_feed->Failed() && !child_feed->Closed();
@@ -291,7 +292,7 @@ void LocalProcess::runner() {
     if (stdouterr_child[1][0] != -1)
         close(stdouterr_child[1][0]);
     pid = 0;
-    Message(out, *id, terminate ? "terminated" : "finished");
+    Message(out, *id, "run", terminate ? "terminated" : "finished");
     owner->HasFinished(*id);
 }
 
@@ -344,12 +345,12 @@ bool LocalProcess::Run() {
         worker = new std::thread(&LocalProcess::runner, this);
     }
     catch (const std::system_error& e) {
-        Error(out, *id, "thread");
+        Message(out, *id, "run", "error", "no-thread");
         owner->HasFinished(*id);
         return false;
     }
     catch (const std::exception& e) {
-        Error(out, *id, "exception");
+        Message(out, *id, "run", "error", "exception");
         owner->HasFinished(*id);
         return false;
     }

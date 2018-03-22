@@ -7,7 +7,7 @@
 //
 
 #include "StorageDataSinkJSON.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -19,7 +19,8 @@ bool StorageDataSinkJSON::start_item() {
         json s = json::parse(key.cbegin(), key.cend());
         key.resize(0);
         if (!s.is_string()) {
-            Error(notifications, identifier, "identifier", "not-string");
+            Message(notifications, identifier,
+                "error", "identifier", "not-string");
             return false;
         }
         name = s;
@@ -62,7 +63,7 @@ void StorageDataSinkJSON::end_group() {
             std::lock_guard<std::mutex> lg(GloballyMessageableOutputs.Mutex());
             for (Output* out : GloballyMessageableOutputs.Outputs())
                 if (out == notifications.ControllerOutput())
-                    ListMessage(*out, *identifier, "stored", labels);
+                    ListMessage(*out, *identifier, "data", "stored", labels);
         }
         storage.Add(*group, notifications.ControllerOutput());
     }
@@ -71,7 +72,7 @@ void StorageDataSinkJSON::end_group() {
 }
 
 bool StorageDataSinkJSON::error_format() const {
-    Error(notifications, identifier, "format");
+    Message(notifications, identifier, "error", "format");
     return false;
 }
 

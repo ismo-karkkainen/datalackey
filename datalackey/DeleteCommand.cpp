@@ -8,7 +8,7 @@
 
 #include "DeleteCommand.hpp"
 #include "Value_t.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 
 
 DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
@@ -23,7 +23,7 @@ void DeleteCommand::Perform(
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
-        Error(out, Id, "argument", "missing");
+        Message(out, Id, Name().c_str(), "error", "argument", "missing");
         return;
     }
     std::vector<std::shared_ptr<SimpleValue>> deleted, missing, invalid;
@@ -38,9 +38,9 @@ void DeleteCommand::Perform(
             invalid.push_back(arg);
     }
     if (!invalid.empty())
-        ListMessage(out, Id, "invalid", invalid);
+        ListMessage(out, Id, Name().c_str(), "invalid", invalid);
     if (!missing.empty())
-        ListMessage(out, Id, "missing", missing);
+        ListMessage(out, Id, Name().c_str(), "missing", missing);
     if (!deleted.empty())
-        ListMessage(out, Id, "deleted", deleted);
+        ListMessage(out, Id, Name().c_str(), "deleted", deleted);
 }

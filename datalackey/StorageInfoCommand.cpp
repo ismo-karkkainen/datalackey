@@ -9,7 +9,7 @@
 #include "StorageInfoCommand.hpp"
 #include "Value_t.hpp"
 #include "Number_t.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include "NullValue.hpp"
 #include <memory>
 
@@ -26,14 +26,16 @@ void StorageInfoCommand::Perform(
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
-        Error(out, Id, "argument", "unexpected");
+        Message(out, Id, Name().c_str(), "error", "argument", "unexpected");
         return;
     }
     auto results = storage.Info();
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
     Feed(*writer, Id);
-    *writer << Dictionary; // Start label dictionary.
+    *writer << ValueRef<std::string>(Name())
+        << ValueRef<std::string>("")
+        << Dictionary; // Start label dictionary.
     StringValue label("");
     std::string format;
     size_t size;

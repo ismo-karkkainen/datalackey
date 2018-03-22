@@ -18,7 +18,7 @@ cat > $EXP <<EOF
 [2,"invalid",null,4]
 [2,"missing","missing"]
 [2,"deleted","label"]
-[3]
+[3,"list",""]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP

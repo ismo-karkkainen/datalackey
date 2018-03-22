@@ -7,7 +7,7 @@
 //
 
 #include "InputScannerJSON.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include <tuple>
 #include <cassert>
 #include <ctype.h>
@@ -25,7 +25,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
                 continue;
             in_string = escaping = false;
             open_something = 0;
-            Note(notifications, identifier, "reset");
+            ::Message(notifications, identifier, "channel", "reset");
             return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         return std::make_tuple(
@@ -45,7 +45,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             open_something = 0;
             in_string = escaping = false;
             if (Previous != InputScanner::Reset)
-                Note(notifications, identifier, "reset");
+                ::Message(notifications, identifier, "channel", "reset");
             return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         if (in_string) {
@@ -100,7 +100,13 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             break;
         }
         if (bad_stream) {
-            Error(notifications, identifier, "format");
+            // This is used by main program (no identifier) or process started
+            // via run command. If more cases appear, the Class parameter has
+            // to become a separate parameter.
+            if (identifier != nullptr)
+                ::Message(notifications, identifier, "run", "error", "format");
+            else
+                ::Message(notifications, "error", "format");
             return std::make_tuple(InputScanner::DiscardRetroactively,
                 RangeBegin, ++curr);
         }

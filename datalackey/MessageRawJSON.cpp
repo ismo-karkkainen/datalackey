@@ -8,7 +8,7 @@
 
 #include "MessageRawJSON.hpp"
 #include "NullValue.hpp"
-#include "Notifications.hpp"
+#include "Messages.hpp"
 #include "Number_t.hpp"
 #include <memory>
 
