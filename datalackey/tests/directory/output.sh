@@ -29,12 +29,12 @@ echo '[3,"get","mapped"]'
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"running",pid]
-[1,"stored","mapped"]
-[1,"exit",0]
-[1,"finished"]
-[2,{"mapped":{"JSON":7}}]
-[3,{"mapped":"value"}]
+[1,"run","running",pid]
+[1,"data","stored","mapped"]
+[1,"run","exit",0]
+[1,"run","finished"]
+[2,"storage-info","",{"mapped":{"JSON":7}}]
+[3,"get","",{"mapped":"value"}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

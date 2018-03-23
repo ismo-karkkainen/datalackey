@@ -36,16 +36,16 @@ echo '[5,"storage-info"]'
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"running",pid]
-[1,"stored","mapped"]
-[1,"stored","pre-label2-post"]
-[1,"stored","pre-label3-post"]
-[1,"exit",0]
-[1,"finished"]
-[2,{"mapped":{"JSON":7},"pre-label2-post":{"JSON":2},"pre-label3-post":{"JSON":2}}]
-[3,{"mapped":"value"}]
-[4,"deleted","pre-label2-post"]
-[5,{"mapped":{"JSON":7},"pre-label3-post":{"JSON":2}}]
+[1,"run","running",pid]
+[1,"data","stored","mapped"]
+[1,"data","stored","pre-label2-post"]
+[1,"data","stored","pre-label3-post"]
+[1,"run","exit",0]
+[1,"run","finished"]
+[2,"storage-info","",{"mapped":{"JSON":7},"pre-label2-post":{"JSON":2},"pre-label3-post":{"JSON":2}}]
+[3,"get","",{"mapped":"value"}]
+[4,"delete","deleted","pre-label2-post"]
+[5,"storage-info","",{"mapped":{"JSON":7},"pre-label3-post":{"JSON":2}}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

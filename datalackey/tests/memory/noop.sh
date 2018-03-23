@@ -13,7 +13,7 @@ echo '[1,"no-op"]' |
 $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[1]
+[1,"no-op",""]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP

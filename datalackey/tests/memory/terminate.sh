@@ -28,11 +28,11 @@ echo '[3,"processes"]'
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"running",pid]
-[2,"terminated",1]
-[1,"signal",9]
-[1,"finished"]
-[3,{}]
+[1,"run","running",pid]
+[2,"terminate","terminated",1]
+[1,"run","signal",9]
+[1,"run","finished"]
+[3,"processes","",{}]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh

@@ -264,8 +264,8 @@ void LocalProcess::real_runner() {
         }
         if (feed_open && child_feed->Closed()) {
             if (child_feed->Failed())
-                Message(out, *id, "input", "failed");
-            Message(out, *id, "input", "closed");
+                Message(out, *id, "run", "input", "failed");
+            Message(out, *id, "run", "input", "closed");
             feed_open = false;
         }
         if (!scanning)

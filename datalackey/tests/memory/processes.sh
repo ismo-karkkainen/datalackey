@@ -25,11 +25,11 @@ echo '[3,"processes"]'
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[1,"running",$(cat _pid.txt)]
-[2,{1:$(cat _pid.txt)}]
-[1,"exit",0]
-[1,"finished"]
-[3,{}]
+[1,"run","running",$(cat _pid.txt)]
+[2,"processes","",{1:$(cat _pid.txt)}]
+[1,"run","exit",0]
+[1,"run","finished"]
+[3,"processes","",{}]
 EOF
 rm -f _pid.txt
 

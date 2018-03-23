@@ -21,9 +21,9 @@ $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"running",pid]
-[1,"exit",$C]
-[1,"finished"]
+[1,"run","running",pid]
+[1,"run","exit",$C]
+[1,"run","finished"]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh

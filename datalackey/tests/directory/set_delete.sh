@@ -17,12 +17,12 @@ echo '{"label":1234}[1,"storage-info"][2,"delete","missing","label",null,4][3,"s
 $DL -d "$STORE" -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[null,"stored","label"]
-[1,{"label":{"JSON":4}}]
-[2,"invalid",null,4]
-[2,"missing","missing"]
-[2,"deleted","label"]
-[3,{}]
+[null,"data","stored","label"]
+[1,"storage-info","",{"label":{"JSON":4}}]
+[2,"delete","invalid",null,4]
+[2,"delete","missing","missing"]
+[2,"delete","deleted","label"]
+[3,"storage-info","",{}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

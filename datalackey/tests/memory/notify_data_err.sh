@@ -13,7 +13,7 @@ echo '[1,"run","notify","data","program","not-run"]' |
 $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[1,"error","notify","data","no-input"]
+[1,"run","error","notify","no-input"]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP

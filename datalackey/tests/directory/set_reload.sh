@@ -23,9 +23,9 @@ echo '[2,"storage-info"]' |
 $DL -d "$STORE" -i stdin JSON -o stdout JSON >> $OUT
 
 cat > $EXP <<EOF
-[null,"stored","label"]
-[1,{"label":{"JSON":4}}]
-[2,{"label":{"JSON":4}}]
+[null,"data","stored","label"]
+[1,"storage-info","",{"label":{"JSON":4}}]
+[2,"storage-info","",{"label":{"JSON":4}}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

@@ -13,6 +13,10 @@
 #include <ctype.h>
 
 
+static void reset_msg(Output& notifications, const SimpleValue* identifier) {
+    Message(notifications, identifier, "channel", "reset");
+}
+
 std::tuple<InputScanner::Recipient, RawData::ConstIterator, RawData::ConstIterator>
 InputScannerJSON::scan_input(InputScanner::Recipient Previous,
     RawData::ConstIterator RangeBegin, RawData::ConstIterator RangeEnd)
@@ -25,7 +29,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
                 continue;
             in_string = escaping = false;
             open_something = 0;
-            ::Message(notifications, identifier, "channel", "reset");
+            reset_msg(notifications, identifier);
             return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         return std::make_tuple(
@@ -45,7 +49,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             open_something = 0;
             in_string = escaping = false;
             if (Previous != InputScanner::Reset)
-                ::Message(notifications, identifier, "channel", "reset");
+                reset_msg(notifications, identifier);
             return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         if (in_string) {

@@ -20,7 +20,7 @@ echo '[1,"run","channel","out","JSON","stdout","program","./_script.sh"]'
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"error","program","./_script.sh"]
+[1,"run","error","program","./_script.sh"]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh

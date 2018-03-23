@@ -18,8 +18,8 @@ echo '[2,"storage-info"]'
 
 cat > $EXP <<EOF
 [null,"error","format"]
-[null,"note","reset"]
-[2,{}]
+[null,"channel","reset"]
+[2,"storage-info","",{}]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP

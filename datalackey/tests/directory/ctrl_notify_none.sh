@@ -27,18 +27,18 @@ EOF
 chmod a+x _controller.sh
 
 (
-echo '[1,"run","channel","out","JSON","stdout","notify","none","end-feed","program","./_controller.sh"]'
+echo '[1,"run","channel","out","JSON","stdout","end-feed","program","./_controller.sh"]'
 sleep 2
 echo '[2,"get","label"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"running",pid]
-[null,"stored","label"]
-[1,"exit",0]
-[1,"finished"]
-[2,{"label":"value"}]
+[1,"run","running",pid]
+[null,"data","stored","label"]
+[1,"run","exit",0]
+[1,"run","finished"]
+[2,"get","",{"label":"value"}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

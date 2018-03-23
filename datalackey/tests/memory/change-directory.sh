@@ -23,9 +23,9 @@ echo '[1,"run","channel","out","JSON","stdout","change-directory","subdir","prog
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"running",pid]
-[1,"exit",0]
-[1,"finished"]
+[1,"run","running",pid]
+[1,"run","exit",0]
+[1,"run","finished"]
 EOF
 
 test -f subdir/cwd &&

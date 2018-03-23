@@ -25,13 +25,13 @@ echo '[6,"storage-info"]'
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[null,"stored","label","label2"]
-[1,{"label":{"JSON":3},"label2":{"JSON":1}}]
-[2,"error","argument","pairless"]
-[3,"renamed","label","label2"]
-[4,{"label2":{"JSON":3}}]
-[5,"renamed","label2","label3"]
-[6,{"label3":{"JSON":3}}]
+[null,"data","stored","label","label2"]
+[1,"storage-info","",{"label":{"JSON":3},"label2":{"JSON":1}}]
+[2,"rename","error","argument","pairless"]
+[3,"rename","renamed","label","label2"]
+[4,"storage-info","",{"label2":{"JSON":3}}]
+[5,"rename","renamed","label2","label3"]
+[6,"storage-info","",{"label3":{"JSON":3}}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

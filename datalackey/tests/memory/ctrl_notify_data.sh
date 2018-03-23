@@ -19,7 +19,7 @@ chmod a+x _script.sh
 
 cat > _controller.sh << EOF
 #!/bin/sh
-echo '["a","run","channel","out","JSON","stdout","notify","none","program","./_script.sh"]'
+echo '["a","run","channel","out","JSON","stdout","program","./_script.sh"]'
 cat | sed 's/"running",.*]$/"running",pid]/' > $CTOUT
 EOF
 chmod a+x _controller.sh
@@ -34,20 +34,20 @@ echo '[3,"get","label"]'
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"running",pid]
-[null,"stored","label"]
-[2,"ended",1]
-[1,"exit",0]
-[1,"input","closed"]
-[1,"finished"]
-[3,{"label":"value"}]
+[1,"run","running",pid]
+[null,"data","stored","label"]
+[2,"end-feed","",1]
+[1,"run","exit",0]
+[1,"run","input","closed"]
+[1,"run","finished"]
+[3,"get","",{"label":"value"}]
 EOF
 
 cat > $CTEXP <<EOF
-["a","running",pid]
-["a","exit",0]
-["a","stored","label"]
-["a","finished"]
+["a","run","running",pid]
+["a","run","exit",0]
+["a","data","stored","label"]
+["a","run","finished"]
 EOF
 
 diff -bq $OUT $EXP && diff -bq $CTOUT $CTEXP && rm -f $OUT $EXP $CTOUT $CTEXP _script.sh _controller.sh

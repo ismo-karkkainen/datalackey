@@ -21,7 +21,7 @@ echo '[1,"run","channel","out","JSON","stdout","change-directory","invalid","pro
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"error","change-directory","invalid","No such file or directory"]
+[1,"run","error","change-directory","invalid","No such file or directory"]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
