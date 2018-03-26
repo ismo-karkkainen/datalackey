@@ -60,8 +60,8 @@ void StorageDataSinkJSON::end_group() {
         std::vector<std::string> labels = group->Labels();
         if (notifications.ControllerOutput() != nullptr) {
             // Ensure that the pointer is still valid.
-            std::lock_guard<std::mutex> lg(GloballyMessageableOutputs.Mutex());
-            for (Output* out : GloballyMessageableOutputs.Outputs())
+            std::lock_guard<std::mutex> lg(DataNotifiedOutputs.Mutex());
+            for (Output* out : DataNotifiedOutputs.Outputs())
                 if (out == notifications.ControllerOutput())
                     ListMessage(*out, *identifier, "data", "stored", labels);
         }

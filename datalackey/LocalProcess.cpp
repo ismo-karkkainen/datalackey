@@ -121,8 +121,8 @@ void LocalProcess::real_runner() {
     } else {
         child_input = new NullOutput();
     }
-    child_feed = new Output(*child_input_enc, *child_input, notify_data,
-        &out, id);
+    child_feed = new Output(*child_input_enc, *child_input,
+        notify_data, notify_process, &out, id);
     // Create output handling objects for each output.
     child_output.reserve(outputs_info.size() < 2 ? 2 : outputs_info.size());
     bool used_std[2] = { false, false };
@@ -242,14 +242,25 @@ void LocalProcess::real_runner() {
         exit(54); // Something else.
     }
     Message(out, *id, "run", "running", pid);
+    std::unique_lock<std::mutex> notify_lock(ProcessNotifiedOutputs.Mutex());
+    for (Output* other : ProcessNotifiedOutputs.Outputs())
+        if (other != &out && other != child_feed)
+            Message(*other, "process", "started", *id);
+    notify_lock.unlock();
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
     bool feed_open = !child_feed->Failed() && !child_feed->Closed();
     while (child_state != None || scanning) {
         ChildState prev = child_state;
         child_state = get_child_state(child_state);
-        if (prev != child_state && child_state == None)
+        if (prev != child_state && child_state == None) {
             child_feed->NoGlobalMessages(); // Child not reading anymore.
+            notify_lock.lock();
+            for (Output* other : ProcessNotifiedOutputs.Outputs())
+                if (other != &out)
+                    Message(*other, "process", "ended", *id);
+            notify_lock.unlock();
+        }
         // Scan for child output.
         scanning = false;
         for (auto& output : child_output) {
@@ -297,7 +308,8 @@ void LocalProcess::runner() {
 }
 
 LocalProcess::LocalProcess(Processes* Owner,
-    Output& StatusOut, bool NotifyData, Storage& S, const SimpleValue& Id,
+    Output& StatusOut, bool NotifyData, bool NotifyProcess,
+    Storage& S, const SimpleValue& Id,
     const std::string& ProgramName,
     const std::vector<std::string>& Arguments,
     const std::map<std::string,std::string>& Environment,
@@ -307,7 +319,8 @@ LocalProcess::LocalProcess(Processes* Owner,
     StringValueMapper* Renamer)
     : child_input_enc(nullptr), child_input(nullptr), child_feed(nullptr),
     child_writer(nullptr),
-    owner(Owner), out(StatusOut), notify_data(NotifyData), storage(S),
+    owner(Owner), out(StatusOut), notify_data(NotifyData),
+    notify_process(NotifyProcess), storage(S),
     id(Id.Clone()), program_name(ProgramName), args(Arguments),
     directory(Directory), input_info(InputInfo),
     outputs_info(OutputsInfo), renamer(Renamer),
@@ -321,6 +334,7 @@ LocalProcess::LocalProcess(Processes* Owner,
     } else {
         child_input_enc = new NullEncoder();
         notify_data = false;
+        notify_process = false;
     }
 }
 

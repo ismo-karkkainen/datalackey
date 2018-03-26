@@ -221,8 +221,8 @@ std::vector<std::string> DirectoryStorage::List() const {
 bool DirectoryStorage::Delete(const StringValue& L, Output* AlreadyNotified) {
     std::lock_guard<std::mutex> lock(label2data_mutex);
     if (del(L)) {
-        std::lock_guard<std::mutex> lock(GloballyMessageableOutputs.Mutex());
-        for (Output* out : GloballyMessageableOutputs.Outputs())
+        std::lock_guard<std::mutex> lock(DataNotifiedOutputs.Mutex());
+        for (Output* out : DataNotifiedOutputs.Outputs())
             if (out != AlreadyNotified)
                 Message(*out, "data", "deleted", L.String().c_str());
         return true;
@@ -242,8 +242,8 @@ bool DirectoryStorage::Rename(const StringValue& Old, const StringValue& New,
     del(New);
     label2data[New] = v;
     lock.unlock();
-    std::lock_guard<std::mutex> out_lock(GloballyMessageableOutputs.Mutex());
-    for (Output* out : GloballyMessageableOutputs.Outputs())
+    std::lock_guard<std::mutex> out_lock(DataNotifiedOutputs.Mutex());
+    for (Output* out : DataNotifiedOutputs.Outputs())
         if (out != AlreadyNotified)
             Message(*out, "data",
                 "renamed", Old.String().c_str(), New.String().c_str());
@@ -264,8 +264,8 @@ void DirectoryStorage::Add(DataGroup& G, Output* AlreadyNotified) {
         labels.push_back(label_data.first);
     }
     lock.unlock();
-    std::lock_guard<std::mutex> msg_lock(GloballyMessageableOutputs.Mutex());
-    for (Output* out : GloballyMessageableOutputs.Outputs())
+    std::lock_guard<std::mutex> msg_lock(DataNotifiedOutputs.Mutex());
+    for (Output* out : DataNotifiedOutputs.Outputs())
         if (out != AlreadyNotified)
             ListMessage(*out, "data", "stored", labels);
 }

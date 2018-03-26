@@ -360,7 +360,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         }
     }
 
-    if (notify_data && input.empty()) {
+    if ((notify_data || notify_process) && input.empty()) {
         Message(Out, Id, "run", "error", "notify", "no-input");
         return;
     }
@@ -430,8 +430,17 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         }
     }
 
-    Process* p = new LocalProcess(this, Out, notify_data, storage, Id,
-        program_name, program_args, env2value, directory,
+    lock.lock();
+    // Other process with same identifier may just have started. Check again.
+    sv = Id.Clone();
+    proc = processes.find(sv);
+    delete sv;
+    if (proc != processes.end()) {
+        Message(Out, Id, "run", "error", "identifier", "in-use");
+        return;
+    }
+    Process* p = new LocalProcess(this, Out, notify_data, notify_process,
+        storage, Id, program_name, program_args, env2value, directory,
         input, outputs, renamer);
 
     // Checks if feed inputs are valid.
@@ -445,16 +454,6 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     p->Feed(inputs.second); // Valid, pass directly.
     if (end_feed) // Ignore possible lack of channel in.
         p->EndFeed();
-    lock.lock();
-    // Other process with same identifier may just have started. Check again.
-    sv = Id.Clone();
-    proc = processes.find(sv);
-    delete sv;
-    if (proc != processes.end()) {
-        Message(Out, Id, "run", "error", "identifier", "in-use");
-        delete p;
-        return;
-    }
     processes.insert(std::pair<SimpleValue*,Process*>(Id.Clone(), p));
 }
 

@@ -80,7 +80,7 @@ class Output {
 private:
     static Output* first;
 
-    // Not necessarily valid, use GloballyMessageableOutputs.
+    // Not necessarily valid, use DataNotifiedOutputs or ProcessNotifiedOutputs.
     Output* controller_output;
     SimpleValue* controller_output_identifier;
 
@@ -103,7 +103,8 @@ private:
     void feeder();
 
 public:
-    Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages = true,
+    Output(const Encoder& E, OutputChannel& Main,
+        bool DataNotify = true, bool ProcessNotify = true,
         Output* ControllerOutput = nullptr, SimpleValue* Identifier = nullptr);
     ~Output();
 
@@ -145,7 +146,8 @@ public:
     }
 };
 
-extern OutputCollection GloballyMessageableOutputs;
+extern OutputCollection DataNotifiedOutputs;
+extern OutputCollection ProcessNotifiedOutputs;
 
 
 #endif /* Output_hpp */

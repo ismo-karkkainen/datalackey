@@ -77,7 +77,8 @@ void OutputItemWriter::Write(
 }
 
 
-OutputCollection GloballyMessageableOutputs;
+OutputCollection DataNotifiedOutputs;
+OutputCollection ProcessNotifiedOutputs;
 
 
 Output* Output::first = nullptr;
@@ -139,8 +140,8 @@ void Output::feeder() {
                 if (input->Data()->Error()) {
                     if (this != Output::first) {
                         std::lock_guard<std::mutex> lock(
-                            GloballyMessageableOutputs.Mutex());
-                        for (auto op : GloballyMessageableOutputs.Outputs()) {
+                            DataNotifiedOutputs.Mutex());
+                        for (auto op : DataNotifiedOutputs.Outputs()) {
                             if (op == controller_output)
                                 Message(*op, controller_output_identifier,
                                     "error", "read",
@@ -228,8 +229,8 @@ void Output::feeder() {
     channel.Close();
 }
 
-Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages,
-    Output* ControllerOutput, SimpleValue* Identifier)
+Output::Output(const Encoder& E, OutputChannel& Main, bool DataNotify,
+    bool ProcessNotify, Output* ControllerOutput, SimpleValue* Identifier)
     : controller_output(ControllerOutput),
     controller_output_identifier(Identifier), encoder(E), channel(Main),
     terminate(false), channel_feeder(nullptr), eof(false), failed(false)
@@ -240,13 +241,15 @@ Output::Output(const Encoder& E, OutputChannel& Main, bool GlobalMessages,
         channel_feeder = new std::thread(&Output::feeder, this);
         if (Output::first == nullptr)
             Output::first = this;
-        if (GlobalMessages)
-            GloballyMessageableOutputs.Add(this);
+        if (DataNotify)
+            DataNotifiedOutputs.Add(this);
+        if (ProcessNotify)
+            ProcessNotifiedOutputs.Add(this);
     }
 }
 
 Output::~Output() {
-    GloballyMessageableOutputs.Remove(this);
+    NoGlobalMessages();
     if (channel_feeder != nullptr) {
         terminate = true;
         output_added.notify_one();
@@ -261,7 +264,8 @@ Output::~Output() {
 }
 
 void Output::NoGlobalMessages() {
-    GloballyMessageableOutputs.Remove(this);
+    DataNotifiedOutputs.Remove(this);
+    ProcessNotifiedOutputs.Remove(this);
 }
 
 OutputItem* Output::Writable(bool Discarder) {

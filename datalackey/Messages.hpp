@@ -31,6 +31,10 @@ void Message(Output& Out, const SimpleValue& Id,
     const char *const Class, const char *const Kind, int last,
     const char *const three = nullptr, const char *const four = nullptr,
     const char *const five = nullptr, const char *const six = nullptr);
+void Message(Output& Out,
+    const char *const Class, const char *const Kind, const SimpleValue& last,
+    const char *const three = nullptr, const char *const four = nullptr,
+    const char *const five = nullptr);
 
 void Feed(OutputItem& Writer, const SimpleValue& Id);
 

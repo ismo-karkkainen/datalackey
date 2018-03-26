@@ -57,6 +57,7 @@ private:
     Processes* owner;
     Output& out;
     bool notify_data;
+    bool notify_process;
     Storage& storage;
     SimpleValue* id;
     std::string program_name;
@@ -86,7 +87,8 @@ private:
 public:
     // Renamer pointer ownership transfers.
     LocalProcess(Processes* Owner,
-        Output& StatusOut, bool NotifyData, Storage& S, const SimpleValue& Id,
+        Output& StatusOut, bool NotifyData, bool NotifyProcess,
+        Storage& S, const SimpleValue& Id,
         const std::string& ProgramName,
         const std::vector<std::string>& Arguments,
         const std::map<std::string,std::string>& Environment,

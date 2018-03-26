@@ -35,6 +35,8 @@ sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
 [1,"run","running",pid]
+[null,"process","started","a"]
+[null,"process","ended","a"]
 [null,"data","stored","label"]
 [2,"end-feed","",1]
 [1,"run","exit",0]
