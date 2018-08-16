@@ -17,7 +17,7 @@ VER=$(cat $VH | grep "Version " | sed 's/;//' | awk '{ printf("%s", $NF) }')
 INT=$(cat $VH | grep "Interface " | sed 's/;//' | awk '{ printf("%s", $NF) }')
 
 cat > $EXP <<EOF
-[1,"version","",{"version":$VER,"interface":$INT}]
+[1,"version","",{"datalackey":$VER,"interface":$INT}]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP

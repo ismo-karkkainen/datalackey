@@ -32,7 +32,8 @@ void Message(Output& Out, const SimpleValue& Id,
     const char *const three = nullptr, const char *const four = nullptr,
     const char *const five = nullptr, const char *const six = nullptr);
 void Message(Output& Out,
-    const char *const Class, const char *const Kind, const SimpleValue& last,
+    const char *const Class, const char *const Kind,
+    const SimpleValue& second_to_last, int last,
     const char *const three = nullptr, const char *const four = nullptr,
     const char *const five = nullptr);
 

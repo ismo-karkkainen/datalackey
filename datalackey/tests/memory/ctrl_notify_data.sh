@@ -31,12 +31,13 @@ echo '[2,"end-feed",1]'
 sleep 1
 echo '[3,"get","label"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running",pid]/' > $OUT
+sed 's/"running",.*]$/"running",pid]/' |
+sed 's/,"a",.*]$/,"a",pid]/' > $OUT
 
 cat > $EXP <<EOF
 [1,"run","running",pid]
-[null,"process","started","a"]
-[null,"process","ended","a"]
+[null,"process","started","a",pid]
+[null,"process","ended","a",pid]
 [null,"data","stored","label"]
 [2,"end-feed","",1]
 [1,"run","exit",0]

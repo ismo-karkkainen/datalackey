@@ -36,7 +36,7 @@ void VersionCommand::Perform(
     *writer << ValueRef<std::string>(Name())
         << ValueRef<std::string>("")
         << Dictionary
-        << ValueRef<std::string>("version") << NumberRef<int>(Version)
+        << ValueRef<std::string>("datalackey") << NumberRef<int>(Version)
         << ValueRef<std::string>("interface") << NumberRef<int>(Interface)
         << End << End; // Dictionary and array.
 }

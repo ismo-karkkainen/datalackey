@@ -20,7 +20,8 @@
 static void message(Output& Out, const SimpleValue* Id,
     const char *const Class, const char *const Kind, const char *const three,
     const char *const four, const char *const five, const char *const six,
-    int* last, long long int* big_last = nullptr, bool null_last = false)
+    int* last, long long int* big_last = nullptr, bool null_last = false,
+    int* real_last = nullptr)
 {
     std::unique_ptr<OutputItem> writer(
         Out.Writable(Id != nullptr && IsNullValue(Id)));
@@ -42,9 +43,11 @@ static void message(Output& Out, const SimpleValue* Id,
     if (last != nullptr)
         *writer << NumberRef<int>(*last);
     if (big_last != nullptr)
-        *writer << NumberRef<long long int>(*last);
+        *writer << NumberRef<long long int>(*big_last);
     if (null_last)
         *writer << Structure::Null;
+    if (real_last != nullptr)
+        *writer << NumberRef<int>(*real_last);
     *writer << End;
 }
 
@@ -77,20 +80,20 @@ void Message(Output& Out, const SimpleValue& Id,
     message(Out, &Id, Class, Kind, three, four, five, six, &last);
 }
 
-void Message(Output& Out,
-    const char *const Class, const char *const Kind, const SimpleValue& last,
+void Message(Output& Out, const char *const Class, const char *const Kind,
+    const SimpleValue& second_to_last, int last,
     const char *const three, const char *const four, const char *const five)
 {
-    if (IsStringValue(&last)) {
-        message(Out, nullptr,
-            Class, Kind, three, four, five, last.String().c_str(), nullptr);
-    } else if (IsNumberValue(&last)) {
-        long long int val = last.Number();
-        message(Out, nullptr,
-            Class, Kind, three, four, five, nullptr, nullptr, &val);
-    } else if (IsNullValue(&last)) {
-        message(Out, nullptr,
-            Class, Kind, three, four, five, nullptr, nullptr, nullptr, true);
+    if (IsStringValue(&second_to_last)) {
+        message(Out, nullptr, Class, Kind, three, four, five,
+            second_to_last.String().c_str(), nullptr, nullptr, false, &last);
+    } else if (IsNumberValue(&second_to_last)) {
+        long long int val = second_to_last.Number();
+        message(Out, nullptr, Class, Kind, three, four, five,
+            nullptr, nullptr, &val, false, &last);
+    } else if (IsNullValue(&second_to_last)) {
+        message(Out, nullptr, Class, Kind, three, four, five,
+            nullptr, nullptr, nullptr, true, &last);
     }
 }
 

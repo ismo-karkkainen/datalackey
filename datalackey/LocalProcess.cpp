@@ -245,7 +245,7 @@ void LocalProcess::real_runner() {
     std::unique_lock<std::mutex> notify_lock(ProcessNotifiedOutputs.Mutex());
     for (Output* other : ProcessNotifiedOutputs.Outputs())
         if (other != &out && other != child_feed)
-            Message(*other, "process", "started", *id);
+            Message(*other, "process", "started", *id, pid);
     notify_lock.unlock();
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
@@ -258,7 +258,7 @@ void LocalProcess::real_runner() {
             notify_lock.lock();
             for (Output* other : ProcessNotifiedOutputs.Outputs())
                 if (other != &out)
-                    Message(*other, "process", "ended", *id);
+                    Message(*other, "process", "ended", *id, pid);
             notify_lock.unlock();
         }
         // Scan for child output.
