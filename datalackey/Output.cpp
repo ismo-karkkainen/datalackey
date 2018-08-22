@@ -279,7 +279,7 @@ OutputItem* Output::Writable(bool Discarder) {
 }
 
 void Output::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
-    if (eof)
+    if (eof || Inputs.empty())
         return;
     std::unique_lock<std::mutex> lock(input_sets_mutex);
     for (auto input : Inputs)

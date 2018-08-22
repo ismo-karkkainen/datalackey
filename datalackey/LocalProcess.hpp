@@ -29,6 +29,7 @@
 #include <thread>
 #include <queue>
 #include <map>
+#include <mutex>
 
 
 class LocalProcess : public Process {
@@ -52,6 +53,8 @@ private:
     int stdouterr_child[2][2];
     Output* child_feed;
     OutputItem* child_writer;
+    mutable std::mutex child_start_mutex;
+    std::unique_lock<std::mutex> child_start_lock;
 
     // Values obtained via constructor.
     Processes* owner;

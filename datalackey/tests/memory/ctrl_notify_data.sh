@@ -32,18 +32,18 @@ sleep 1
 echo '[3,"get","label"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' |
-sed 's/,"a",.*]$/,"a",pid]/' > $OUT
+sed 's/,"a",.*]$/,"a",pid]/' | sort > $OUT
 
 cat > $EXP <<EOF
-[1,"run","running",pid]
-[null,"process","started","a",pid]
-[null,"process","ended","a",pid]
-[null,"data","stored","label"]
-[2,"end-feed","",1]
 [1,"run","exit",0]
-[1,"run","input","closed"]
 [1,"run","finished"]
+[1,"run","input","closed"]
+[1,"run","running",pid]
+[2,"end-feed","",1]
 [3,"get","",{"label":"value"}]
+[null,"data","stored","label"]
+[null,"process","ended","a",pid]
+[null,"process","started","a",pid]
 EOF
 
 cat > $CTEXP <<EOF

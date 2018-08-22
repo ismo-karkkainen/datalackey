@@ -166,6 +166,7 @@ void LocalProcess::real_runner() {
         child_output.push_back(std::shared_ptr<ChildOutput>(
             new ChildOutput(ic, mh, sds, is)));
     }
+    child_start_lock.unlock();
     // Take program_name, args, and env and turn to what execve needs.
     const char** argv_ptrs = new const char*[2 + args.size()];
     argv_ptrs[0] = program_name.c_str();
@@ -318,7 +319,7 @@ LocalProcess::LocalProcess(Processes* Owner,
     const std::vector<std::vector<std::string>>& OutputsInfo,
     StringValueMapper* Renamer)
     : child_input_enc(nullptr), child_input(nullptr), child_feed(nullptr),
-    child_writer(nullptr),
+    child_writer(nullptr), child_start_lock(child_start_mutex, std::defer_lock),
     owner(Owner), out(StatusOut), notify_data(NotifyData),
     notify_process(NotifyProcess), storage(S),
     id(Id.Clone()), program_name(ProgramName), args(Arguments),
@@ -356,14 +357,17 @@ Encoder* LocalProcess::Encoder() const {
 bool LocalProcess::Run() {
     assert(worker == nullptr);
     try {
+        child_start_lock.lock();
         worker = new std::thread(&LocalProcess::runner, this);
     }
     catch (const std::system_error& e) {
+        child_start_lock.unlock();
         Message(out, *id, "run", "error", "no-thread");
         owner->HasFinished(*id);
         return false;
     }
     catch (const std::exception& e) {
+        child_start_lock.unlock();
         Message(out, *id, "run", "error", "exception");
         owner->HasFinished(*id);
         return false;
@@ -372,20 +376,24 @@ bool LocalProcess::Run() {
 }
 
 void LocalProcess::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
+    std::lock_guard<std::mutex> lock(child_start_mutex);
     if (child_feed != nullptr)
         child_feed->Feed(Inputs);
 }
 
 void LocalProcess::EndFeed() {
+    std::lock_guard<std::mutex> lock(child_start_mutex);
     if (child_feed != nullptr)
         child_feed->End();
 }
 
 bool LocalProcess::Closed() {
+    std::lock_guard<std::mutex> lock(child_start_mutex);
     return child_feed == nullptr || child_feed->Closed();
 }
 
 bool LocalProcess::Terminate() {
+    std::lock_guard<std::mutex> lock(child_start_mutex);
     if (worker == nullptr)
         return false;
     return kill();
@@ -396,5 +404,6 @@ bool LocalProcess::Finished() const {
 }
 
 pid_t LocalProcess::PID() const {
+    std::lock_guard<std::mutex> lock(child_start_mutex);
     return pid;
 }

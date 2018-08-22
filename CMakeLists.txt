@@ -256,6 +256,9 @@ add_test(NAME ctrl_notify_none COMMAND ctrl_notify_none.sh $<TARGET_FILE:datalac
 add_executable(ctrl_notify_data.sh IMPORTED)
 set_property(TARGET ctrl_notify_data.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/memory/ctrl_notify_data.sh)
 add_test(NAME ctrl_notify_data COMMAND ctrl_notify_data.sh $<TARGET_FILE:datalackey> )
+add_executable(input_eof.sh IMPORTED)
+set_property(TARGET input_eof.sh PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/memory/input_eof.sh)
+add_test(NAME input_eof COMMAND input_eof.sh $<TARGET_FILE:datalackey> )
 
 # Directory storage tests
 #
