@@ -207,6 +207,14 @@ void Output::feeder() {
             input = inputs.front();
             inputs.pop();
             lock.unlock();
+            if (input == nullptr) { // Empty object.
+                Encoder* e = encoder.Clone();
+                e->Encode(deco, Dictionary);
+                e->Encode(deco, Structure::End);
+                data = &deco;
+                delete e;
+                continue;
+            }
             in_input = true;
             Encoder* e = encoder.Clone();
             e->Encode(deco, Dictionary);
@@ -279,7 +287,7 @@ OutputItem* Output::Writable(bool Discarder) {
 }
 
 void Output::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
-    if (eof || Inputs.empty())
+    if (eof)
         return;
     std::unique_lock<std::mutex> lock(input_sets_mutex);
     for (auto input : Inputs)

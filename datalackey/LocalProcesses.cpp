@@ -451,7 +451,8 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         delete p;
         return;
     }
-    p->Feed(inputs.second); // Valid, pass directly.
+    if (!inputs.second.empty())
+        p->Feed(inputs.second); // Valid, pass directly.
     if (end_feed) // Ignore possible lack of channel in.
         p->EndFeed();
     processes.insert(std::pair<SimpleValue*,Process*>(Id.Clone(), p));
