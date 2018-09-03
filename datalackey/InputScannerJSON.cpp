@@ -11,6 +11,9 @@
 #include <tuple>
 #include <cassert>
 #include <ctype.h>
+#if defined(__linux__)
+#include <cstring>
+#endif
 
 
 static void reset_msg(Output& notifications, const SimpleValue* identifier) {

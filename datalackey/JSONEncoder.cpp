@@ -91,7 +91,7 @@ bool JSONEncoder::Encode(RawData& Buffer, const ValueReference& VR) {
     add_separator(Buffer);
     if (VR.IsChar() || VR.IsString()) {
         std::string encoded(json(VR.String()).dump());
-        Buffer.Append(encoded.cbegin(), encoded.cend());
+        Buffer.Append(encoded.c_str());
     } else {
         Buffer.Append(VR.String().c_str());
     }

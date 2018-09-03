@@ -25,6 +25,9 @@
 #include <limits>
 #include <iostream>
 #include <cassert>
+#if defined(__linux__)
+#include <signal.h>
+#endif
 
 static const char* inputs[1] = { "stdin" };
 static const char* outputs[2] = { "stdout", "stderr" };
@@ -71,6 +74,9 @@ int main(int argc, char** argv) {
     if (rv >= 0)
         return rv;
 
+#if defined(__linux__)
+    signal(SIGPIPE, SIG_IGN);
+#endif
     Storage* storage = nullptr;
     if (opt::Given("directory", 1)) {
         mode_t mode = S_IRUSR | S_IWUSR;

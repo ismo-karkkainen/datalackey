@@ -18,6 +18,11 @@ else()
     set(ReleaseOptions "")
 endif()
 
+if (UNIX AND NOT APPLE)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+endif()
+
 add_compile_options( ${GenericOptions} )
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
     add_compile_options( ${ReleaseOptions} )
@@ -102,6 +107,9 @@ list(APPEND Sources datalackey/Options.cpp)
 list(APPEND Sources datalackey/datalackey.cpp)
 
 add_executable( datalackey ${Sources} )
+if (UNIX AND NOT APPLE)
+    target_link_libraries(datalackey Threads::Threads)
+endif()
 
 list(APPEND AlwaysSmall ${Sources})
 list(REMOVE_ITEM AlwaysSmall datalackey/RawData.cpp)

@@ -1,6 +1,6 @@
 #include "Options.hpp"
 #include <ctype.h>
-#include <strings.h>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <utility>

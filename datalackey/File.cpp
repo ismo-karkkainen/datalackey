@@ -14,6 +14,11 @@
 #include <sys/param.h>
 #include <cerrno>
 
+#if defined(__linux__)
+#include <limits.h>
+#include <stdlib.h>
+#endif
+
 
 const char Separator = '/';
 
@@ -24,7 +29,11 @@ static std::string absolute(const std::string& Name, struct stat& info) {
         return std::string();
     std::string abs;
     char* buffer = new char[MAXPATHLEN + 1];
+#if defined(__APPLE__)
     if (-1 != fcntl(fd, F_GETPATH, buffer))
+#elif defined(__linux__)
+    if (buffer == realpath(Name.c_str(), buffer))
+#endif
         abs = std::string(buffer);
     delete[] buffer;
     int res = fstat(fd, &info);

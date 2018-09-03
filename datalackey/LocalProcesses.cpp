@@ -444,7 +444,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         input, outputs, renamer);
 
     // Checks if feed inputs are valid.
-    auto inputs = feed(Out, Id, feed_params, p->Encoder(), "run");
+    auto inputs = feed(Out, Id, feed_params, p->EncoderClone(), "run");
 
     if (!inputs.first || !p->Run()) {
         // Error has been reported.
@@ -472,7 +472,7 @@ void LocalProcesses::Feed(Output& Out, const SimpleValue& Id,
         Message(Out, Id, "feed", "error", "closed");
         return;
     }
-    auto inputs = feed(Out, Id, Parameters, proc->second->Encoder(), "feed");
+    auto inputs = feed(Out, Id, Parameters, proc->second->EncoderClone(), "feed");
     if (inputs.first)
         proc->second->Feed(inputs.second);
 }

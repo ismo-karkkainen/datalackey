@@ -102,7 +102,7 @@ public:
 
     ~LocalProcess();
 
-    class Encoder* Encoder() const;
+    class Encoder* EncoderClone() const;
 
     bool Run();
     void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs);

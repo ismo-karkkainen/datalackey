@@ -20,7 +20,7 @@ public:
     virtual ~Process();
 
     // Returns a clone of the encoder in use, or nullptr if no input specified.
-    virtual Encoder* Encoder() const = 0;
+    virtual Encoder* EncoderClone() const = 0;
 
     virtual bool Run() = 0;
     virtual void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) = 0;

@@ -114,7 +114,9 @@ void LocalProcess::real_runner() {
             Message(out, *id, "run", "error", "pipe");
             return;
         }
+#if defined(__APPLE__)
         fcntl(stdin_child[1], F_SETNOSIGPIPE);
+#endif
         int flags = fcntl(stdin_child[1], F_GETFL);
         fcntl(stdin_child[1], F_SETFL, flags | O_NONBLOCK);
         child_input = new FileDescriptorOutput(stdin_child[1]);
@@ -350,7 +352,7 @@ LocalProcess::~LocalProcess() {
     delete child_input_enc;
 }
 
-Encoder* LocalProcess::Encoder() const {
+Encoder* LocalProcess::EncoderClone() const {
     return child_input_enc->Clone();
 }
 
