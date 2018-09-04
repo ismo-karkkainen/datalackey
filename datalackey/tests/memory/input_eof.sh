@@ -38,14 +38,15 @@ chmod a+x _script.sh
 echo '{"label":123}'
 echo '[1,"run","channel","in","JSON","stdin","channel","out","JSON","stdout","input","label","foo","output-prefix","fed-","end-feed","program","./_script.sh"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running",pid]/' > $OUT
+sed 's/"running",.*]$/"running",pid]/' | grep -v closed | sort > $OUT
+# Message [1,"run","input","closed"] appears randomly.
 
 cat > $EXP <<EOF
-[null,"data","stored","label"]
-[1,"run","running",pid]
-[1,"run","exit",0]
 [1,"data","stored","fed-foo-out"]
+[1,"run","exit",0]
 [1,"run","finished"]
+[1,"run","running",pid]
+[null,"data","stored","label"]
 EOF
 
 diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh

@@ -19,7 +19,7 @@ chmod a+x _script.sh
 echo '[1,"run","program","./_script.sh"]'
 sleep 1
 echo '[2,"processes"]'
-ps -u $(whoami) | grep _script.sh | grep -v grep | awk '{ print $2 }' > _pid.txt
+ps u | grep _script.sh | grep -v grep | awk '{ print $2 }' > _pid.txt
 sleep 2
 echo '[3,"processes"]'
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT

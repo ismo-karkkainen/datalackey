@@ -15,6 +15,7 @@ while read L
 do
     echo \$L
 done
+sleep 1
 EOF
 chmod a+x _script.sh
 
@@ -27,7 +28,7 @@ sleep 1
 echo '[3,"feed",1,"input","label","in2"]'
 sleep 1
 echo '[4,"end-feed",1]'
-sleep 1
+sleep 2
 echo '[5,"storage-info"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
@@ -38,8 +39,8 @@ cat > $EXP <<EOF
 [1,"data","stored","fed-in1"]
 [1,"data","stored","fed-in2"]
 [4,"end-feed","",1]
-[1,"run","exit",0]
 [1,"run","input","closed"]
+[1,"run","exit",0]
 [1,"run","finished"]
 [5,"storage-info","",{"fed-in1":{"JSON":3},"fed-in2":{"JSON":3},"label":{"JSON":3}}]
 EOF
