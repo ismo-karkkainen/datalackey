@@ -252,7 +252,7 @@ void LocalProcess::real_runner() {
     notify_lock.unlock();
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
-    bool feed_open = !child_feed->Failed() && !child_feed->Closed();
+    bool feed_open = !child_feed->Failed();
     while (child_state != None || scanning) {
         ChildState prev = child_state;
         child_state = get_child_state(child_state);

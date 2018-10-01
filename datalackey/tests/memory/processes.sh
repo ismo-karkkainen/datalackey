@@ -26,6 +26,7 @@ echo '[3,"processes"]'
 
 cat > $EXP <<EOF
 [1,"run","running",$(cat _pid.txt)]
+[1,"run","input","closed"]
 [2,"processes","",{1:$(cat _pid.txt)}]
 [1,"run","exit",0]
 [1,"run","finished"]

@@ -33,6 +33,7 @@ sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
 [1,"run","running",pid]
+[1,"run","input","closed"]
 [1,"data","stored","mapped"]
 [1,"data","stored","pre-label2-post"]
 [1,"data","stored","pre-label3-post"]

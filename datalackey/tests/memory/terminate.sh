@@ -29,6 +29,7 @@ sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
 [1,"run","running",pid]
+[1,"run","input","closed"]
 [2,"terminate","terminated",1]
 [1,"run","signal",9]
 [1,"run","finished"]
