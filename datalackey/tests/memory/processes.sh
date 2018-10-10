@@ -11,16 +11,16 @@ EXP="${B}_expected.txt"
 
 cat > _script.sh << EOF
 #!/bin/sh
-sleep 2
+sleep 1
 EOF
 chmod a+x _script.sh
 
 (
 echo '[1,"run","program","./_script.sh"]'
-sleep 1
+nap
 echo '[2,"processes"]'
 ps u | grep _script.sh | grep -v grep | awk '{ print $2 }' > _pid.txt
-sleep 2
+sleep 1
 echo '[3,"processes"]'
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
 
@@ -34,4 +34,4 @@ cat > $EXP <<EOF
 EOF
 rm -f _pid.txt
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
+compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

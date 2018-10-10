@@ -12,13 +12,13 @@ EXP="${B}_expected.txt"
 cat > _script.sh << EOF
 #!/bin/sh
 echo '{ "label": "value" }'
-sleep 1
+nap
 EOF
 chmod a+x _script.sh
 
 (
 echo '[1,"run","channel","out","JSON","stdout","output","label","mapped","program","./_script.sh"]'
-sleep 2
+sleep 1
 echo '[2,"storage-info"]'
 echo '[3,"get","mapped"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
@@ -34,4 +34,4 @@ cat > $EXP <<EOF
 [3,"get","",{"mapped":"value"}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
+compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

@@ -15,7 +15,7 @@ mkdir "$STORE"
 
 (
 echo '{"label":1234}'
-sleep 1
+nap
 echo '[1,"storage-info"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON > $OUT
 
@@ -36,6 +36,6 @@ EOF
 
 test 2 -eq $(ls $STORE/.datalackey/ | wc -w) &&
 test -f $STORE/.datalackey/10 &&
-diff -bq $COUT $CEXP &&
-diff -bq $OUT $EXP &&
+compare-output $COUT $CEXP &&
+compare-output $OUT $EXP &&
 rm -rf $OUT $EXP $COUT $CEXP "$STORE"

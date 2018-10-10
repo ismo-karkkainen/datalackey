@@ -16,13 +16,13 @@ mkdir "$STORE"
 cat > _script.sh << EOF
 #!/bin/sh
 echo '{ "label": "value" }'
-sleep 1
+nap
 EOF
 chmod a+x _script.sh
 
 (
 echo '[1,"run","channel","out","JSON","stdout","output","label","mapped","program","./_script.sh"]'
-sleep 2
+sleep 1
 echo '[2,"storage-info"]'
 echo '[3,"get","mapped"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
@@ -46,6 +46,6 @@ EOF
 
 test 2 -eq $(ls $STORE/.datalackey/ | wc -w) &&
 test -f "$STORE/.datalackey/10" &&
-diff -bq $COUT $CEXP &&
-diff -bq $OUT $EXP &&
+compare-output $COUT $CEXP &&
+compare-output $OUT $EXP &&
 rm -rf $OUT $EXP $COUT $CEXP _script.sh "$STORE"

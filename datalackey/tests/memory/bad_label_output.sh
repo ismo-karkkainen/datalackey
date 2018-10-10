@@ -22,4 +22,4 @@ cat > $EXP <<EOF
 [2,"storage-info","",{}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+compare-output $OUT $EXP && rm -f $OUT $EXP

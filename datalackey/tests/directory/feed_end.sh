@@ -25,25 +25,27 @@ chmod a+x _script.sh
 (
 echo '{"label":123}'
 echo '[1,"run","channel","in","JSON","stdin","channel","out","JSON","stdout","output-prefix","fed-","program","./_script.sh"]'
-sleep 1
+nap
 echo '[2,"feed",1,"input","label","in1"]'
-sleep 1
+nap
 echo '[3,"feed",1,"input","label","in2"]'
-sleep 1
+nap
 echo '[4,"end-feed",1]'
-sleep 1
+nap
 echo '[5,"list"]'
-) | $DL -d "$STORE" -i stdin JSON -o stdout JSON | sort |
+) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
-cat << EOF | sort > $EXP
+cat << EOF > $EXP
 [null,"data","stored","label"]
 [1,"run","running",pid]
 [1,"data","stored","fed-in1"]
 [1,"data","stored","fed-in2"]
 [4,"end-feed","",1]
+set
 [1,"run","exit",0]
 [1,"run","input","closed"]
+end
 [1,"run","finished"]
 [5,"list","","fed-in1","fed-in2","label"]
 EOF
@@ -58,6 +60,6 @@ test 4 -eq $(ls $STORE/.datalackey/ | wc -w) &&
 test -f "$STORE/.datalackey/10" &&
 test -f "$STORE/.datalackey/20" &&
 test -f "$STORE/.datalackey/30" &&
-diff -bq $COUT $CEXP &&
-diff -bq $OUT $EXP &&
+compare-output $COUT $CEXP &&
+compare-output $OUT $EXP &&
 rm -rf $OUT $EXP $COUT $CEXP _script.sh "$STORE"

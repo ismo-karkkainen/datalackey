@@ -20,9 +20,9 @@ chmod a+x _script.sh
 
 (
 echo '[1,"run","program","./_script.sh"]'
-sleep 1
+nap
 echo '[2,"terminate",1]'
-sleep 1
+nap
 echo '[3,"processes"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
@@ -36,4 +36,4 @@ cat > $EXP <<EOF
 [3,"processes","",{}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
+compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

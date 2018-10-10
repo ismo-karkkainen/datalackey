@@ -30,4 +30,4 @@ cat > $EXP <<EOF
 [6,"storage-info","",{"label3":{"JSON":3}}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+compare-output $OUT $EXP && rm -f $OUT $EXP

@@ -15,20 +15,20 @@ while read L
 do
     echo \$L
 done
-sleep 1
+nap
 EOF
 chmod a+x _script.sh
 
 (
 echo '{"label":123}'
 echo '[1,"run","channel","in","JSON","stdin","channel","out","JSON","stdout","output-prefix","fed-","program","./_script.sh"]'
-sleep 1
+nap
 echo '[2,"feed",1,"input","label","in1"]'
-sleep 1
+nap
 echo '[3,"feed",1,"input","label","in2"]'
-sleep 1
+nap
 echo '[4,"end-feed",1]'
-sleep 2
+sleep 1
 echo '[5,"storage-info"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
@@ -45,4 +45,4 @@ cat > $EXP <<EOF
 [5,"storage-info","",{"fed-in1":{"JSON":3},"fed-in2":{"JSON":3},"label":{"JSON":3}}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
+compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

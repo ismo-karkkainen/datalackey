@@ -1,0 +1,94 @@
+#!/usr/bin/python
+
+import sys
+
+if len(sys.argv) != 3:
+    print("Usage: compare-output output target")
+    print("Allowed target contents:")
+    print("line-used-as-is")
+    print("optional:line (marks line as optional)")
+    print("set (begins a set of lines in arbitrary order, no nested sets)")
+    print("end (ends a set)")
+    print("escape:line (allows line to start with any special word)")
+    print("Spaces are ignored before optional:, set, end, escape:")
+    sys.exit(5)
+
+# Handles line or lines in arbitrary order. Lines may be optional.
+class Target(object):
+    def __init__(self):
+        self._compulsory = []
+        self._optional = []
+
+    def Add(self, Target, Optional):
+        (self._optional if Optional else self._compulsory).append(Target)
+
+    def Check(self, Output):
+        for lst in (self._compulsory, self._optional,):
+            try:
+                del lst[lst.index(Output)]
+                return True
+            except ValueError:
+                pass
+        return False
+
+    def Remains(self):
+        return len(self._compulsory) > 0
+
+# Read target data.
+try:
+    f = open(sys.argv[2], "r")
+except IOError, e:
+    print(str(e))
+    sys.exit(2)
+targets = []
+in_set = False
+t = Target()
+for line in f.readlines():
+    optional = False
+    s = line.lstrip()
+    tgt = None
+    if s.startswith("escape:"):
+        tgt = s[len("escape:"):]
+    elif s.startswith("set"):
+        if in_set:
+            print("No nested sets allowed.")
+            sys.exit(4)
+        in_set = True
+    elif s.startswith("end"):
+        if not in_set:
+            print("end outside set.")
+            sys.exit(4)
+        in_set = False
+    elif s.startswith("optional:"):
+        optional = True
+        tgt = s[len("optional:"):]
+    else:
+        tgt = line
+    if not tgt is None:
+        t.Add(tgt.rstrip("\r\n"), optional)
+    if not in_set:
+        targets.append(t)
+        t = Target()
+f.close()
+if in_set:
+    print("Set remains open.")
+    sys.exit(4)
+
+# Read source file line by line.
+try:
+    f = open(sys.argv[1], "r")
+except IOError, e:
+    print(str(e))
+    sys.exit(3)
+idx = 0
+for line in f.readlines():
+    if idx == len(targets):
+        print("Out of targets.")
+        sys.exit(1)
+    line = line.rstrip("\r\n")
+    while not targets[idx].Check(line):
+        if targets[idx].Remains():
+            print(line)
+            sys.exit(1)
+        idx = idx + 1
+f.close()

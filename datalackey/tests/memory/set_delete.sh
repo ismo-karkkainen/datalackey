@@ -21,4 +21,4 @@ cat > $EXP <<EOF
 [3,"list",""]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+compare-output $OUT $EXP && rm -f $OUT $EXP

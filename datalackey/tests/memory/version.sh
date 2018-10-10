@@ -20,4 +20,4 @@ cat > $EXP <<EOF
 [1,"version","",{"datalackey":$VER,"interface":$INT}]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+compare-output $OUT $EXP && rm -f $OUT $EXP

@@ -24,4 +24,4 @@ cat > $EXP <<EOF
 [1,"run","error","change-directory","invalid","No such file or directory"]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
+compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

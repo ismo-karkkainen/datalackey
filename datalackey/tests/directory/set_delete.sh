@@ -32,6 +32,6 @@ cat > $CEXP <<EOF
 EOF
 
 test 1 -eq $(ls $STORE/.datalackey/ | wc -w) &&
-diff -bq $COUT $CEXP &&
-diff -bq $OUT $EXP &&
+compare-output $COUT $CEXP &&
+compare-output $OUT $EXP &&
 rm -rf $OUT $EXP $COUT $CEXP "$STORE"

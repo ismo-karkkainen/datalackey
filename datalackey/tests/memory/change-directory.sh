@@ -30,4 +30,4 @@ cat > $EXP <<EOF
 EOF
 
 test -f subdir/cwd &&
-diff -bq $OUT $EXP && rm -rf $OUT $EXP _script.sh subdir
+compare-output $OUT $EXP && rm -rf $OUT $EXP _script.sh subdir

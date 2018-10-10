@@ -17,4 +17,4 @@ cat > $EXP <<EOF
 [null,"error","format"]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP
+compare-output $OUT $EXP && rm -f $OUT $EXP

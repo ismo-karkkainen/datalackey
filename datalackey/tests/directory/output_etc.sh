@@ -21,13 +21,13 @@ echo '"value"'
 echo '}'
 echo '{ "label2": 13 }'
 echo '{ "label3": 31 }'
-sleep 1
+nap
 EOF
 chmod a+x _script.sh
 
 (
 echo '[1,"run","channel","out","JSON","stdout","output-prefix","pre-","output-postfix","-post","output","label","mapped","program","./_script.sh"]'
-sleep 2
+sleep 1
 echo '[2,"storage-info"]'
 echo '[3,"get","mapped"]'
 echo '[4,"delete","pre-label2-post"]'
@@ -58,6 +58,6 @@ EOF
 test 3 -eq $(ls $STORE/.datalackey/ | wc -w) &&
 test -f "$STORE/.datalackey/10" &&
 test -f "$STORE/.datalackey/30" &&
-diff -bq $COUT $CEXP &&
-diff -bq $OUT $EXP &&
+compare-output $COUT $CEXP &&
+compare-output $OUT $EXP &&
 rm -rf $OUT $EXP $COUT $CEXP _script.sh "$STORE"

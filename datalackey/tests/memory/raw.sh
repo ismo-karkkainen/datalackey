@@ -14,7 +14,7 @@ cat > _script.sh << EOF
 for w in "a" "ab" "abc"
 do
     echo "\$w"
-    sleep 1
+    nap
 done
 EOF
 chmod a+x _script.sh
@@ -33,4 +33,4 @@ cat > $EXP <<EOF
 [1,"run","finished"]
 EOF
 
-diff -bq $OUT $EXP && rm -f $OUT $EXP _script.sh
+compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

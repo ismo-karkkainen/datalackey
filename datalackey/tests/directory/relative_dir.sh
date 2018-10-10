@@ -20,5 +20,5 @@ EOF
 
 test 1 -eq $(ls $STORE/.datalackey/ | wc -w) &&
 test -f $STORE/.datalackey/catalog &&
-diff -bq $OUT $EXP &&
+compare-output $OUT $EXP &&
 rm -rf $OUT $EXP "$STORE"

@@ -26,24 +26,24 @@ chmod a+x _controller.sh
 
 (
 echo '[1,"run","channel","out","JSON","stdout","channel","in","JSON","stdin","notify","data","program","./_controller.sh"]'
-sleep 1
+nap
 echo '[2,"end-feed",1]'
-sleep 1
+nap
 echo '[3,"get","label"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' |
-sed 's/,"a",.*]$/,"a",pid]/' | sort > $OUT
+sed 's/,"a",.*]$/,"a",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"run","exit",0]
-[1,"run","finished"]
-[1,"run","input","closed"]
 [1,"run","running",pid]
-[2,"end-feed","",1]
-[3,"get","",{"label":"value"}]
-[null,"data","stored","label"]
-[null,"process","ended","a",pid]
 [null,"process","started","a",pid]
+[null,"process","ended","a",pid]
+[null,"data","stored","label"]
+[2,"end-feed","",1]
+[1,"run","exit",0]
+[1,"run","input","closed"]
+[1,"run","finished"]
+[3,"get","",{"label":"value"}]
 EOF
 
 cat > $CTEXP <<EOF
@@ -54,4 +54,4 @@ cat > $CTEXP <<EOF
 ["a","run","finished"]
 EOF
 
-diff -bq $OUT $EXP && diff -bq $CTOUT $CTEXP && rm -f $OUT $EXP $CTOUT $CTEXP _script.sh _controller.sh
+compare-output $OUT $EXP && compare-output $CTOUT $CTEXP && rm -f $OUT $EXP $CTOUT $CTEXP _script.sh _controller.sh
