@@ -15,7 +15,7 @@
 
 
 ProcessesCommand::ProcessesCommand(const char *const Name, Output& Out, const Processes& P)
-    : Command(Name, Out), processes(P)
+    : Command(Name, Out), processes(P), unexpected(Name, "unexpected")
 { }
 
 ProcessesCommand::~ProcessesCommand() {
@@ -26,13 +26,13 @@ void ProcessesCommand::Perform(
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "unexpected");
+        unexpected.Send(out, Id);
         return;
     }
     auto results = processes.List();
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
-    Feed(*writer, Id);
+    Message::Feed(*writer, Id);
     *writer << ValueRef<std::string>(Name())
         << ValueRef<std::string>("")
         << Dictionary; // Start process id to PID dictionary.
@@ -40,7 +40,7 @@ void ProcessesCommand::Perform(
     pid_t pid;
     for (size_t k = 0; k < results.size(); ++k) {
         std::tie(id, pid) = results[k];
-        Feed(*writer, *id);
+        Message::Feed(*writer, *id);
         *writer << NumberRef<pid_t>(pid);
         delete id;
     }

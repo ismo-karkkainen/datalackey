@@ -16,10 +16,6 @@
 #endif
 
 
-static void reset_msg(Output& notifications, const SimpleValue* identifier) {
-    Message(notifications, identifier, "channel", "reset");
-}
-
 std::tuple<InputScanner::Recipient, RawData::ConstIterator, RawData::ConstIterator>
 InputScannerJSON::scan_input(InputScanner::Recipient Previous,
     RawData::ConstIterator RangeBegin, RawData::ConstIterator RangeEnd)
@@ -32,7 +28,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
                 continue;
             in_string = escaping = false;
             open_something = 0;
-            reset_msg(notifications, identifier);
+            msg_channel_reset.Send(notifications, *identifier);
             return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         return std::make_tuple(
@@ -52,7 +48,7 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             open_something = 0;
             in_string = escaping = false;
             if (Previous != InputScanner::Reset)
-                reset_msg(notifications, identifier);
+                msg_channel_reset.Send(notifications, *identifier);
             return std::make_tuple(InputScanner::Reset, RangeBegin, ++curr);
         }
         if (in_string) {
@@ -107,13 +103,12 @@ InputScannerJSON::scan_input(InputScanner::Recipient Previous,
             break;
         }
         if (bad_stream) {
-            // This is used by main program (no identifier) or process started
-            // via run command. If more cases appear, the Class parameter has
-            // to become a separate parameter.
+            // Message either main program or a process started via run command.
+            // There should be a notification to main controller in all cases.
             if (identifier != nullptr)
-                ::Message(notifications, identifier, "run", "error", "format");
+                msg_run_error_format.Send(notifications, *identifier);
             else
-                ::Message(notifications, "error", "format");
+                msg_null_error_format.Send(notifications);
             return std::make_tuple(InputScanner::DiscardRetroactively,
                 RangeBegin, ++curr);
         }

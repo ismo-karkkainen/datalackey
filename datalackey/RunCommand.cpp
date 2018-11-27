@@ -12,7 +12,7 @@
 
 
 RunCommand::RunCommand(const char *const Name, Output& Out, Processes& P)
-    : Command(Name, Out), processes(P)
+    : Command(Name, Out), processes(P), missing(Name, "missing")
 { }
 
 RunCommand::~RunCommand() {
@@ -22,7 +22,7 @@ void RunCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "missing");
+        missing.Send(out, Id);
         return;
     }
     processes.Run(out, Id, Arguments);

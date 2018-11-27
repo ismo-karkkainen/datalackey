@@ -12,7 +12,11 @@
 
 
 DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
-    : Command(Name, Out), storage(S)
+    : Command(Name, Out), storage(S),
+    err_missing(Name, "missing"),
+    msg_invalid(Name, "invalid"),
+    msg_missing(Name, "missing"),
+    msg_deleted(Name, "deleted")
 { }
 
 DeleteCommand::~DeleteCommand() {
@@ -23,7 +27,7 @@ void DeleteCommand::Perform(
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "missing");
+        err_missing.Send(out, Id);
         return;
     }
     std::vector<std::shared_ptr<SimpleValue>> deleted, missing, invalid;
@@ -38,9 +42,9 @@ void DeleteCommand::Perform(
             invalid.push_back(arg);
     }
     if (!invalid.empty())
-        ListMessage(out, Id, Name().c_str(), "invalid", invalid);
+        msg_invalid.Send(out, Id, invalid);
     if (!missing.empty())
-        ListMessage(out, Id, Name().c_str(), "missing", missing);
+        msg_missing.Send(out, Id, missing);
     if (!deleted.empty())
-        ListMessage(out, Id, Name().c_str(), "deleted", deleted);
+        msg_deleted.Send(out, Id, deleted);
 }

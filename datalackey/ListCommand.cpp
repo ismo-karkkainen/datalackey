@@ -15,7 +15,8 @@
 
 
 ListCommand::ListCommand(const char *const Name, Output& Out, const Storage& S)
-    : Command(Name, Out), storage(S)
+    : Command(Name, Out), storage(S),
+    unexpected(Name, "unexpected"), list(Name, "")
 { }
 
 ListCommand::~ListCommand() {
@@ -26,9 +27,9 @@ void ListCommand::Perform(
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "unexpected");
+        unexpected.Send(out, Id);
         return;
     }
     auto result = storage.List();
-    ListMessage(out, Id, Name().c_str(), "", result);
+    list.Send(out, Id, result);
 }

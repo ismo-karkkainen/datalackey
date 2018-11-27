@@ -11,11 +11,13 @@
 
 #include "Command.hpp"
 #include "Processes.hpp"
+#include "Messages.hpp"
 
 
 class ProcessesCommand : public Command {
 private:
     const Processes& processes;
+    CmdErrorArgumentSth unexpected;
 
 public:
     ProcessesCommand(const char *const Name, Output& Out, const Processes& P);

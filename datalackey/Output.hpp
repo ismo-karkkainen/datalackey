@@ -22,6 +22,7 @@
 class Output;
 
 #include "InputScanner.hpp"
+#include "Message.hpp"
 #include <vector>
 #include <mutex>
 #include <queue>
@@ -78,6 +79,13 @@ public:
 
 class Output {
 private:
+    class ReadError : public Message {
+    public:
+        void Report(Output& Out) const;
+        void Send(Output& Out, const SimpleValue* Id, const char* const Label)
+            const;
+    };
+
     static Output* first;
 
     // Not necessarily valid, use DataNotifiedOutputs or ProcessNotifiedOutputs.
@@ -98,6 +106,8 @@ private:
     mutable std::mutex input_sets_mutex;
 
     bool failed;
+
+    ReadError read_error;
 
     void clear_buffers();
     void feeder();

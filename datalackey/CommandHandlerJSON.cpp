@@ -48,12 +48,12 @@ bool CommandHandlerJSON::End() {
     }
     catch (const std::exception& e) {
         buffer.Clear();
-        Message(out, "error", "format");
+        msg_null_error_format.Send(out);
         return false;
     }
     assert(cmd.is_array());
     if (cmd.size() == 0) {
-        Message(out, "error", "identifier", "missing");
+        msg_error_identifier_missing.Send(out);
         return true;
     }
     std::unique_ptr<SimpleValue> identifier = nullptr;
@@ -63,7 +63,7 @@ bool CommandHandlerJSON::End() {
     else if (cmd[0].is_number()) {
         double d(cmd[0].get<double>()), i;
         if (0.0 != std::modf(d, &i)) {
-            Message(out, "error", "identifier", "invalid");
+            msg_error_identifier_invalid.Send(out);
             return true;
         }
         identifier = std::unique_ptr<SimpleValue>(
@@ -71,22 +71,21 @@ bool CommandHandlerJSON::End() {
     } else if (cmd[0].is_null()) {
         identifier = std::unique_ptr<SimpleValue>(new NullValue());
     } else {
-        Message(out, "error", "identifier", "invalid");
+        msg_error_identifier_invalid.Send(out);
         return true;
     }
     if (cmd.size() == 1) {
-        Message(out, identifier.get(), "error", "command", "missing");
+        msg_error_command_missing.Send(out, *identifier.get());
         return true;
     }
     if (!cmd[1].is_string()) {
-        Message(out, identifier.get(), "error", "command", "not-string");
+        msg_error_command_not_string.Send(out, *identifier.get());
         return true;
     }
     std::string command = cmd[1];
     auto iter = handlers.find(command);
     if (iter == handlers.end()) {
-        Message(out, identifier.get(),
-            "error", "command", "unknown", command.c_str());
+        msg_error_command_unknown.Send(out, *identifier.get(), command.c_str());
         return true;
     }
     std::vector<std::shared_ptr<SimpleValue>> args;
@@ -97,8 +96,8 @@ bool CommandHandlerJSON::End() {
         else if (cmd[k].is_number()) {
             double d(cmd[k].get<double>()), i;
             if (0.0 != std::modf(d, &i)) {
-                Message(out, identifier.get(),
-                    command.c_str(), "error", "argument", "not-integer");
+                msg_arg_error_argument_not_integer.Send(
+                    out, *identifier.get(), command.c_str());
                 return true;
             }
             args.push_back(std::shared_ptr<SimpleValue>(
@@ -106,8 +105,8 @@ bool CommandHandlerJSON::End() {
         } else if (cmd[k].is_null()) {
             args.push_back(std::shared_ptr<SimpleValue>(new NullValue()));
         } else {
-            Message(out, identifier.get(),
-                command.c_str(), "error", "argument", "invalid");
+            msg_arg_error_argument_invalid.Send(
+                out, *identifier.get(), command.c_str());
             return true;
         }
     }

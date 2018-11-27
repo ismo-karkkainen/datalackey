@@ -15,7 +15,7 @@
 
 
 StorageInfoCommand::StorageInfoCommand(const char *const Name, Output& Out, const Storage& S)
-    : Command(Name, Out), storage(S)
+    : Command(Name, Out), storage(S), unexpected(Name, "unexpected")
 { }
 
 StorageInfoCommand::~StorageInfoCommand() {
@@ -26,13 +26,13 @@ void StorageInfoCommand::Perform(
 {
     // An array with output identifier that was given after the command.
     if (!Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "unexpected");
+        unexpected.Send(out, Id);
         return;
     }
     auto results = storage.Info();
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
-    Feed(*writer, Id);
+    Message::Feed(*writer, Id);
     *writer << ValueRef<std::string>(Name())
         << ValueRef<std::string>("")
         << Dictionary; // Start label dictionary.

@@ -11,11 +11,14 @@
 
 #include "Command.hpp"
 #include "Storage.hpp"
+#include "Messages.hpp"
 
 
 class ListCommand : public Command {
 private:
     const Storage& storage;
+    CmdErrorArgumentSth unexpected;
+    CmdSthList list;
 
 public:
     ListCommand(const char *const Name, Output& Out, const Storage& S);

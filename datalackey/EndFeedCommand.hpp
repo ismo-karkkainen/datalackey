@@ -11,11 +11,13 @@
 
 #include "Command.hpp"
 #include "Processes.hpp"
+#include "Messages.hpp"
 
 
 class EndFeedCommand : public Command {
 private:
     Processes& processes;
+    CmdErrorArgumentSth missing;
 
 public:
     EndFeedCommand(const char *const Name, Output& Out, Processes& P);

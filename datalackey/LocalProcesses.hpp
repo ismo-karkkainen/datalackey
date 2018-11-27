@@ -14,6 +14,7 @@
 #include "Process.hpp"
 #include "SimpleValue.hpp"
 #include "ProcessInput.hpp"
+#include "Messages.hpp"
 #include <map>
 #include <memory>
 #include <stack>
@@ -35,7 +36,7 @@ private:
     std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> feed(
         Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Parameters, Encoder* E,
-        const char *const cmd);
+        bool FromFeed = false);
 
 public:
     LocalProcesses(Storage& S);

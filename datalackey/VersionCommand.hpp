@@ -11,9 +11,13 @@
 
 #include "Command.hpp"
 #include "Storage.hpp"
+#include "Messages.hpp"
 
 
 class VersionCommand : public Command {
+private:
+    CmdErrorArgumentSth unexpected;
+
 public:
     VersionCommand(const char *const Name, Output& Out);
     ~VersionCommand();

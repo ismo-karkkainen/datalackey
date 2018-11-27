@@ -7,11 +7,25 @@
 //
 
 #include "NoOperationCommand.hpp"
-#include "Messages.hpp"
+
+
+NoOperationCommand::NoOpMessage::NoOpMessage(const char* const Name)
+    : name(Name)
+{ }
+
+void NoOperationCommand::NoOpMessage::Report(Output& Out) const {
+    Send(Out, Message::id);
+}
+
+void NoOperationCommand::NoOpMessage::Send(Output& Out, const SimpleValue& Id)
+    const
+{
+    message(Out, Id, name, "");
+}
 
 
 NoOperationCommand::NoOperationCommand(const char *const Name, Output& Out)
-    : Command(Name, Out)
+    : Command(Name, Out), reply(Name)
 { }
 
 NoOperationCommand::~NoOperationCommand() {
@@ -20,5 +34,5 @@ NoOperationCommand::~NoOperationCommand() {
 void NoOperationCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    Message(out, Id, Name().c_str(), "");
+    reply.Send(out, Id);
 }

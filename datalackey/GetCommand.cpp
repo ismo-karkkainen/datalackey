@@ -15,7 +15,11 @@
 
 
 GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S)
-    : Command(Name, Out), storage(S)
+    : Command(Name, Out), storage(S),
+    arg_missing(Name, "missing"),
+    msg_invalid(Name, "invalid"),
+    msg_missing(Name, "missing"),
+    msg_failed(Name, "failed")
 { }
 
 GetCommand::~GetCommand() {
@@ -26,7 +30,7 @@ void GetCommand::Perform(
 {
     // An array with output identifier and labels.
     if (Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "missing");
+        arg_missing.Send(out, Id);
         return;
     }
     // Filter out invalid values.
@@ -41,7 +45,7 @@ void GetCommand::Perform(
             std::shared_ptr<ProcessInput>(new ProcessInput(arg, arg)));
     }
     if (!invalid.empty())
-        ListMessage(out, Id, Name().c_str(), "invalid", invalid);
+        msg_invalid.Send(out, Id, invalid);
     // Process without input can call this so do nothing.
     // (In theory should "output" the data but there is no format to use.)
     if (out.Format() == nullptr)
@@ -54,11 +58,11 @@ void GetCommand::Perform(
         if (!res->Data())
             missing.push_back(res->SharedLabel());
     if (!missing.empty())
-        ListMessage(out, Id, Name().c_str(), "missing", missing);
+        msg_missing.Send(out, Id, missing);
     // Write out remaining results.
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.
-    Feed(*writer, Id);
+    Message::Feed(*writer, Id);
     *writer << ValueRef<std::string>(Name())
         << ValueRef<std::string>("")
         << Dictionary; // Start data dictionary.
@@ -67,7 +71,7 @@ void GetCommand::Perform(
         std::shared_ptr<DataReader> data = results[k]->Data();
         if (!data)
             continue;
-        Feed(*writer, *(results[k]->Name()));
+        Message::Feed(*writer, *(results[k]->Name()));
         *writer << RawItem;
         // Failure after this messes up the whole thing.
         while (std::shared_ptr<const RawData> block = data->Read(1048576))
@@ -80,5 +84,5 @@ void GetCommand::Perform(
     // If there were any failures, report them but the chances of the controller
     // getting these in any sensible manner are slim, maybe with one-line JSON.
     if (!failed.empty())
-        ListMessage(out, Id, Name().c_str(), "failed", failed);
+        msg_failed.Send(out, Id, failed);
 }

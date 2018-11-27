@@ -16,7 +16,7 @@
 
 
 VersionCommand::VersionCommand(const char *const Name, Output& Out)
-    : Command(Name, Out)
+    : Command(Name, Out), unexpected(Name, "unexpected")
 { }
 
 VersionCommand::~VersionCommand() {
@@ -27,12 +27,12 @@ void VersionCommand::Perform(
 {
     // An array with output identifier and labels.
     if (!Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "unexpected");
+        unexpected.Send(out, Id);
         return;
     }
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array;
-    Feed(*writer, Id);
+    Message::Feed(*writer, Id);
     *writer << ValueRef<std::string>(Name())
         << ValueRef<std::string>("")
         << Dictionary

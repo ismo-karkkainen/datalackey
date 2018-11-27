@@ -11,11 +11,16 @@
 
 #include "Command.hpp"
 #include "Storage.hpp"
+#include "Messages.hpp"
 
 
 class RenameCommand : public Command {
 private:
     Storage& storage;
+    CmdErrorArgumentSth arg_missing;
+    CmdErrorArgumentSth pairless;
+    CmdSthArg2 msg_renamed;
+    CmdSthList msg_invalid, msg_missing;
 
 public:
     RenameCommand(const char *const Name, Output& Out, Storage& S);

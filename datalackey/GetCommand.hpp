@@ -11,11 +11,14 @@
 
 #include "Command.hpp"
 #include "Storage.hpp"
+#include "Messages.hpp"
 
 
 class GetCommand : public Command {
 private:
     Storage& storage;
+    CmdErrorArgumentSth arg_missing;
+    CmdSthList msg_invalid, msg_missing, msg_failed;
 
 public:
     GetCommand(const char *const Name, Output& Out, Storage& S);

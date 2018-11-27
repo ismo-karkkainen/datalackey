@@ -13,7 +13,7 @@
 
 EndFeedCommand::EndFeedCommand(
     const char *const Name, Output& Out, Processes& P)
-    : Command(Name, Out), processes(P)
+    : Command(Name, Out), processes(P), missing(Name, "missing")
 { }
 
 EndFeedCommand::~EndFeedCommand() {
@@ -23,7 +23,7 @@ void EndFeedCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "missing");
+        missing.Send(out, Id);
         return;
     }
     processes.EndFeed(out, Id, Arguments);

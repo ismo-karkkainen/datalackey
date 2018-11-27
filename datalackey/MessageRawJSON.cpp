@@ -8,7 +8,7 @@
 
 #include "MessageRawJSON.hpp"
 #include "NullValue.hpp"
-#include "Messages.hpp"
+#include "Message.hpp"
 #include "Number_t.hpp"
 #include "Value_t.hpp"
 #include <memory>
@@ -33,7 +33,7 @@ bool MessageRawJSON::Input(
     if (writer == nullptr) {
         writer = out.Writable(IsNullValue(&identifier));
         *writer << Array;
-        Feed(*writer, identifier);
+        Message::Feed(*writer, identifier);
         *writer << ValueRef<std::string>("run")
             << ValueRef<std::string>("bytes");
     }

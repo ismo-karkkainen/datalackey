@@ -8,12 +8,14 @@
 
 #include "TerminateCommand.hpp"
 #include "Value_t.hpp"
-#include "Messages.hpp"
 
 
 TerminateCommand::TerminateCommand(
     const char *const Name, Output& Out, Processes& P)
-    : Command(Name, Out), processes(P)
+    : Command(Name, Out), processes(P),
+    arg_missing(Name, "missing"),
+    msg_missing(Name, "missing"),
+    msg_terminated(Name, "terminated")
 { }
 
 TerminateCommand::~TerminateCommand() {
@@ -24,7 +26,7 @@ void TerminateCommand::Perform(
 {
     // An array with process identifiers.
     if (Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "missing");
+        arg_missing.Send(out, Id);
         return;
     }
     std::vector<std::shared_ptr<SimpleValue>> terminated, missing;
@@ -35,7 +37,7 @@ void TerminateCommand::Perform(
             missing.push_back(arg);
     }
     if (!missing.empty())
-        ListMessage(out, Id, Name().c_str(), "missing", missing);
+        msg_missing.Send(out, Id, missing);
     if (!terminated.empty())
-        ListMessage(out, Id, Name().c_str(), "terminated", terminated);
+        msg_terminated.Send(out, Id, terminated);
 }

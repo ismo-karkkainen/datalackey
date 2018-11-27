@@ -9,7 +9,6 @@
 #include "Output.hpp"
 #include "Value_t.hpp"
 #include "Structure.hpp"
-#include "Messages.hpp"
 #include <cassert>
 
 
@@ -81,6 +80,21 @@ OutputCollection DataNotifiedOutputs;
 OutputCollection ProcessNotifiedOutputs;
 
 
+void Output::ReadError::Report(Output& Out) const {
+    Send(Out, &Message::id, Message::item);
+    Send(Out, nullptr, Message::item);
+}
+
+void Output::ReadError::Send(
+    Output& Out, const SimpleValue* Id, const char* const Label) const
+{
+    if (Id == nullptr)
+        message(Out, "read", "error", Label);
+    else
+        message(Out, Id, "read", "error", Label);
+}
+
+
 Output* Output::first = nullptr;
 
 
@@ -143,11 +157,11 @@ void Output::feeder() {
                             DataNotifiedOutputs.Mutex());
                         for (auto op : DataNotifiedOutputs.Outputs()) {
                             if (op == controller_output)
-                                Message(*op, controller_output_identifier,
-                                    "error", "read",
+                                read_error.Send(*op,
+                                    controller_output_identifier,
                                     input->Label()->String().c_str());
                             else if (op == Output::first)
-                                Message(*op, "error", "read",
+                                read_error.Send(*op, nullptr,
                                     input->Label()->String().c_str());
                             // No idea what the command is. Run, feed, get?
                             // Technically bad enough to warrant special

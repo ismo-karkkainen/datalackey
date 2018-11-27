@@ -17,6 +17,7 @@
 #include "Options.hpp"
 #include "Time.hpp"
 #include "File.hpp"
+#include "MessageReporter.hpp"
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -59,6 +60,8 @@ static int HandleArguments(int argc, char** argv) {
     opt::AddValue(1024, 0, std::numeric_limits<int>::max());
     opt::Usage(
         "Megabytes of total memory attempted to keep free. 0 for no limit.");
+    opt::AddFlag('r', "report", false);
+    opt::Usage("Report messages and notifications to command-out and exit.");
     opt::AddFlag('h', "help", false);
     opt::Usage("Print help and exit.");
     if (opt::GivenOption('h', "help", argc, argv)) {
@@ -157,11 +160,18 @@ int main(int argc, char** argv) {
         choice.c_str(), *in_channel, *command_handler, *sink, *out, nullptr);
     assert(scanner != nullptr);
 
-    while (!scanner->Ended() || !procs->Finished() || !out->Finished()) {
-        bool did_something = scanner->Scan();
-        did_something = procs->CleanFinished() || did_something;
-        if (!did_something)
+    if (opt::Given("report")) {
+        MessageReporter::Get().Report(*out);
+        while (!out->Finished())
             Nap(20000000); // 20 ms.
+    } else {
+        // Run normally.
+        while (!scanner->Ended() || !procs->Finished() || !out->Finished()) {
+            bool did_something = scanner->Scan();
+            did_something = procs->CleanFinished() || did_something;
+            if (!did_something)
+                Nap(20000000); // 20 ms.
+        }
     }
 
     delete procs;

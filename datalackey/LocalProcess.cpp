@@ -11,7 +11,7 @@
 #include "FileDescriptorInput.hpp"
 #include "FileDescriptorOutput.hpp"
 #include "Time.hpp"
-#include "Messages.hpp"
+#include "ProcessMessages.hpp"
 #include "JSONEncoder.hpp"
 #include "NullEncoder.hpp"
 #include "NullOutput.hpp"
@@ -76,14 +76,14 @@ LocalProcess::ChildState LocalProcess::get_child_state(ChildState Previous) {
         return Running;
     } else if (waited == pid) {
         if (WIFEXITED(status)) {
-            Message(out, *id, "run", "exit", WEXITSTATUS(status));
+            pm_run_exit.Send(out, *id, WEXITSTATUS(status));
             return None;
         } else if (WIFSIGNALED(status)) {
-            Message(out, *id, "run", "signal", WTERMSIG(status));
+            pm_run_signal.Send(out, *id, WTERMSIG(status));
             return None;
         } else if (WIFSTOPPED(status)) {
             if (Previous != Stopped)
-                Message(out, *id, "run", "stopped", WSTOPSIG(status));
+                pm_run_stopped.Send(out, *id, WSTOPSIG(status));
             return Stopped;
         }
     } else if (waited == -1) {
@@ -104,14 +104,14 @@ void LocalProcess::real_runner() {
     }
     for (int k = 0; k < 2; ++k) {
         if (-1 == pipe(stdouterr_child[k])) {
-            Message(out, *id, "run", "error", "pipe");
+            pm_run_error_pipe.Send(out, *id);
             return;
         }
     }
     if (uses_stdin) {
         errno = 0;
         if (-1 == pipe(stdin_child)) {
-            Message(out, *id, "run", "error", "pipe");
+            pm_run_error_pipe.Send(out, *id);
             return;
         }
 #if defined(__APPLE__)
@@ -132,14 +132,14 @@ void LocalProcess::real_runner() {
         InputChannel* ic = nullptr;
         if (settings[1] == "stdout") {
             if (used_std[0]) {
-                Message(out, *id, "run", "duplicate", "stdout");
+                pm_run_error_duplicate_stdout.Send(out, *id);
                 return;
             }
             ic = new FileDescriptorInput(stdouterr_child[0][0]);
             used_std[0] = true;
         } else if (settings[1] == "stderr") {
             if (used_std[1]) {
-                Message(out, *id, "run", "duplicate", "stderr");
+                pm_run_error_duplicate_stderr.Send(out, *id);
                 return;
             }
             ic = new FileDescriptorInput(stdouterr_child[1][0]);
@@ -185,9 +185,9 @@ void LocalProcess::real_runner() {
         int err = errno;
         if (pid == -1) {
             if (err == EAGAIN)
-                Message(out, *id, "run", "error", "no-processes");
+                pm_run_error_no_processes.Send(out, *id);
             else if (err == ENOMEM)
-                Message(out, *id, "run", "error", "no-memory");
+                pm_run_error_no_memory.Send(out, *id);
             return;
         }
         if (stdin_child[0] != -1)
@@ -244,11 +244,11 @@ void LocalProcess::real_runner() {
         }
         exit(54); // Something else.
     }
-    Message(out, *id, "run", "running", pid);
+    pm_run_running.Send(out, *id, pid);
     std::unique_lock<std::mutex> notify_lock(ProcessNotifiedOutputs.Mutex());
     for (Output* other : ProcessNotifiedOutputs.Outputs())
         if (other != &out && other != child_feed)
-            Message(*other, "process", "started", *id, pid);
+            pm_process_started.Send(*other, *id, pid);
     notify_lock.unlock();
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
@@ -261,7 +261,7 @@ void LocalProcess::real_runner() {
             notify_lock.lock();
             for (Output* other : ProcessNotifiedOutputs.Outputs())
                 if (other != &out)
-                    Message(*other, "process", "ended", *id, pid);
+                    pm_process_ended.Send(*other, *id, pid);
             notify_lock.unlock();
         }
         // Scan for child output.
@@ -278,8 +278,8 @@ void LocalProcess::real_runner() {
         }
         if (feed_open && child_feed->Closed()) {
             if (child_feed->Failed())
-                Message(out, *id, "run", "input", "failed");
-            Message(out, *id, "run", "input", "closed");
+                pm_run_error_input_failed.Send(out, *id);
+            pm_run_input_closed.Send(out, *id);
             feed_open = false;
         }
         if (!scanning)
@@ -306,7 +306,10 @@ void LocalProcess::runner() {
     if (stdouterr_child[1][0] != -1)
         close(stdouterr_child[1][0]);
     pid = 0;
-    Message(out, *id, "run", terminate ? "terminated" : "finished");
+    if (terminate)
+        pm_run_terminated.Send(out, *id);
+    else
+        pm_run_finished.Send(out, *id);
     owner->HasFinished(*id);
 }
 
@@ -364,13 +367,13 @@ bool LocalProcess::Run() {
     }
     catch (const std::system_error& e) {
         child_start_lock.unlock();
-        Message(out, *id, "run", "error", "no-thread");
+        pm_run_error_no_thread.Send(out, *id);
         owner->HasFinished(*id);
         return false;
     }
     catch (const std::exception& e) {
         child_start_lock.unlock();
-        Message(out, *id, "run", "error", "exception");
+        pm_run_error_exception.Send(out, *id);
         owner->HasFinished(*id);
         return false;
     }

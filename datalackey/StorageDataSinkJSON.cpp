@@ -19,8 +19,7 @@ bool StorageDataSinkJSON::start_item() {
         json s = json::parse(key.cbegin(), key.cend());
         key.resize(0);
         if (!s.is_string()) {
-            Message(notifications, identifier,
-                "error", "identifier", "not-string");
+            msg_error_identifier_not_string.Send(notifications, *identifier);
             return false;
         }
         name = s;
@@ -63,7 +62,7 @@ void StorageDataSinkJSON::end_group() {
             std::lock_guard<std::mutex> lg(DataNotifiedOutputs.Mutex());
             for (Output* out : DataNotifiedOutputs.Outputs())
                 if (out == notifications.ControllerOutput())
-                    ListMessage(*out, *identifier, "data", "stored", labels);
+                    msg_data_stored.Send(*out, *identifier, labels);
         }
         storage.Add(*group, notifications.ControllerOutput());
     }
@@ -72,7 +71,7 @@ void StorageDataSinkJSON::end_group() {
 }
 
 bool StorageDataSinkJSON::error_format() const {
-    Message(notifications, identifier, "error", "format");
+    msg_error_format.Send(notifications, *identifier);
     return false;
 }
 

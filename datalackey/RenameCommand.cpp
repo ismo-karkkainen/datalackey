@@ -8,11 +8,15 @@
 
 #include "RenameCommand.hpp"
 #include "Value_t.hpp"
-#include "Messages.hpp"
 
 
 RenameCommand::RenameCommand(const char *const Name, Output& Out, Storage& S)
-    : Command(Name, Out), storage(S)
+    : Command(Name, Out), storage(S),
+    arg_missing(Name, "missing"),
+    pairless(Name, "pairless"),
+    msg_renamed(Name, "renamed"),
+    msg_invalid(Name, "invalid"),
+    msg_missing(Name, "missing")
 { }
 
 RenameCommand::~RenameCommand() {
@@ -23,11 +27,11 @@ void RenameCommand::Perform(
 {
     // An array with output identifier and label pairs.
     if (Arguments.empty()) {
-        Message(out, Id, Name().c_str(), "error", "argument", "missing");
+        arg_missing.Send(out, Id);
         return;
     }
     if (Arguments.size() % 2 != 0) {
-        Message(out, Id, Name().c_str(), "error", "argument", "pairless");
+        pairless.Send(out, Id);
         return;
     }
     std::vector<std::shared_ptr<SimpleValue>> missing, invalid;
@@ -41,13 +45,13 @@ void RenameCommand::Perform(
         if (label == nullptr || target == nullptr)
             continue;
         if (storage.Rename(*label, *target, &out))
-            Message(out, Id, Name().c_str(),
-                "renamed", label->String().c_str(), target->String().c_str());
+            msg_renamed.Send(out, Id,
+                label->String().c_str(), target->String().c_str());
         else
             missing.push_back(Arguments[k]);
     }
     if (!invalid.empty())
-        ListMessage(out, Id, Name().c_str(), "invalid", invalid);
+        msg_invalid.Send(out, Id, invalid);
     if (!missing.empty())
-        ListMessage(out, Id, Name().c_str(), "missing", missing);
+        msg_missing.Send(out, Id, missing);
 }
