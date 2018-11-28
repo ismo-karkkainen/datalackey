@@ -99,49 +99,26 @@ void ErrorCommandSthArg::Send(
 }
 
 
-CmdSthList::CmdSthList(const char* const Cmd, const char* const Sth)
-    : cmd(Cmd), sth(Sth)
+Sth2List::Sth2List(const char* const Sth, const char* const Sth2)
+    : sth(Sth), sth2(Sth2)
 { }
 
-void CmdSthList::Report(Output& Out) const {
+void Sth2List::Report(Output& Out) const {
     std::vector<std::shared_ptr<SimpleValue>> dots;
     dots.push_back(Message::dots);
     Send(Out, Message::id, dots);
 }
 
-void CmdSthList::Send(Output& Out, const SimpleValue& Id,
+void Sth2List::Send(Output& Out, const SimpleValue& Id,
     const std::vector<std::shared_ptr<SimpleValue>>& List) const
 {
-    listmessage(Out, Id, cmd, sth, List);
+    listmessage(Out, Id, sth, sth2, List);
 }
 
-void CmdSthList::Send(Output& Out, const SimpleValue& Id,
+void Sth2List::Send(Output& Out, const SimpleValue& Id,
     const std::vector<std::string>& List) const
 {
-    listmessage(Out, Id, cmd, sth, List);
-}
-
-
-NullNtfSthArg::NullNtfSthArg(
-    const char* const Ntf, const char* const Sth, int PlaceholderCount)
-    : ntf(Ntf), sth(Sth), placeholder_count(PlaceholderCount)
-{
-    assert(0 < placeholder_count && placeholder_count < 3);
-}
-
-void NullNtfSthArg::Report(Output& Out) const {
-    if (placeholder_count == 1)
-        Send(Out, Message::item);
-    else
-        Send(Out, Message::item, Message::item);
-}
-
-void NullNtfSthArg::Send(
-    Output& Out, const char* const Arg, const char* const Arg2) const
-{
-    assert((Arg2 != nullptr && placeholder_count == 2) ||
-        (Arg2 == nullptr && placeholder_count == 1));
-    message(Out, ntf, sth, Arg, Arg2);
+    listmessage(Out, Id, sth, sth2, List);
 }
 
 
@@ -168,49 +145,32 @@ void NullNtfSthList::Send(Output& Out, const std::vector<std::string>& List)
 }
 
 
-CmdSthArg2::CmdSthArg2(const char* const Cmd, const char* const Sth)
-    : cmd(Cmd), sth(Sth)
-{ }
-
-void CmdSthArg2::Report(Output& Out) const {
-    Send(Out, Message::id, Message::item, Message::item);
-}
-
-void CmdSthArg2::Send(Output& Out, const SimpleValue& Id,
-    const char* const Arg, const char* const Arg2) const
-{
-    message(Out, Id, cmd, sth, Arg, Arg2);
-}
-
-
-Sth2Opt::Sth2Opt(const char* const Sth, const char* const Sth2,
-    const char* const Opt)
-    : sth(Sth), sth2(Sth2), opt(Opt)
-{ }
-
-void Sth2Opt::Report(Output& Out) const {
-    Send(Out, Message::id);
-}
-
-void Sth2Opt::Send(Output& Out, const SimpleValue& Id) const {
-    message(Out, Id, sth, sth2, opt);
-}
-
-
-Sth2List::Sth2List(const char* const Sth, const char* const Sth2)
+Sth2Arg2::Sth2Arg2(const char* const Sth, const char* const Sth2)
     : sth(Sth), sth2(Sth2)
 { }
 
-void Sth2List::Report(Output& Out) const {
-    std::vector<std::string> dots;
-    dots.push_back(Message::dots->String());
-    Send(Out, Message::id, dots);
+void Sth2Arg2::Report(Output& Out) const {
+    Send(Out, Message::id, Message::item, Message::item);
 }
 
-void Sth2List::Send(Output& Out, const SimpleValue& Id,
-    const std::vector<std::string>& List) const
+void Sth2Arg2::Send(Output& Out, const SimpleValue& Id,
+    const char* const Arg, const char* const Arg2) const
 {
-    listmessage(Out, Id, sth, sth2, List);
+    message(Out, Id, sth, sth2, Arg, Arg2);
+}
+
+
+Sth2Opt3::Sth2Opt3(const char* const Sth, const char* const Sth2,
+    const char* const Opt, const char* const Opt2, const char* const Opt3)
+    : sth(Sth), sth2(Sth2), opt(Opt), opt2(Opt2), opt3(Opt3)
+{ }
+
+void Sth2Opt3::Report(Output& Out) const {
+    Send(Out, Message::id);
+}
+
+void Sth2Opt3::Send(Output& Out, const SimpleValue& Id) const {
+    message(Out, Id, sth, sth2, opt, opt2, opt3);
 }
 
 
@@ -227,9 +187,9 @@ NullNtfSthList ntf_data_deleted("data", "deleted");;
 NullNtfSthList ntf_data_renamed("data", "renamed");
 NullNtfSthList ntf_data_stored("data", "stored");
 
-Sth2Opt msg_channel_reset("channel", "reset");
-Sth2Opt msg_run_error_format("run", "error", "format");
-Sth2Opt msg_error_format("error", "format");
+Sth2Opt3 msg_channel_reset("channel", "reset");
+Sth2Opt3 msg_run_error_format("run", "error", "format");
+Sth2Opt3 msg_error_format("error", "format");
 
-Sth2Opt msg_error_identifier_not_string("error", "identifier", "not-string");
+Sth2Opt3 msg_error_identifier_not_string("error", "identifier", "not-string");
 Sth2List msg_data_stored("data", "stored");

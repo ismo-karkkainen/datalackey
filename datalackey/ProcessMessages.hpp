@@ -14,11 +14,11 @@
 #include "Messages.hpp"
 
 
-extern CmdSthList pm_end_feed;
-extern CmdSthList pm_end_feed_missing;
-extern CmdSthList pm_end_feed_not_open;
-extern CmdSthList pm_run_missing;
-extern CmdSthList pm_feed_missing;
+extern Sth2List pm_end_feed;
+extern Sth2List pm_end_feed_missing;
+extern Sth2List pm_end_feed_not_open;
+extern Sth2List pm_run_missing;
+extern Sth2List pm_feed_missing;
 
 class NullNtfSthIdInt : public Message {
 private:
@@ -54,42 +54,24 @@ extern CmdSthInt pm_run_stopped;
 extern CmdSthInt pm_run_running;
 
 
-class CmdSthOpt3 : public Message {
-private:
-    const char* const cmd;
-    const char* const sth;
-    const char* const opt;
-    const char* const opt2;
-    const char* const opt3;
-
-public:
-    CmdSthOpt3(const char* const Cmd, const char* const Sth,
-        const char* const Opt = nullptr,
-        const char* const Opt2 = nullptr,
-        const char* const Opt3 = nullptr);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id) const;
-};
-
-extern CmdSthOpt3 pm_run_error_pipe;
-extern CmdSthOpt3 pm_run_error_duplicate_stdout;
-extern CmdSthOpt3 pm_run_error_duplicate_stderr;
-extern CmdSthOpt3 pm_run_error_no_processes;
-extern CmdSthOpt3 pm_run_error_no_memory;
-extern CmdSthOpt3 pm_run_error_input_failed;
-extern CmdSthOpt3 pm_run_input_closed;
-extern CmdSthOpt3 pm_run_terminated;
-extern CmdSthOpt3 pm_run_finished;
-extern CmdSthOpt3 pm_run_error_no_thread;
-extern CmdSthOpt3 pm_run_error_exception;
-extern CmdSthOpt3 pm_run_error_identifier_in_use;
-extern CmdSthOpt3 pm_run_error_channel_in_multiple;
-extern CmdSthOpt3 pm_run_error_notify_no_input;
-extern CmdSthOpt3 pm_run_error_channel_in_missing;
-extern CmdSthOpt3 pm_run_error_channel_out_missing;
-extern CmdSthOpt3 pm_feed_error_not_found;
-extern CmdSthOpt3 pm_feed_error_closed;
+extern Sth2Opt3 pm_run_error_pipe;
+extern Sth2Opt3 pm_run_error_duplicate_stdout;
+extern Sth2Opt3 pm_run_error_duplicate_stderr;
+extern Sth2Opt3 pm_run_error_no_processes;
+extern Sth2Opt3 pm_run_error_no_memory;
+extern Sth2Opt3 pm_run_error_input_failed;
+extern Sth2Opt3 pm_run_input_closed;
+extern Sth2Opt3 pm_run_terminated;
+extern Sth2Opt3 pm_run_finished;
+extern Sth2Opt3 pm_run_error_no_thread;
+extern Sth2Opt3 pm_run_error_exception;
+extern Sth2Opt3 pm_run_error_identifier_in_use;
+extern Sth2Opt3 pm_run_error_channel_in_multiple;
+extern Sth2Opt3 pm_run_error_notify_no_input;
+extern Sth2Opt3 pm_run_error_channel_in_missing;
+extern Sth2Opt3 pm_run_error_channel_out_missing;
+extern Sth2Opt3 pm_feed_error_not_found;
+extern Sth2Opt3 pm_feed_error_closed;
 
 
 class CmdErrorArgArgumentSth : public Message {

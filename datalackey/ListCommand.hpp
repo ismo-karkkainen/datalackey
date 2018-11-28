@@ -18,7 +18,7 @@ class ListCommand : public Command {
 private:
     const Storage& storage;
     CmdErrorArgumentSth unexpected;
-    CmdSthList list;
+    Sth2List list;
 
 public:
     ListCommand(const char *const Name, Output& Out, const Storage& S);

@@ -88,35 +88,19 @@ public:
 };
 
 
-class CmdSthList : public Message {
+class Sth2List : public Message {
 private:
-    const char* const cmd;
     const char* const sth;
+    const char* const sth2;
 
 public:
-    CmdSthList(const char* const Cmd, const char* const Sth);
+    Sth2List(const char* const Sth, const char* const Sth2);
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue& Id,
         const std::vector<std::shared_ptr<SimpleValue>>& List) const;
     void Send(Output& Out, const SimpleValue& Id,
         const std::vector<std::string>& List) const;
-};
-
-
-class NullNtfSthArg : public Message {
-private:
-    const char* const ntf;
-    const char* const sth;
-    int placeholder_count;
-
-public:
-    NullNtfSthArg(
-        const char* const Ntf, const char* const Sth, int PlaceholderCount);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out,
-        const char* const Arg, const char* const Arg2 = nullptr) const;
 };
 
 
@@ -135,13 +119,13 @@ public:
 };
 
 
-class CmdSthArg2 : public Message {
+class Sth2Arg2 : public Message {
 private:
-    const char* const cmd;
     const char* const sth;
+    const char* const sth2;
 
 public:
-    CmdSthArg2(const char* const Cmd, const char* const Sth);
+    Sth2Arg2(const char* const Sth, const char* const Sth2);
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue& Id,
@@ -149,32 +133,22 @@ public:
 };
 
 
-class Sth2Opt : public Message {
+class Sth2Opt3 : public Message {
 private:
     const char* const sth;
     const char* const sth2;
     const char* const opt;
+    const char* const opt2;
+    const char* const opt3;
 
 public:
-    Sth2Opt(const char* const Sth, const char* const Sth2,
-        const char* const Opt = nullptr);
+    Sth2Opt3(const char* const Sth, const char* const Sth2,
+        const char* const Opt = nullptr,
+        const char* const Opt2 = nullptr,
+        const char* const Opt3 = nullptr);
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue& Id) const;
-};
-
-
-class Sth2List : public Message {
-private:
-    const char* const sth;
-    const char* const sth2;
-
-public:
-    Sth2List(const char* const Sth, const char* const Sth2);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id,
-        const std::vector<std::string>& List) const;
 };
 
 
@@ -192,11 +166,11 @@ extern NullNtfSthList ntf_data_deleted;
 extern NullNtfSthList ntf_data_renamed;
 extern NullNtfSthList ntf_data_stored;
 
-extern Sth2Opt msg_channel_reset;
-extern Sth2Opt msg_run_error_format;
-extern Sth2Opt msg_error_format;
+extern Sth2Opt3 msg_channel_reset;
+extern Sth2Opt3 msg_run_error_format;
+extern Sth2Opt3 msg_error_format;
 
-extern Sth2Opt msg_error_identifier_not_string;
+extern Sth2Opt3 msg_error_identifier_not_string;
 extern Sth2List msg_data_stored;
 
 

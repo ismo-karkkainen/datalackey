@@ -19,7 +19,7 @@ private:
     Storage& storage;
     CmdErrorArgumentSth arg_missing;
     CmdErrorArgumentSth pairless;
-    CmdSthList msg_invalid, msg_missing, msg_renamed;
+    Sth2List msg_invalid, msg_missing, msg_renamed;
 
 public:
     RenameCommand(const char *const Name, Output& Out, Storage& S);
