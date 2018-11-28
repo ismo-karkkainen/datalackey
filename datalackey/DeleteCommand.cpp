@@ -9,6 +9,7 @@
 #include "DeleteCommand.hpp"
 #include "Value_t.hpp"
 #include "Messages.hpp"
+#include "OutputCollection.hpp"
 
 
 DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
@@ -34,7 +35,7 @@ void DeleteCommand::Perform(
     for (auto arg : Arguments) {
         StringValue* label(dynamic_cast<StringValue*>(arg.get()));
         if (label != nullptr) {
-            if (storage.Delete(*label, &out))
+            if (storage.Delete(*label))
                 deleted.push_back(arg);
             else
                 missing.push_back(arg);
@@ -45,6 +46,9 @@ void DeleteCommand::Perform(
         msg_invalid.Send(out, Id, invalid);
     if (!missing.empty())
         msg_missing.Send(out, Id, missing);
-    if (!deleted.empty())
+    if (!deleted.empty()) {
         msg_deleted.Send(out, Id, deleted);
+        DataNotifiedOutputs.Notify(&out,
+            [deleted](Output* Out) { ntf_data_deleted.Send(*Out, deleted); });
+    }
 }

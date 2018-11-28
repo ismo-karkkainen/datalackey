@@ -12,7 +12,6 @@
 #include "StringValue.hpp"
 #include "DataGroup.hpp"
 #include "ProcessInput.hpp"
-#include "Output.hpp"
 #include <memory>
 #include <vector>
 #include <tuple>
@@ -26,11 +25,10 @@ public:
     virtual bool IsValid() const = 0;
 
     virtual std::vector<std::string> List() const = 0;
-    virtual bool Delete(const StringValue& L, Output* AlreadyNotified = nullptr) = 0;
-    virtual bool Rename(const StringValue& Old, const StringValue& New,
-        Output* AlreadyNotified = nullptr) = 0;
 
-    virtual void Add(DataGroup& G, Output* AlreadyNotified = nullptr) = 0;
+    virtual bool Delete(const StringValue& L) = 0;
+    virtual bool Rename(const StringValue& Old, const StringValue& New) = 0;
+    virtual void Add(DataGroup& G) = 0;
 
     virtual void Prepare(const char *const Format,
         std::vector<std::shared_ptr<ProcessInput>>& Inputs) = 0;

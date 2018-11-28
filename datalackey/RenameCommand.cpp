@@ -8,15 +8,16 @@
 
 #include "RenameCommand.hpp"
 #include "Value_t.hpp"
+#include "OutputCollection.hpp"
 
 
 RenameCommand::RenameCommand(const char *const Name, Output& Out, Storage& S)
     : Command(Name, Out), storage(S),
     arg_missing(Name, "missing"),
     pairless(Name, "pairless"),
-    msg_renamed(Name, "renamed"),
     msg_invalid(Name, "invalid"),
-    msg_missing(Name, "missing")
+    msg_missing(Name, "missing"),
+    msg_renamed(Name, "renamed")
 { }
 
 RenameCommand::~RenameCommand() {
@@ -34,7 +35,7 @@ void RenameCommand::Perform(
         pairless.Send(out, Id);
         return;
     }
-    std::vector<std::shared_ptr<SimpleValue>> missing, invalid;
+    std::vector<std::shared_ptr<SimpleValue>> missing, invalid, renamed_pairs;
     for (size_t k = 0; k < Arguments.size(); k += 2) {
         StringValue* label(dynamic_cast<StringValue*>(Arguments[k].get()));
         StringValue* target(dynamic_cast<StringValue*>(Arguments[k + 1].get()));
@@ -44,14 +45,20 @@ void RenameCommand::Perform(
             invalid.push_back(Arguments[k + 1]);
         if (label == nullptr || target == nullptr)
             continue;
-        if (storage.Rename(*label, *target, &out))
-            msg_renamed.Send(out, Id,
-                label->String().c_str(), target->String().c_str());
-        else
+        if (storage.Rename(*label, *target)) {
+            renamed_pairs.push_back(Arguments[k]);
+            renamed_pairs.push_back(Arguments[k + 1]);
+        } else
             missing.push_back(Arguments[k]);
     }
     if (!invalid.empty())
         msg_invalid.Send(out, Id, invalid);
     if (!missing.empty())
         msg_missing.Send(out, Id, missing);
+    if (!renamed_pairs.empty()) {
+        msg_renamed.Send(out, Id, renamed_pairs);
+        DataNotifiedOutputs.Notify(&out,
+            [&renamed_pairs](Output* Out) {
+                ntf_data_renamed.Send(*Out, renamed_pairs); });
+    }
 }

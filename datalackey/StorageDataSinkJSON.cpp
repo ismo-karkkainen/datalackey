@@ -8,6 +8,7 @@
 
 #include "StorageDataSinkJSON.hpp"
 #include "Messages.hpp"
+#include "OutputCollection.hpp"
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -57,14 +58,11 @@ void StorageDataSinkJSON::end_item() {
 void StorageDataSinkJSON::end_group() {
     if (open_dicts == 0 && group != nullptr && part != BadInput) {
         std::vector<std::string> labels = group->Labels();
-        if (notifications.ControllerOutput() != nullptr) {
-            // Ensure that the pointer is still valid.
-            std::lock_guard<std::mutex> lg(DataNotifiedOutputs.Mutex());
-            for (Output* out : DataNotifiedOutputs.Outputs())
-                if (out == notifications.ControllerOutput())
-                    msg_data_stored.Send(*out, *identifier, labels);
-        }
-        storage.Add(*group, notifications.ControllerOutput());
+        storage.Add(*group);
+        DataNotifiedOutputs.Notify(notifications.ControllerOutput(),
+            [this, &labels](Output* Out) {
+                msg_data_stored.Send(*Out, *identifier, labels); },
+            [&labels](Output* Out) { ntf_data_stored.Send(*Out, labels); });
     }
     delete group;
     group = nullptr;

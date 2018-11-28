@@ -188,8 +188,8 @@ extern ErrorCommandSthArg msg_error_command_unknown;
 extern ArgErrorArgumentSth msg_arg_error_argument_not_integer;
 extern ArgErrorArgumentSth msg_arg_error_argument_invalid;
 
-extern NullNtfSthArg ntf_data_deleted;
-extern NullNtfSthArg ntf_data_renamed;
+extern NullNtfSthList ntf_data_deleted;
+extern NullNtfSthList ntf_data_renamed;
 extern NullNtfSthList ntf_data_stored;
 
 extern Sth2Opt msg_channel_reset;

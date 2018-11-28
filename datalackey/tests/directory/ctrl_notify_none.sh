@@ -38,8 +38,10 @@ cat > $EXP <<EOF
 [1,"run","running",pid]
 [1,"run","input","closed"]
 [null,"process","started","a",pid]
-[null,"process","ended","a",pid]
+set
 [null,"data","stored","label"]
+[null,"process","ended","a",pid]
+end
 [1,"run","exit",0]
 [1,"run","finished"]
 [2,"get","",{"label":"value"}]

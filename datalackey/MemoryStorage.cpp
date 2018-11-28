@@ -9,6 +9,7 @@
 #include "MemoryStorage.hpp"
 #include "MemoryOwner.hpp"
 #include "Messages.hpp"
+#include "OutputCollection.hpp"
 #include <cassert>
 
 
@@ -113,22 +114,13 @@ std::vector<std::string> MemoryStorage::List() const {
     return results;
 }
 
-bool MemoryStorage::Delete(const StringValue& L, Output* AlreadyNotified) {
+bool MemoryStorage::Delete(const StringValue& L) {
     std::lock_guard<std::mutex> lock(label2data_mutex);
-    if (del(L)) {
-        std::lock_guard<std::mutex> lock(DataNotifiedOutputs.Mutex());
-        for (Output* out : DataNotifiedOutputs.Outputs())
-            if (out != AlreadyNotified)
-                ntf_data_deleted.Send(*out, L.String().c_str());
-        return true;
-    }
-    return false;
+    return del(L);
 }
 
-bool MemoryStorage::Rename(const StringValue& Old, const StringValue& New,
-    Output* AlreadyNotified)
-{
-    std::unique_lock<std::mutex> lock(label2data_mutex);
+bool MemoryStorage::Rename(const StringValue& Old, const StringValue& New) {
+    std::lock_guard<std::mutex> lock(label2data_mutex);
     auto old = label2data.find(Old);
     if (old == label2data.end())
         return false;
@@ -136,17 +128,12 @@ bool MemoryStorage::Rename(const StringValue& Old, const StringValue& New,
     label2data.erase(old);
     del(New);
     label2data[New] = v;
-    lock.unlock();
-    std::lock_guard<std::mutex> out_lock(DataNotifiedOutputs.Mutex());
-    for (Output* out : DataNotifiedOutputs.Outputs())
-        if (out != AlreadyNotified)
-            ntf_data_renamed.Send(*out, Old.String().c_str(), New.String().c_str());
     return true;
 }
 
-void MemoryStorage::Add(DataGroup& G, Output* AlreadyNotified) {
+void MemoryStorage::Add(DataGroup& G) {
     std::vector<std::string> labels;
-    std::unique_lock<std::mutex> lock(label2data_mutex);
+    std::lock_guard<std::mutex> lock(label2data_mutex);
     while (true) {
         auto label_data = G.Get();
         if (label_data.second == nullptr)
@@ -157,11 +144,6 @@ void MemoryStorage::Add(DataGroup& G, Output* AlreadyNotified) {
             new MemoryStorage::Value(G.Format(), label_data.second));
         labels.push_back(label_data.first);
     }
-    lock.unlock();
-    std::lock_guard<std::mutex> msg_lock(DataNotifiedOutputs.Mutex());
-    for (Output* out : DataNotifiedOutputs.Outputs())
-        if (out != AlreadyNotified)
-            ntf_data_stored.Send(*out, labels);
 }
 
 void MemoryStorage::Prepare(const char *const Format,

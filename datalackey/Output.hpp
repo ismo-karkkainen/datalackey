@@ -138,26 +138,4 @@ public:
 };
 
 
-// Stores pointers to output objects that want to or can receive notifications.
-class OutputCollection {
-private:
-    std::set<Output*> collection;
-    std::mutex mutex;
-
-    friend class Output;
-
-    void Add(Output* O);
-    void Remove(Output* O);
-
-public:
-    std::mutex& Mutex() { return mutex; } // Lock first.
-    std::vector<Output*> Outputs() const { // Previous locked for use duration.
-        return std::vector<Output*>(collection.begin(), collection.end());
-    }
-};
-
-extern OutputCollection DataNotifiedOutputs;
-extern OutputCollection ProcessNotifiedOutputs;
-
-
 #endif /* Output_hpp */

@@ -14,6 +14,7 @@
 #include <utility>
 #include <string>
 #include <memory>
+#include <mutex>
 #include <map>
 
 
@@ -47,11 +48,9 @@ public:
 
     std::vector<std::string> List() const;
 
-    bool Delete(const StringValue& L, Output* AlreadyNotified = nullptr);
-    bool Rename(const StringValue& Old, const StringValue& New,
-        Output* AlreadyNotified = nullptr);
-
-    void Add(DataGroup& G, Output* AlreadyNotified = nullptr);
+    bool Delete(const StringValue& L);
+    bool Rename(const StringValue& Old, const StringValue& New);
+    void Add(DataGroup& G);
 
     void Prepare(const char *const Format,
         std::vector<std::shared_ptr<ProcessInput>>& Inputs);

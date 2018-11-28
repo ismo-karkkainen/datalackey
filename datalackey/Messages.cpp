@@ -223,8 +223,8 @@ ErrorCommandSthArg msg_error_command_unknown("unknown");
 ArgErrorArgumentSth msg_arg_error_argument_not_integer("not-integer");
 ArgErrorArgumentSth msg_arg_error_argument_invalid("invalid");
 
-NullNtfSthArg ntf_data_deleted("data", "deleted", 1);
-NullNtfSthArg ntf_data_renamed("data", "renamed", 2);
+NullNtfSthList ntf_data_deleted("data", "deleted");;
+NullNtfSthList ntf_data_renamed("data", "renamed");
 NullNtfSthList ntf_data_stored("data", "stored");
 
 Sth2Opt msg_channel_reset("channel", "reset");

@@ -20,6 +20,7 @@
 #include "Number_t.hpp"
 #include "NumberValue.hpp"
 #include "NullValue.hpp"
+#include "OutputCollection.hpp"
 #include <system_error>
 #include <unistd.h>
 #include <cerrno>
@@ -244,12 +245,10 @@ void LocalProcess::real_runner() {
         }
         exit(54); // Something else.
     }
-    pm_run_running.Send(out, *id, pid);
-    std::unique_lock<std::mutex> notify_lock(ProcessNotifiedOutputs.Mutex());
-    for (Output* other : ProcessNotifiedOutputs.Outputs())
-        if (other != &out && other != child_feed)
-            pm_process_started.Send(*other, *id, pid);
-    notify_lock.unlock();
+    pm_run_running.Send(out, *id, pid); // Not necessarily notified.
+    ProcessNotifiedOutputs.Notify(&out,
+        [this](Output* Out) {
+            if (Out != child_feed) pm_process_started.Send(*Out, *id, pid); });
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
     bool feed_open = !child_feed->Failed();
@@ -258,11 +257,6 @@ void LocalProcess::real_runner() {
         child_state = get_child_state(child_state);
         if (prev != child_state && child_state == None) {
             child_feed->NoGlobalMessages(); // Child not reading anymore.
-            notify_lock.lock();
-            for (Output* other : ProcessNotifiedOutputs.Outputs())
-                if (other != &out)
-                    pm_process_ended.Send(*other, *id, pid);
-            notify_lock.unlock();
         }
         // Scan for child output.
         scanning = false;
@@ -305,11 +299,13 @@ void LocalProcess::runner() {
         close(stdouterr_child[0][0]);
     if (stdouterr_child[1][0] != -1)
         close(stdouterr_child[1][0]);
-    pid = 0;
     if (terminate)
-        pm_run_terminated.Send(out, *id);
+        pm_run_terminated.Send(out, *id); // Not necessarily notified.
     else
-        pm_run_finished.Send(out, *id);
+        pm_run_finished.Send(out, *id); // Not necessarily notified.
+    ProcessNotifiedOutputs.Notify(&out,
+        [this](Output* Out) { pm_process_ended.Send(*Out, *id, pid); });
+    pid = 0;
     owner->HasFinished(*id);
 }
 

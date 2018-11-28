@@ -7,6 +7,7 @@
 //
 
 #include "Output.hpp"
+#include "OutputCollection.hpp"
 #include "Value_t.hpp"
 #include "Structure.hpp"
 #include <cassert>
@@ -74,10 +75,6 @@ void OutputItemWriter::Write(
 {
     buffer.Write(Start, End);
 }
-
-
-OutputCollection DataNotifiedOutputs;
-OutputCollection ProcessNotifiedOutputs;
 
 
 void Output::ReadError::Report(Output& Out) const {
@@ -153,22 +150,18 @@ void Output::feeder() {
             } else {
                 if (input->Data()->Error()) {
                     if (this != Output::first) {
-                        std::lock_guard<std::mutex> lock(
-                            DataNotifiedOutputs.Mutex());
-                        for (auto op : DataNotifiedOutputs.Outputs()) {
-                            if (op == controller_output)
-                                read_error.Send(*op,
-                                    controller_output_identifier,
-                                    input->Label()->String().c_str());
-                            else if (op == Output::first)
-                                read_error.Send(*op, nullptr,
-                                    input->Label()->String().c_str());
-                            // No idea what the command is. Run, feed, get?
-                            // Technically bad enough to warrant special
-                            // handling in controller. Identifier is that of
-                            // run command.
-                            // Must add format once supported.
-                        }
+                        DataNotifiedOutputs.Notify(controller_output,
+                            [this, &input](Output* Out) { read_error.Send(
+                                *Out, controller_output_identifier,
+                                input->Label()->String().c_str()); },
+                            [this, &input](Output* Out) {
+                                if (Out == Output::first) read_error.Send(
+                                    *Out, nullptr,
+                                    input->Label()->String().c_str()); });
+                        // No idea what the command is. Run, feed, get?
+                        // Technically bad enough to warrant special handling
+                        // in controller. Identifier is that of run command.
+                        // Must add format once supported.
                     }
                     failed = true;
                     clear_buffers();
@@ -337,15 +330,4 @@ void Output::Ended(OutputItemBuffer& IB) {
     ended_buffers.push(&IB);
     lock2.unlock();
     output_added.notify_one();
-}
-
-
-void OutputCollection::Add(Output* O) {
-    std::lock_guard<std::mutex> lock(mutex);
-    collection.insert(O);
-}
-
-void OutputCollection::Remove(Output* O) {
-    std::lock_guard<std::mutex> lock(mutex);
-    collection.erase(O);
 }
