@@ -18,7 +18,7 @@ class TerminateCommand : public Command {
 private:
     Processes& processes;
     CmdErrorArgumentSth arg_missing;
-    Sth2List msg_missing, msg_terminated;
+    Sth2OptList msg_missing, msg_terminated;
 
 public:
     TerminateCommand(const char *const Name, Output& Out, Processes& P);

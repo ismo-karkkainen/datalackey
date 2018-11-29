@@ -18,7 +18,7 @@ class DeleteCommand : public Command {
 private:
     Storage& storage;
     CmdErrorArgumentSth err_missing;
-    Sth2List msg_invalid, msg_missing, msg_deleted;
+    Sth2OptList msg_invalid, msg_missing, msg_deleted;
 
 public:
     DeleteCommand(const char *const Name, Output& Out, Storage& S);

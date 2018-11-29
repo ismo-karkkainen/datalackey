@@ -45,6 +45,7 @@ ProcessInput::ProcessInput(std::shared_ptr<SimpleValue>& Value, Encoder* E,
                 assert(false);
         }
     }
+    rdo->Finish();
     delete enc;
     std::shared_ptr<DataOwner> shared(rdo);
     SetData(rdo->Reader(shared));

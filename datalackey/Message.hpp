@@ -69,24 +69,30 @@ protected:
 
     void listmsg(Output& Out, const SimpleValue* Id,
         const char *const Class, const char *const Kind,
-        const std::vector<std::shared_ptr<SimpleValue>>& List) const;
+        const std::vector<std::shared_ptr<SimpleValue>>& List,
+        const char *const OptPreList = nullptr) const;
     void listmsg(Output& Out, const SimpleValue* Id,
         const char *const Class, const char *const Kind,
-        const std::vector<std::string>& List) const;
+        const std::vector<std::string>& List,
+        const char *const OptPreList = nullptr) const;
 
     void listmessage(Output& Out, const SimpleValue& Id,
         const char *const Class, const char *const Kind,
-        const std::vector<std::shared_ptr<SimpleValue>>& List) const;
+        const std::vector<std::shared_ptr<SimpleValue>>& List,
+        const char *const OptPreList = nullptr) const;
     void listmessage(Output& Out, const SimpleValue& Id,
         const char *const Class, const char *const Kind,
-        const std::vector<std::string>& List) const;
+        const std::vector<std::string>& List,
+        const char *const OptPreList = nullptr) const;
 
     void listmessage(Output& Out,
         const char *const Class, const char *const Kind,
-        const std::vector<std::shared_ptr<SimpleValue>>& List) const;
+        const std::vector<std::shared_ptr<SimpleValue>>& List,
+        const char *const OptPreList = nullptr) const;
     void listmessage(Output& Out,
         const char *const Class, const char *const Kind,
-        const std::vector<std::string>& List) const;
+        const std::vector<std::string>& List,
+        const char *const OptPreList = nullptr) const;
 
 public:
     virtual ~Message();

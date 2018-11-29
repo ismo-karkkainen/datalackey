@@ -18,7 +18,7 @@ class GetCommand : public Command {
 private:
     Storage& storage;
     CmdErrorArgumentSth arg_missing;
-    Sth2List msg_invalid, msg_missing, msg_failed;
+    Sth2OptList msg_invalid, msg_missing, msg_failed;
 
 public:
     GetCommand(const char *const Name, Output& Out, Storage& S);

@@ -19,14 +19,13 @@ bool StorageDataSinkJSON::start_item() {
     try {
         json s = json::parse(key.cbegin(), key.cend());
         key.resize(0);
-        if (!s.is_string()) {
-            msg_error_identifier_not_string.Send(notifications, *identifier);
-            return false;
-        }
+        // We scanned for string inside quotes and hence if it is not a string,
+        // the parsing above has thrown an exception.
+        assert(s.is_string());
         name = s;
     }
     catch (const std::exception& e) {
-        return error_format();
+        return false;
     }
     StringValue label(name);
     if (renamer != nullptr)
@@ -61,7 +60,7 @@ void StorageDataSinkJSON::end_group() {
         storage.Add(*group);
         DataNotifiedOutputs.Notify(notifications.ControllerOutput(),
             [this, &labels](Output* Out) {
-                msg_data_stored.Send(*Out, *identifier, labels); },
+                msg_data_stored.Send(*Out, identifier, labels); },
             [&labels](Output* Out) { ntf_data_stored.Send(*Out, labels); });
     }
     delete group;
@@ -69,7 +68,7 @@ void StorageDataSinkJSON::end_group() {
 }
 
 bool StorageDataSinkJSON::error_format() const {
-    msg_error_format.Send(notifications, *identifier);
+    msg_error_format.Send(notifications, identifier);
     return false;
 }
 

@@ -110,18 +110,13 @@ static bool is_string(size_t Index, const std::string& command,
 
 static bool is_string_or_null(size_t Index, const std::string& command,
     std::vector<std::shared_ptr<SimpleValue>>& Parameters,
-    Output& Out, const SimpleValue& Id, bool FromFeed = false)
+    Output& Out, const SimpleValue& Id)
 {
     if (IsStringValue(Parameters[Index].get()))
         return true;
     if (IsNullValue(Parameters[Index].get()))
         return true;
-    if (FromFeed)
-        pm_feed_error_cmd_argument_not_string_null.Send(
-            Out, Id, command.c_str());
-    else
-        pm_run_error_cmd_argument_not_string_null.Send(
-            Out, Id, command.c_str());
+    pm_run_error_cmd_argument_not_string_null.Send(Out, Id, command.c_str());
     return false;
 }
 
@@ -181,9 +176,9 @@ std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
             missing.push_back(input->SharedLabel());
     if (!missing.empty()) {
         if (FromFeed)
-            pm_feed_missing.Send(Out, Id, missing);
+            pm_feed_error_missing.Send(Out, Id, missing);
         else
-            pm_run_missing.Send(Out, Id, missing);
+            pm_run_error_missing.Send(Out, Id, missing);
     }
     return std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>>(
         missing.empty(), input_values);

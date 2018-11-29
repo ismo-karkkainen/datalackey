@@ -99,26 +99,49 @@ void ErrorCommandSthArg::Send(
 }
 
 
-Sth2List::Sth2List(const char* const Sth, const char* const Sth2)
-    : sth(Sth), sth2(Sth2)
+Sth2OptList::Sth2OptList(const char* const Sth, const char* const Sth2,
+    const char* const Opt)
+    : sth(Sth), sth2(Sth2), opt(Opt)
 { }
 
-void Sth2List::Report(Output& Out) const {
+void Sth2OptList::Report(Output& Out) const {
     std::vector<std::shared_ptr<SimpleValue>> dots;
     dots.push_back(Message::dots);
     Send(Out, Message::id, dots);
 }
 
-void Sth2List::Send(Output& Out, const SimpleValue& Id,
+void Sth2OptList::Send(Output& Out, const SimpleValue& Id,
     const std::vector<std::shared_ptr<SimpleValue>>& List) const
 {
-    listmessage(Out, Id, sth, sth2, List);
+    listmessage(Out, Id, sth, sth2, List, opt);
 }
 
-void Sth2List::Send(Output& Out, const SimpleValue& Id,
+void Sth2OptList::Send(Output& Out, const SimpleValue& Id,
     const std::vector<std::string>& List) const
 {
-    listmessage(Out, Id, sth, sth2, List);
+    listmessage(Out, Id, sth, sth2, List, opt);
+}
+
+
+NullableSth2OptList::NullableSth2OptList(
+    const char* const Sth, const char* const Sth2)
+    : sth(Sth), sth2(Sth2)
+{ }
+
+void NullableSth2OptList::Report(Output& Out) const {
+    std::vector<std::string> dots;
+    dots.push_back(Message::dots->String());
+    Send(Out, &Message::id, dots);
+    Send(Out, nullptr, dots);
+}
+
+void NullableSth2OptList::Send(Output& Out, const SimpleValue* Id,
+    const std::vector<std::string>& List) const
+{
+    if (Id != nullptr)
+        listmessage(Out, *Id, sth, sth2, List);
+    else
+        listmessage(Out, sth, sth2, List);
 }
 
 
@@ -174,6 +197,22 @@ void Sth2Opt3::Send(Output& Out, const SimpleValue& Id) const {
 }
 
 
+NullableSth2Opt3::NullableSth2Opt3(
+    const char* const Sth, const char* const Sth2,
+    const char* const Opt, const char* const Opt2, const char* const Opt3)
+    : sth(Sth), sth2(Sth2), opt(Opt), opt2(Opt2), opt3(Opt3)
+{ }
+
+void NullableSth2Opt3::Report(Output& Out) const {
+    Send(Out, &Message::id);
+    Send(Out, nullptr);
+}
+
+void NullableSth2Opt3::Send(Output& Out, const SimpleValue* Id) const {
+    message(Out, Id, sth, sth2, opt, opt2, opt3);
+}
+
+
 NullErrorSthOpt msg_null_error_format("format");
 NullErrorSthOpt msg_error_identifier_missing("identifier", "missing");
 NullErrorSthOpt msg_error_identifier_invalid("identifier", "invalid");
@@ -189,7 +228,6 @@ NullNtfSthList ntf_data_stored("data", "stored");
 
 Sth2Opt3 msg_channel_reset("channel", "reset");
 Sth2Opt3 msg_run_error_format("run", "error", "format");
-Sth2Opt3 msg_error_format("error", "format");
+NullableSth2Opt3 msg_error_format("error", "format");
 
-Sth2Opt3 msg_error_identifier_not_string("error", "identifier", "not-string");
-Sth2List msg_data_stored("data", "stored");
+NullableSth2OptList msg_data_stored("data", "stored");

@@ -136,7 +136,8 @@ void Message::feed(OutputItem& Writer, const SimpleValue& Id) const {
 
 void Message::listmsg(Output& Out, const SimpleValue* Id,
     const char *const Class, const char *const Kind,
-    const std::vector<std::shared_ptr<SimpleValue>>& List) const
+    const std::vector<std::shared_ptr<SimpleValue>>& List,
+    const char *const OptPreList) const
 {
     std::unique_ptr<OutputItem> writer(
         Out.Writable(Id != nullptr && IsNullValue(Id)));
@@ -147,6 +148,8 @@ void Message::listmsg(Output& Out, const SimpleValue* Id,
         feed(*writer, *Id);
     *writer << ValueRef<std::string>(Class)
         << ValueRef<std::string>(Kind);
+    if (OptPreList != nullptr)
+        *writer << ValueRef<std::string>(OptPreList);
     for (auto arg : List)
         feed(*writer, *arg);
     *writer << End;
@@ -154,7 +157,7 @@ void Message::listmsg(Output& Out, const SimpleValue* Id,
 
 void Message::listmsg(Output& Out, const SimpleValue* Id,
     const char *const Class, const char *const Kind,
-    const std::vector<std::string>& List) const
+    const std::vector<std::string>& List, const char *const OptPreList) const
 {
     std::unique_ptr<OutputItem> writer(
         Out.Writable(Id != nullptr && IsNullValue(Id)));
@@ -165,6 +168,8 @@ void Message::listmsg(Output& Out, const SimpleValue* Id,
         feed(*writer, *Id);
     *writer << ValueRef<std::string>(Class)
         << ValueRef<std::string>(Kind);
+    if (OptPreList != nullptr)
+        *writer << ValueRef<std::string>(OptPreList);
     for (auto arg : List)
         *writer << ValueRef<std::string>(arg);
     *writer << End;
@@ -172,28 +177,30 @@ void Message::listmsg(Output& Out, const SimpleValue* Id,
 
 void Message::listmessage(Output& Out, const SimpleValue& Id,
     const char *const Class, const char *const Kind,
-    const std::vector<std::shared_ptr<SimpleValue>>& List) const
+    const std::vector<std::shared_ptr<SimpleValue>>& List,
+    const char *const OptPreList) const
 {
-    listmsg(Out, &Id, Class, Kind, List);
+    listmsg(Out, &Id, Class, Kind, List, OptPreList);
 }
 
 void Message::listmessage(Output& Out, const SimpleValue& Id,
     const char *const Class, const char *const Kind,
-    const std::vector<std::string>& List) const
+    const std::vector<std::string>& List, const char *const OptPreList) const
 {
-    listmsg(Out, &Id, Class, Kind, List);
+    listmsg(Out, &Id, Class, Kind, List, OptPreList);
 }
 
 void Message::listmessage(Output& Out,
     const char *const Class, const char *const Kind,
-    const std::vector<std::shared_ptr<SimpleValue>>& List) const
+    const std::vector<std::shared_ptr<SimpleValue>>& List,
+    const char *const OptPreList) const
 {
-    listmsg(Out, nullptr, Class, Kind, List);
+    listmsg(Out, nullptr, Class, Kind, List, OptPreList);
 }
 
 void Message::listmessage(Output& Out,
     const char *const Class, const char *const Kind,
-    const std::vector<std::string>& List) const
+    const std::vector<std::string>& List, const char *const OptPreList) const
 {
-    listmsg(Out, nullptr, Class, Kind, List);
+    listmsg(Out, nullptr, Class, Kind, List, OptPreList);
 }

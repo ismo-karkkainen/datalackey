@@ -107,11 +107,11 @@ void RunErrorSthArg2::Send(Output& Out, const SimpleValue& Id,
 
 
 
-Sth2List pm_end_feed("end-feed", "");;
-Sth2List pm_end_feed_missing("end-feed", "missing");
-Sth2List pm_end_feed_not_open("end-feed", "not-open");
-Sth2List pm_run_missing("run", "missing");
-Sth2List pm_feed_missing("feed", "missing");
+Sth2OptList pm_end_feed("end-feed", "");;
+Sth2OptList pm_end_feed_missing("end-feed", "missing");
+Sth2OptList pm_end_feed_not_open("end-feed", "not-open");
+Sth2OptList pm_run_error_missing("run", "error", "missing");
+Sth2OptList pm_feed_error_missing("feed", "error", "missing");
 
 NullNtfSthIdInt pm_process_started("process", "started");
 NullNtfSthIdInt pm_process_ended("process", "ended");
@@ -120,6 +120,7 @@ CmdSthInt pm_run_exit("run", "exit");
 CmdSthInt pm_run_signal("run", "signal");
 CmdSthInt pm_run_stopped("run", "stopped");
 CmdSthInt pm_run_running("run", "running");
+Sth2Opt3 pm_run_continued("run", "continued");
 
 Sth2Opt3 pm_run_error_pipe("run", "error", "pipe");
 Sth2Opt3 pm_run_error_duplicate_stdout("run", "error", "duplicate", "stdout");
@@ -152,8 +153,6 @@ CmdErrorArgArgumentSth pm_feed_error_cmd_argument_not_string(
     "feed", "not-string");
 CmdErrorArgArgumentSth pm_run_error_cmd_argument_not_string_null(
     "run", "not-string-or-null");
-CmdErrorArgArgumentSth pm_feed_error_cmd_argument_not_string_null(
-    "feed", "not-string-or-null");
 CmdErrorArgArgumentSth pm_run_error_cmd_argument_unknown("run", "unknown");
 CmdErrorArgArgumentSth pm_feed_error_cmd_argument_unknown("feed", "unknown");
 

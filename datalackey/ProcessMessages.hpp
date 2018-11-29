@@ -14,11 +14,11 @@
 #include "Messages.hpp"
 
 
-extern Sth2List pm_end_feed;
-extern Sth2List pm_end_feed_missing;
-extern Sth2List pm_end_feed_not_open;
-extern Sth2List pm_run_missing;
-extern Sth2List pm_feed_missing;
+extern Sth2OptList pm_end_feed;
+extern Sth2OptList pm_end_feed_missing;
+extern Sth2OptList pm_end_feed_not_open;
+extern Sth2OptList pm_run_error_missing;
+extern Sth2OptList pm_feed_error_missing;
 
 class NullNtfSthIdInt : public Message {
 private:
@@ -52,7 +52,7 @@ extern CmdSthInt pm_run_exit;
 extern CmdSthInt pm_run_signal;
 extern CmdSthInt pm_run_stopped;
 extern CmdSthInt pm_run_running;
-
+extern Sth2Opt3 pm_run_continued;
 
 extern Sth2Opt3 pm_run_error_pipe;
 extern Sth2Opt3 pm_run_error_duplicate_stdout;
@@ -91,7 +91,6 @@ extern CmdErrorArgArgumentSth pm_feed_error_cmd_argument_missing;
 extern CmdErrorArgArgumentSth pm_run_error_cmd_argument_not_string;
 extern CmdErrorArgArgumentSth pm_feed_error_cmd_argument_not_string;
 extern CmdErrorArgArgumentSth pm_run_error_cmd_argument_not_string_null;
-extern CmdErrorArgArgumentSth pm_feed_error_cmd_argument_not_string_null;
 extern CmdErrorArgArgumentSth pm_run_error_cmd_argument_unknown;
 extern CmdErrorArgArgumentSth pm_feed_error_cmd_argument_unknown;
 

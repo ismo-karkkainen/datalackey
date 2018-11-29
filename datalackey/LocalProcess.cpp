@@ -74,6 +74,8 @@ LocalProcess::ChildState LocalProcess::get_child_state(ChildState Previous) {
     pid_t waited = waitpid(pid, &status, WNOHANG | WUNTRACED);
     int err = errno;
     if (waited == 0) { // Ok. Expected.
+        if (Previous == Stopped)
+            pm_run_continued.Send(out, *id);
         return Running;
     } else if (waited == pid) {
         if (WIFEXITED(status)) {

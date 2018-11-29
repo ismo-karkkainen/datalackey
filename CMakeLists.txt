@@ -202,6 +202,8 @@ new_test_arg(exit9 exit.sh 9)
 add_exe(memory signal.sh)
 new_test_arg(signal6 signal.sh 6)
 new_test_arg(signal9 signal.sh 9)
+add_exe(memory stop.sh)
+new_test(stopcont stop.sh)
 
 # Simple commands
 #
@@ -270,6 +272,8 @@ add_exe(memory ctrl_notify_data.sh)
 new_test(ctrl_notify_data ctrl_notify_data.sh)
 add_exe(memory input_eof.sh)
 new_test(input_eof input_eof.sh)
+add_exe(memory notify_data_child.sh)
+new_test(notify_data_child notify_data_child.sh)
 
 # Directory storage tests
 #
@@ -291,3 +295,34 @@ add_exe(directory d_ bad_dir.sh)
 new_test(d_bad_dir d_bad_dir.sh)
 add_exe(directory d_ set_reload.sh)
 new_test(d_set_reload d_set_reload.sh)
+
+# Missing/unexpected arguments and errors.
+#
+add_exe(error missing_or_unexpected.sh)
+new_test_arg(delete_missing missing_or_unexpected.sh delete)
+new_test_arg(end_feed_missing missing_or_unexpected.sh end-feed)
+new_test_arg(feed_missing missing_or_unexpected.sh feed)
+new_test_arg(get_missing missing_or_unexpected.sh get)
+new_test_arg(list_unexpected missing_or_unexpected.sh list)
+new_test_arg(processes_unexpected missing_or_unexpected.sh processes)
+new_test_arg(rename_missing missing_or_unexpected.sh rename)
+new_test_arg(run_missing missing_or_unexpected.sh run)
+new_test_arg(storage_info_unexpected missing_or_unexpected.sh storage-info)
+new_test_arg(terminate_missing missing_or_unexpected.sh terminate)
+new_test_arg(version_unexpected missing_or_unexpected.sh version)
+
+# Various errors.
+#
+add_exe(error error.sh)
+new_test_arg(identifier_missing error.sh identifier_missing)
+new_test_arg(identifier_invalid_float error.sh identifier_invalid_float)
+new_test_arg(identifier_invalid_type error.sh identifier_invalid_type)
+new_test_arg(command_missing error.sh command_missing)
+new_test_arg(command_not_string error.sh command_not_string)
+new_test_arg(command_unknown error.sh command_unknown)
+new_test_arg(argument_not_integer error.sh argument_not_integer)
+new_test_arg(argument_invalid error.sh argument_invalid)
+new_test_arg(data_identifier_not_string error.sh data_identifier_not_string)
+new_test_arg(data_identifier_error_format error.sh data_identifier_error_format)
+add_exe(error feed.sh)
+new_test(feed_errors feed.sh)

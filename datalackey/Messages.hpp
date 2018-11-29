@@ -88,18 +88,34 @@ public:
 };
 
 
-class Sth2List : public Message {
+class Sth2OptList : public Message {
 private:
     const char* const sth;
     const char* const sth2;
+    const char* const opt;
 
 public:
-    Sth2List(const char* const Sth, const char* const Sth2);
+    Sth2OptList(const char* const Sth, const char* const Sth2,
+        const char* const Opt = nullptr);
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue& Id,
         const std::vector<std::shared_ptr<SimpleValue>>& List) const;
     void Send(Output& Out, const SimpleValue& Id,
+        const std::vector<std::string>& List) const;
+};
+
+
+class NullableSth2OptList : public Message {
+private:
+    const char* const sth;
+    const char* const sth2;
+
+public:
+    NullableSth2OptList(const char* const Sth, const char* const Sth2);
+
+    void Report(Output& Out) const;
+    void Send(Output& Out, const SimpleValue* Id,
         const std::vector<std::string>& List) const;
 };
 
@@ -152,6 +168,25 @@ public:
 };
 
 
+class NullableSth2Opt3 : public Message {
+private:
+    const char* const sth;
+    const char* const sth2;
+    const char* const opt;
+    const char* const opt2;
+    const char* const opt3;
+
+public:
+    NullableSth2Opt3(const char* const Sth, const char* const Sth2,
+        const char* const Opt = nullptr,
+        const char* const Opt2 = nullptr,
+        const char* const Opt3 = nullptr);
+
+    void Report(Output& Out) const;
+    void Send(Output& Out, const SimpleValue* Id) const;
+};
+
+
 // Message objects for various format or storage-specific classes.
 extern NullErrorSthOpt msg_null_error_format;
 extern NullErrorSthOpt msg_error_identifier_missing;
@@ -168,10 +203,9 @@ extern NullNtfSthList ntf_data_stored;
 
 extern Sth2Opt3 msg_channel_reset;
 extern Sth2Opt3 msg_run_error_format;
-extern Sth2Opt3 msg_error_format;
+extern NullableSth2Opt3 msg_error_format;
 
-extern Sth2Opt3 msg_error_identifier_not_string;
-extern Sth2List msg_data_stored;
+extern NullableSth2OptList msg_data_stored;
 
 
 #endif /* Messages_hpp */
