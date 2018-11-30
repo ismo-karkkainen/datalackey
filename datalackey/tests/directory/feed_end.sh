@@ -24,7 +24,7 @@ chmod a+x _script.sh
 
 (
 echo '{"label":123}'
-echo '[1,"run","channel","in","JSON","stdin","channel","out","JSON","stdout","output-prefix","fed-","program","./_script.sh"]'
+echo '[1,"run","in","JSON","stdin","out","JSON","stdout","output-prefix","fed-","program","./_script.sh"]'
 nap
 echo '[2,"feed",1,"input","label","in1"]'
 nap

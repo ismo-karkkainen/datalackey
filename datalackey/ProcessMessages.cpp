@@ -133,15 +133,11 @@ Sth2Opt3 pm_run_terminated("run", "terminated");
 Sth2Opt3 pm_run_finished("run", "finished");
 Sth2Opt3 pm_run_error_no_thread("run", "error", "no-thread");
 Sth2Opt3 pm_run_error_exception("run", "error", "exception");
-Sth2Opt3 pm_run_error_identifier_in_use(
-    "run", "error", "identifier", "in-use");
-Sth2Opt3 pm_run_error_channel_in_multiple(
-    "run", "error", "channel", "in", "multiple");
+Sth2Opt3 pm_run_error_identifier_in_use("run", "error", "identifier", "in-use");
+Sth2Opt3 pm_run_error_in_multiple("run", "error", "in", "multiple");
 Sth2Opt3 pm_run_error_notify_no_input("run", "error", "notify", "no-input");
-Sth2Opt3 pm_run_error_channel_in_missing(
-    "run", "error", "channel", "in", "missing");
-Sth2Opt3 pm_run_error_channel_out_missing(
-    "run", "error", "channel", "out", "missing");
+Sth2Opt3 pm_run_error_in_missing("run", "error", "in", "missing");
+Sth2Opt3 pm_run_error_out_missing("run", "error", "out", "missing");
 Sth2Opt3 pm_feed_error_not_found("feed", "error", "not-found");
 Sth2Opt3 pm_feed_error_closed("feed", "error", "closed");
 
@@ -159,16 +155,17 @@ CmdErrorArgArgumentSth pm_feed_error_cmd_argument_unknown("feed", "unknown");
 CmdErrorArgDuplicateArg pm_run_error_cmd_duplicate("run");
 CmdErrorArgDuplicateArg pm_feed_error_cmd_duplicate("feed");
 
-RunErrorSth2OptArg pm_run_error_channel_unknown("channel", "unknown");
+RunErrorSth2OptArg pm_run_error_in_unknown("in", "unknown");
+RunErrorSth2OptArg pm_run_error_out_unknown("out", "unknown");
 RunErrorSth2OptArg pm_run_error_notify_unknown("notify", "unknown");
 RunErrorSth2OptArg pm_run_error_env_invalid("env", "argument", "invalid");
 RunErrorSth2OptArg pm_run_error_env_duplicate("env", "argument", "duplicate");
-RunErrorSth2OptArg pm_run_error_channel_format_unknown(
-    "channel", "format", "unknown");
-RunErrorSth2OptArg pm_run_error_channel_direction_unknown(
-    "channel", "direction", "unknown");
-RunErrorSth2OptArg pm_run_error_channel_out_duplicate(
-    "channel", "out", "duplicate");
+RunErrorSth2OptArg pm_run_error_in_format_unknown(
+    "in", "format", "unknown");
+RunErrorSth2OptArg pm_run_error_out_format_unknown(
+    "out", "format", "unknown");
+RunErrorSth2OptArg pm_run_error_out_duplicate(
+    "out", "duplicate");
 RunErrorSth2OptArg pm_run_error_argument_unknown("argument", "unknown");;
 
 RunErrorSthArg2 pm_run_error_cd_errmsg("change-directory", 2);

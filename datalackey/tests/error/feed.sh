@@ -19,7 +19,7 @@ chmod a+x _subscript.sh
 
 cat > _script.sh << EOF
 #!/bin/sh
-echo '["sub","run","end-feed","channel","out","JSON","stdout","program","./_subscript.sh"]'
+echo '["sub","run","end-feed","out","JSON","stdout","program","./_subscript.sh"]'
 rm -f $OUT_SCR
 while read L
 do
@@ -30,7 +30,7 @@ EOF
 chmod a+x _script.sh
 
 (
-echo '[1,"run","channel","in","JSON","stdin","channel","out","JSON","stdout","notify","data","program","./_script.sh"]'
+echo '[1,"run","in","JSON","stdin","out","JSON","stdout","notify","data","program","./_script.sh"]'
 nap
 echo '[2,"feed",0]'
 echo '[5,"feed",1,"invalid"]'

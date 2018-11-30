@@ -19,13 +19,13 @@ chmod a+x _script.sh
 
 cat > _controller.sh << EOF
 #!/bin/sh
-echo '["a","run","channel","out","JSON","stdout","program","./_script.sh"]'
+echo '["a","run","out","JSON","stdout","program","./_script.sh"]'
 cat | sed 's/"running",.*]$/"running",pid]/' > $CTOUT
 EOF
 chmod a+x _controller.sh
 
 (
-echo '[1,"run","channel","out","JSON","stdout","channel","in","JSON","stdin","notify","data","program","./_controller.sh"]'
+echo '[1,"run","out","JSON","stdout","in","JSON","stdin","notify","data","program","./_controller.sh"]'
 nap
 echo '[2,"end-feed",1]'
 nap

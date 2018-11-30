@@ -66,10 +66,10 @@ extern Sth2Opt3 pm_run_finished;
 extern Sth2Opt3 pm_run_error_no_thread;
 extern Sth2Opt3 pm_run_error_exception;
 extern Sth2Opt3 pm_run_error_identifier_in_use;
-extern Sth2Opt3 pm_run_error_channel_in_multiple;
+extern Sth2Opt3 pm_run_error_in_multiple;
 extern Sth2Opt3 pm_run_error_notify_no_input;
-extern Sth2Opt3 pm_run_error_channel_in_missing;
-extern Sth2Opt3 pm_run_error_channel_out_missing;
+extern Sth2Opt3 pm_run_error_in_missing;
+extern Sth2Opt3 pm_run_error_out_missing;
 extern Sth2Opt3 pm_feed_error_not_found;
 extern Sth2Opt3 pm_feed_error_closed;
 
@@ -125,13 +125,14 @@ public:
 };
 
 
-extern RunErrorSth2OptArg pm_run_error_channel_unknown;
+extern RunErrorSth2OptArg pm_run_error_in_unknown;
+extern RunErrorSth2OptArg pm_run_error_out_unknown;
 extern RunErrorSth2OptArg pm_run_error_notify_unknown;
 extern RunErrorSth2OptArg pm_run_error_env_invalid;
 extern RunErrorSth2OptArg pm_run_error_env_duplicate;
-extern RunErrorSth2OptArg pm_run_error_channel_format_unknown;
-extern RunErrorSth2OptArg pm_run_error_channel_direction_unknown;
-extern RunErrorSth2OptArg pm_run_error_channel_out_duplicate;
+extern RunErrorSth2OptArg pm_run_error_in_format_unknown;
+extern RunErrorSth2OptArg pm_run_error_out_format_unknown;
+extern RunErrorSth2OptArg pm_run_error_out_duplicate;
 extern RunErrorSth2OptArg pm_run_error_argument_unknown;
 
 class RunErrorSthArg2 : public Message {

@@ -20,7 +20,7 @@ rm -rf "$SUBDIR"
 mkdir "$SUBDIR"
 
 (
-echo '[1,"run","channel","out","JSON","stdout","change-directory",'
+echo '[1,"run","out","JSON","stdout","change-directory",'
 echo "\"$SUBDIR\""
 echo ',"program","./_script.sh"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |

@@ -21,13 +21,13 @@ chmod a+x _script.sh
 
 cat > _controller.sh << EOF
 #!/bin/sh
-echo '["a","run","channel","out","JSON","stdout","program","./_script.sh"]'
+echo '["a","run","out","JSON","stdout","program","./_script.sh"]'
 nap
 EOF
 chmod a+x _controller.sh
 
 (
-echo '[1,"run","channel","out","JSON","stdout","end-feed","program","./_controller.sh"]'
+echo '[1,"run","out","JSON","stdout","end-feed","program","./_controller.sh"]'
 sleep 1
 echo '[2,"get","label"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |

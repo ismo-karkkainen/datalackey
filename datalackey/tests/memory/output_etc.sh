@@ -22,7 +22,7 @@ EOF
 chmod a+x _script.sh
 
 (
-echo '[1,"run","channel","out","JSON","stdout","output-prefix","pre-","output-postfix","-post","output","label","mapped","program","./_script.sh"]'
+echo '[1,"run","out","JSON","stdout","output-prefix","pre-","output-postfix","-post","output","label","mapped","program","./_script.sh"]'
 sleep 1
 echo '[2,"storage-info"]'
 echo '[3,"get","mapped"]'

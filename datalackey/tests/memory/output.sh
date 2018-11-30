@@ -16,7 +16,7 @@ EOF
 chmod a+x _script.sh
 
 (
-echo '[1,"run","channel","out","JSON","stdout","output","label","mapped","program","./_script.sh"]'
+echo '[1,"run","out","JSON","stdout","output","label","mapped","program","./_script.sh"]'
 nap
 echo '[2,"storage-info"]'
 echo '[3,"get","mapped","miss",4]'
