@@ -55,8 +55,6 @@ extern CmdSthInt pm_run_running;
 extern Sth2Opt3 pm_run_continued;
 
 extern Sth2Opt3 pm_run_error_pipe;
-extern Sth2Opt3 pm_run_error_duplicate_stdout;
-extern Sth2Opt3 pm_run_error_duplicate_stderr;
 extern Sth2Opt3 pm_run_error_no_processes;
 extern Sth2Opt3 pm_run_error_no_memory;
 extern Sth2Opt3 pm_run_error_input_failed;
@@ -133,6 +131,7 @@ extern RunErrorSth2OptArg pm_run_error_env_duplicate;
 extern RunErrorSth2OptArg pm_run_error_in_format_unknown;
 extern RunErrorSth2OptArg pm_run_error_out_format_unknown;
 extern RunErrorSth2OptArg pm_run_error_out_duplicate;
+extern RunErrorSth2OptArg pm_run_error_output_duplicate;
 extern RunErrorSth2OptArg pm_run_error_argument_unknown;
 
 class RunErrorSthArg2 : public Message {

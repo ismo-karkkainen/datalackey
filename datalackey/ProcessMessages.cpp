@@ -123,8 +123,6 @@ CmdSthInt pm_run_running("run", "running");
 Sth2Opt3 pm_run_continued("run", "continued");
 
 Sth2Opt3 pm_run_error_pipe("run", "error", "pipe");
-Sth2Opt3 pm_run_error_duplicate_stdout("run", "error", "duplicate", "stdout");
-Sth2Opt3 pm_run_error_duplicate_stderr("run", "error", "duplicate", "stderr");
 Sth2Opt3 pm_run_error_no_processes("run", "error", "no-processes");
 Sth2Opt3 pm_run_error_no_memory("run", "error", "no-memory");
 Sth2Opt3 pm_run_error_input_failed("run", "error", "input", "failed");
@@ -160,12 +158,10 @@ RunErrorSth2OptArg pm_run_error_out_unknown("out", "unknown");
 RunErrorSth2OptArg pm_run_error_notify_unknown("notify", "unknown");
 RunErrorSth2OptArg pm_run_error_env_invalid("env", "argument", "invalid");
 RunErrorSth2OptArg pm_run_error_env_duplicate("env", "argument", "duplicate");
-RunErrorSth2OptArg pm_run_error_in_format_unknown(
-    "in", "format", "unknown");
-RunErrorSth2OptArg pm_run_error_out_format_unknown(
-    "out", "format", "unknown");
-RunErrorSth2OptArg pm_run_error_out_duplicate(
-    "out", "duplicate");
+RunErrorSth2OptArg pm_run_error_in_format_unknown("in", "format", "unknown");
+RunErrorSth2OptArg pm_run_error_out_format_unknown("out", "format", "unknown");
+RunErrorSth2OptArg pm_run_error_out_duplicate("out", "duplicate");
+RunErrorSth2OptArg pm_run_error_output_duplicate("output", "duplicate");
 RunErrorSth2OptArg pm_run_error_argument_unknown("argument", "unknown");;
 
 RunErrorSthArg2 pm_run_error_cd_errmsg("change-directory", 2);

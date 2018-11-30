@@ -8,7 +8,8 @@ if len(sys.argv) != 3:
     print("line-used-as-is")
     print("optional:line (marks line as optional)")
     print("set (begins a set of lines in arbitrary order, no nested sets)")
-    print("end (ends a set)")
+    print("subset (like set but all optional and at least one required)")
+    print("end (ends a set or subset)")
     print("escape:line (allows line to start with any special word)")
     print("Spaces are ignored before optional:, set, end, escape:")
     sys.exit(5)
@@ -18,9 +19,19 @@ class Target(object):
     def __init__(self):
         self._compulsory = []
         self._optional = []
+        self._subset = False
+        self._max_optional_len = 0
+
+    def Subset(self):
+        self._subset = True
 
     def Add(self, Target, Optional):
-        (self._optional if Optional else self._compulsory).append(Target)
+        if Optional or self._subset:
+            self._optional.append(Target)
+            self._max_optional_len = len(self._optional)
+        else:
+            self._compulsory.append(Target)
+
 
     def Check(self, Output):
         for lst in (self._compulsory, self._optional,):
@@ -32,7 +43,7 @@ class Target(object):
         return False
 
     def Remains(self):
-        return len(self._compulsory) > 0
+        return len(self._compulsory) > 0 or self._subset and len(self._optional) == self._max_optional_len
 
 # Read target data.
 try:
@@ -51,9 +62,15 @@ for line in f.readlines():
         tgt = s[len("escape:"):]
     elif s.startswith("set"):
         if in_set:
-            print("No nested sets allowed.")
+            print("No nested (sub)sets allowed.")
             sys.exit(4)
         in_set = True
+    elif s.startswith("subset"):
+        if in_set:
+            print("No nested (sub)sets allowed.")
+            sys.exit(4)
+        in_set = True
+        t.Subset()
     elif s.startswith("end"):
         if not in_set:
             print("end outside set.")

@@ -318,15 +318,19 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
                 pm_run_error_out_format_unknown.Send(Out, Id, format.c_str());
                 return;
             }
-            outputs.push_back(std::vector<std::string>());
-            outputs.back().push_back(format);
             std::string channel = Parameters[k + 1]->String();
-            if (channel == "stdout" || channel == "stderr") {
-                outputs.back().push_back(channel);
-            } else {
+            if (channel != "stdout" && channel != "stderr") {
                 pm_run_error_out_unknown.Send(Out, Id, channel.c_str());
                 return;
             }
+            for (auto&& earlier : outputs)
+                if (earlier[1] == channel) {
+                    pm_run_error_out_duplicate.Send(Out, Id, channel.c_str());
+                    return;
+                }
+            outputs.push_back(std::vector<std::string>());
+            outputs.back().push_back(format);
+            outputs.back().push_back(channel);
             k += 2;
         } else if (command == "notify") {
             if (!has_count(k, 2, command, Parameters, Out, Id) ||
@@ -386,7 +390,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         renamer.reset(new StringValueMapperSimple(prefix, postfix));
         for (auto& nl : name_label) {
             if (!renamer->Map(nl.first, nl.second)) {
-                pm_run_error_out_duplicate.Send(
+                pm_run_error_output_duplicate.Send(
                     Out, Id, nl.first.String().c_str());
                 return;
             }

@@ -134,17 +134,9 @@ void LocalProcess::real_runner() {
     for (auto& settings : outputs_info) {
         InputChannel* ic = nullptr;
         if (settings[1] == "stdout") {
-            if (used_std[0]) {
-                pm_run_error_duplicate_stdout.Send(out, *id);
-                return;
-            }
             ic = new FileDescriptorInput(stdouterr_child[0][0]);
             used_std[0] = true;
         } else if (settings[1] == "stderr") {
-            if (used_std[1]) {
-                pm_run_error_duplicate_stderr.Send(out, *id);
-                return;
-            }
             ic = new FileDescriptorInput(stdouterr_child[1][0]);
             used_std[1] = true;
         }
