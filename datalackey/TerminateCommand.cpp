@@ -13,9 +13,9 @@
 TerminateCommand::TerminateCommand(
     const char *const Name, Output& Out, Processes& P)
     : Command(Name, Out), processes(P),
-    arg_missing(Name, "missing"),
     msg_missing(Name, "missing"),
-    msg_terminated(Name, "terminated")
+    msg_terminated(Name, "terminated"),
+    description(Name)
 { }
 
 TerminateCommand::~TerminateCommand() {
@@ -24,13 +24,10 @@ TerminateCommand::~TerminateCommand() {
 void TerminateCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    // An array with process identifiers.
-    if (Arguments.empty()) {
-        arg_missing.Send(out, Id);
+    if (!description.Validate(out, Id, Arguments))
         return;
-    }
     std::vector<std::shared_ptr<SimpleValue>> terminated, missing;
-    for (auto arg : Arguments) {
+    for (auto& arg : Arguments) {
         if (processes.Terminate(*arg))
             terminated.push_back(arg);
         else

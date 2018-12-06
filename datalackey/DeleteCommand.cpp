@@ -8,42 +8,32 @@
 
 #include "DeleteCommand.hpp"
 #include "Value_t.hpp"
-#include "Messages.hpp"
 #include "OutputCollection.hpp"
 
 
 DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
     : Command(Name, Out), storage(S),
-    err_missing(Name, "missing"),
-    msg_invalid(Name, "invalid"),
     msg_missing(Name, "missing"),
-    msg_deleted(Name, "deleted")
+    msg_deleted(Name, "deleted"),
+    description(Name)
 { }
 
-DeleteCommand::~DeleteCommand() {
-}
+DeleteCommand::~DeleteCommand() { }
 
 void DeleteCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    // An array with output identifier and labels.
-    if (Arguments.empty()) {
-        err_missing.Send(out, Id);
+    if (!description.Validate(out, Id, Arguments))
         return;
-    }
-    std::vector<std::shared_ptr<SimpleValue>> deleted, missing, invalid;
+    std::vector<std::shared_ptr<SimpleValue>> deleted, missing;
     for (auto arg : Arguments) {
         StringValue* label(dynamic_cast<StringValue*>(arg.get()));
-        if (label != nullptr) {
-            if (storage.Delete(*label))
-                deleted.push_back(arg);
-            else
-                missing.push_back(arg);
-        } else
-            invalid.push_back(arg);
+        assert(label != nullptr);
+        if (storage.Delete(*label))
+            deleted.push_back(arg);
+        else
+            missing.push_back(arg);
     }
-    if (!invalid.empty())
-        msg_invalid.Send(out, Id, invalid);
     if (!missing.empty())
         msg_missing.Send(out, Id, missing);
     if (!deleted.empty()) {

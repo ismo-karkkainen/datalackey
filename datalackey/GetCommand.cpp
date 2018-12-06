@@ -16,10 +16,10 @@
 
 GetCommand::GetCommand(const char *const Name, Output& Out, Storage& S)
     : Command(Name, Out), storage(S),
-    arg_missing(Name, "missing"),
-    msg_invalid(Name, "invalid"),
     msg_missing(Name, "missing"),
-    msg_failed(Name, "failed")
+    msg_failed(Name, "failed"),
+    msg_reply(Name, "", "mapping label-to-value"),
+    description(Name)
 { }
 
 GetCommand::~GetCommand() {
@@ -28,33 +28,20 @@ GetCommand::~GetCommand() {
 void GetCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    // An array with output identifier and labels.
-    if (Arguments.empty()) {
-        arg_missing.Send(out, Id);
+    if (!description.Validate(out, Id, Arguments))
         return;
-    }
-    // Filter out invalid values.
-    std::vector<std::shared_ptr<SimpleValue>> invalid;
-    std::vector<std::shared_ptr<ProcessInput>> results;
-    for (auto arg : Arguments) {
-        if (dynamic_cast<StringValue*>(arg.get()) == nullptr) {
-            invalid.push_back(arg);
-            continue;
-        }
-        results.push_back(
-            std::shared_ptr<ProcessInput>(new ProcessInput(arg, arg)));
-    }
-    if (!invalid.empty())
-        msg_invalid.Send(out, Id, invalid);
-    // Process without input can call this so do nothing.
-    // (In theory should "output" the data but there is no format to use.)
+    // Process without input can call this but there is no format in that case.
     if (out.Format() == nullptr)
         return;
+    std::vector<std::shared_ptr<ProcessInput>> results;
+    for (auto& arg : Arguments)
+        results.push_back(
+            std::shared_ptr<ProcessInput>(new ProcessInput(arg, arg)));
     // Try to get the data.
     storage.Prepare(out.Format(), results);
     // Report the ones that were not present.
     std::vector<std::shared_ptr<SimpleValue>> missing;
-    for (auto res : results)
+    for (auto& res : results)
         if (!res->Data())
             missing.push_back(res->SharedLabel());
     if (!missing.empty())
@@ -82,7 +69,7 @@ void GetCommand::Perform(
     }
     *writer << End << End; // Close data dictionary and message array.
     // If there were any failures, report them but the chances of the controller
-    // getting these in any sensible manner are slim, maybe with one-line JSON.
+    // getting these in any sensible manner are slim. Maybe with one-line JSON.
     if (!failed.empty())
         msg_failed.Send(out, Id, failed);
 }

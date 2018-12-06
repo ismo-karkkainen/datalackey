@@ -12,13 +12,14 @@
 #include "Command.hpp"
 #include "Processes.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class TerminateCommand : public Command {
 private:
     Processes& processes;
-    CmdErrorArgumentSth arg_missing;
-    Sth2OptList msg_missing, msg_terminated;
+    Sth2Opt2List msg_missing, msg_terminated;
+    ListDescription description;
 
 public:
     TerminateCommand(const char *const Name, Output& Out, Processes& P);

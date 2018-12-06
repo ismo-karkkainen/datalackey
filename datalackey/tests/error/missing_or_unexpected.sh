@@ -55,38 +55,38 @@ esac
 (
 case $C in
 delete)
-    echo '["id","delete","error","argument","missing"]'
+    echo '["id","error","missing","id","delete"]'
     ;;
 end-feed)
-    echo '["id","end-feed","error","argument","missing"]'
+    echo '["id","error","missing","id","end-feed"]'
     ;;
 feed)
-    echo '["id","feed","error","argument","missing"]'
+    echo '["id","error","missing","id","feed"]'
     ;;
 get)
-    echo '["id","get","error","argument","missing"]'
+    echo '["id","error","missing","id","get"]'
     ;;
 list)
-    echo '["id","list","error","argument","unexpected"]'
+    echo '["id","error","unexpected","id","list","unexpected"]'
     ;;
 processes)
-    echo '["id","processes","error","argument","unexpected"]'
+    echo '["id","error","unexpected","id","processes","unexpected"]'
     ;;
 rename)
-    echo '["id","rename","error","argument","missing"]'
-    echo '["id","rename","error","argument","pairless"]'
+    echo '["id","error","missing","id","rename"]'
+    echo '["id","error","pairless","id","rename","pairless"]'
     ;;
 run)
-    echo '["id","run","error","argument","missing"]'
+    echo '["id","error","missing","id","run"]'
     ;;
 storage-info)
-    echo '["id","storage-info","error","argument","unexpected"]'
+    echo '["id","error","unexpected","id","storage-info","unexpected"]'
     ;;
 terminate)
-    echo '["id","terminate","error","argument","missing"]'
+    echo '["id","error","missing","id","terminate"]'
     ;;
 version)
-    echo '["id","version","error","argument","unexpected"]'
+    echo '["id","error","unexpected","id","version","unexpected"]'
     ;;
 *)
     echo "Invalid test script argument: $C"

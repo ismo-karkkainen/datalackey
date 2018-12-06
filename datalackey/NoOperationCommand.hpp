@@ -11,6 +11,7 @@
 
 #include "Command.hpp"
 #include "Message.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class NoOperationCommand : public Command {
@@ -25,6 +26,7 @@ private:
     };
 
     NoOpMessage reply;
+    ParameterlessDescription description;
 
 public:
     NoOperationCommand(const char *const Name, Output& Out);

@@ -12,14 +12,14 @@
 #include "Command.hpp"
 #include "Storage.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class RenameCommand : public Command {
 private:
     Storage& storage;
-    CmdErrorArgumentSth arg_missing;
-    CmdErrorArgumentSth pairless;
-    Sth2OptList msg_invalid, msg_missing, msg_renamed;
+    Sth2Opt2List msg_missing, msg_renamed;
+    StringListDescription description;
 
 public:
     RenameCommand(const char *const Name, Output& Out, Storage& S);

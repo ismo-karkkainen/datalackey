@@ -20,6 +20,7 @@ echo '[1,"run","out","JSON","stdout","output","label","mapped","program","./_scr
 nap
 echo '[2,"storage-info"]'
 echo '[3,"get","mapped","miss",4]'
+echo '[4,"get","mapped","miss"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
@@ -32,9 +33,9 @@ set
 [1,"run","finished"]
 end
 [2,"storage-info","",{"mapped":{"JSON":7}}]
-[3,"get","invalid",4]
-[3,"get","missing","miss"]
-[3,"get","",{"mapped":"value"}]
+[3,"error","not-string",3,"get","mapped","miss",4]
+[4,"get","missing","miss"]
+[4,"get","",{"mapped":"value"}]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

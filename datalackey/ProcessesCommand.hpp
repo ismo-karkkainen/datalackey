@@ -12,12 +12,14 @@
 #include "Command.hpp"
 #include "Processes.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class ProcessesCommand : public Command {
 private:
     const Processes& processes;
-    CmdErrorArgumentSth unexpected;
+    Sth2Opt3 msg_reply; // For message report only.
+    ParameterlessDescription description;
 
 public:
     ProcessesCommand(const char *const Name, Output& Out, const Processes& P);

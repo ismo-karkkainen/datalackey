@@ -79,47 +79,6 @@ bool LocalProcesses::Terminate(const SimpleValue& Id) {
     return true;
 }
 
-static bool has_count(size_t Index, size_t Count, const std::string& command,
-    std::vector<std::shared_ptr<SimpleValue>>& Parameters,
-    Output& Out, const SimpleValue& Id, bool FromFeed = false)
-{
-    if (Parameters.size() < Index + Count) {
-        if (FromFeed)
-            pm_feed_error_cmd_argument_missing.Send(Out, Id, command.c_str());
-        else
-            pm_run_error_cmd_argument_missing.Send(Out, Id, command.c_str());
-        return false;
-    }
-    return true;
-}
-
-static bool is_string(size_t Index, const std::string& command,
-    std::vector<std::shared_ptr<SimpleValue>>& Parameters,
-    Output& Out, const SimpleValue& Id, bool FromFeed = false)
-{
-    if (!IsStringValue(Parameters[Index].get())) {
-        if (FromFeed)
-            pm_feed_error_cmd_argument_not_string.Send(
-                Out, Id, command.c_str());
-        else
-            pm_run_error_cmd_argument_not_string.Send(Out, Id, command.c_str());
-        return false;
-    }
-    return true;
-}
-
-static bool is_string_or_null(size_t Index, const std::string& command,
-    std::vector<std::shared_ptr<SimpleValue>>& Parameters,
-    Output& Out, const SimpleValue& Id)
-{
-    if (IsStringValue(Parameters[Index].get()))
-        return true;
-    if (IsNullValue(Parameters[Index].get()))
-        return true;
-    pm_run_error_cmd_argument_not_string_null.Send(Out, Id, command.c_str());
-    return false;
-}
-
 std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
     Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Parameters, Encoder* E,
@@ -133,30 +92,16 @@ std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
         std::string command = Parameters[k]->String();
         if (command == "input") {
             // input label name
-            if (!has_count(k, 3, command, Parameters, Out, Id, FromFeed) ||
-                !is_string(k + 1, command, Parameters, Out, Id, FromFeed) ||
-                !is_string(k + 2, command, Parameters, Out, Id, FromFeed))
-                return std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>>(false,std::vector<std::shared_ptr<ProcessInput>>());;
             input_values.push_back(std::shared_ptr<ProcessInput>(
                 new ProcessInput(Parameters[k + 1], Parameters[k + 2])));
             k += 3;
         } else if (command == "direct") {
             // direct value-(string|integer|null) name
-            if (!has_count(k, 3, command, Parameters, Out, Id, FromFeed) ||
-                !is_string(k + 2, command, Parameters, Out, Id, FromFeed))
-                return std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>>(false,std::vector<std::shared_ptr<ProcessInput>>());;
             input_values.push_back(std::shared_ptr<ProcessInput>(
                 new ProcessInput(Parameters[k + 1], E, Parameters[k + 2])));
             k += 3;
-        } else {
-            if (FromFeed)
-                pm_feed_error_cmd_argument_unknown.Send(
-                    Out, Id, command.c_str());
-            else
-                pm_run_error_cmd_argument_unknown.Send(
-                    Out, Id, command.c_str());
-            return std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>>(false,std::vector<std::shared_ptr<ProcessInput>>());;
-        }
+        } else
+            assert(false);
         auto result = seen_names.insert(input_values.back()->Name()->String());
         if (!result.second) {
             if (FromFeed)
@@ -222,9 +167,6 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         std::string command = Parameters[k]->String();
         if (command == "env") {
             // env variable-name value
-            if (!has_count(k, 3, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             std::string name = Parameters[k + 1]->String();
             if (name.find('=') != std::string::npos) {
                 pm_run_error_env_invalid.Send(Out, Id, name.c_str());
@@ -241,25 +183,17 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
             clear_env = true;
             k += 1;
         } else if (command == "input") {
-            if (!has_count(k, 3, command, Parameters, Out, Id))
-                return;
             feed_params.push_back(Parameters[k]);
             feed_params.push_back(Parameters[k + 1]);
             feed_params.push_back(Parameters[k + 2]);
             k += 3;
         } else if (command == "direct") {
-            if (!has_count(k, 3, command, Parameters, Out, Id))
-                return;
             feed_params.push_back(Parameters[k]);
             feed_params.push_back(Parameters[k + 1]);
             feed_params.push_back(Parameters[k + 2]);
             k += 3;
         } else if (command == "output") {
             // output name label|null
-            if (!has_count(k, 3, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id) ||
-                !is_string_or_null(k + 2, command, Parameters, Out, Id))
-                return;
             name_label.push_back(
                 std::pair<StringValue,std::shared_ptr<SimpleValue>>(
                     StringValue(Parameters[k + 1]->String()),
@@ -267,63 +201,28 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
             k += 3;
         } else if (command == "output-prefix") {
             // output-prefix prefix-for-unknown
-            if (!has_count(k, 2, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             prefix = Parameters[k + 1]->String();
             k += 2;
         } else if (command == "output-postfix") {
             // output-postfix postfix-for-unknown
-            if (!has_count(k, 2, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             postfix = Parameters[k + 1]->String();
             k += 2;
         } else if (command == "in") {
-            if (!has_count(k, 3, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             ++k;
             if (!input.empty()) {
                 pm_run_error_in_multiple.Send(Out, Id);
                 return;
             }
-            if (!is_string(k, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             std::string format = Parameters[k]->String();
-            if (format != "JSON") {
-                pm_run_error_in_format_unknown.Send(Out, Id, format.c_str());
-                return;
-            }
             input.push_back(format);
             std::string channel = Parameters[k + 1]->String();
-            if (channel == "stdin") {
-                input.push_back(channel);
-            } else {
-                pm_run_error_in_unknown.Send(Out, Id, channel.c_str());
-                return;
-            }
+            input.push_back(channel);
             k += 2;
         } else if (command == "out") {
-            if (!has_count(k, 3, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             ++k;
-            if (!is_string(k, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             std::string format = Parameters[k]->String();
-            if (format != "JSON" && format != "bytes") {
-                pm_run_error_out_format_unknown.Send(Out, Id, format.c_str());
-                return;
-            }
             std::string channel = Parameters[k + 1]->String();
-            if (channel != "stdout" && channel != "stderr") {
-                pm_run_error_out_unknown.Send(Out, Id, channel.c_str());
-                return;
-            }
-            for (auto&& earlier : outputs)
+            for (const auto& earlier : outputs)
                 if (earlier[1] == channel) {
                     pm_run_error_out_duplicate.Send(Out, Id, channel.c_str());
                     return;
@@ -333,41 +232,27 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
             outputs.back().push_back(channel);
             k += 2;
         } else if (command == "notify") {
-            if (!has_count(k, 2, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             if (Parameters[k + 1]->String() == "data")
                 notify_data = true;
             else if (Parameters[k + 1]->String() == "process")
                 notify_process = true;
-            else {
-                pm_run_error_notify_unknown.Send(
-                    Out, Id, Parameters[k + 1]->String().c_str());
-                return;
-            }
+            else
+                assert(false);
             k += 2;
         } else if (command == "end-feed") {
             end_feed = true;
             k += 1;
         } else if (command == "change-directory") {
-            if (!has_count(k, 2, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             directory = Parameters[k + 1]->String();
             k += 2;
         } else if (command == "program") {
             // program executable args...
-            if (!has_count(k, 2, command, Parameters, Out, Id) ||
-                !is_string(k + 1, command, Parameters, Out, Id))
-                return;
             program_name = Parameters[k + 1]->String();
             k += 2;
             while (k < Parameters.size())
                 program_args.push_back(Parameters[k++]->String());
-        } else {
-            pm_run_error_argument_unknown.Send(Out, Id, command.c_str());
-            return;
-        }
+        } else
+            assert(false);
     }
 
     if ((notify_data || notify_process) && input.empty()) {
@@ -481,7 +366,8 @@ void LocalProcesses::Feed(Output& Out, const SimpleValue& Id,
         pm_feed_error_closed.Send(Out, Id);
         return;
     }
-    auto inputs = feed(Out, Id, Parameters, proc->second->EncoderClone(), "feed");
+    auto inputs =
+        feed(Out, Id, Parameters, proc->second->EncoderClone(), "feed");
     if (inputs.first)
         proc->second->Feed(inputs.second);
 }

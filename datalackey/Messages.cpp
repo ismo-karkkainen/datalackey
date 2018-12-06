@@ -99,43 +99,43 @@ void ErrorCommandSthArg::Send(
 }
 
 
-Sth2OptList::Sth2OptList(const char* const Sth, const char* const Sth2,
-    const char* const Opt)
-    : sth(Sth), sth2(Sth2), opt(Opt)
+Sth2Opt2List::Sth2Opt2List(const char* const Sth, const char* const Sth2,
+    const char* const Opt, const char* const Opt2)
+    : sth(Sth), sth2(Sth2), opt(Opt), opt2(Opt2)
 { }
 
-void Sth2OptList::Report(Output& Out) const {
+void Sth2Opt2List::Report(Output& Out) const {
     std::vector<std::shared_ptr<SimpleValue>> dots;
     dots.push_back(Message::dots);
     Send(Out, Message::id, dots);
 }
 
-void Sth2OptList::Send(Output& Out, const SimpleValue& Id,
+void Sth2Opt2List::Send(Output& Out, const SimpleValue& Id,
     const std::vector<std::shared_ptr<SimpleValue>>& List) const
 {
-    listmessage(Out, Id, sth, sth2, List, opt);
+    listmessage(Out, Id, sth, sth2, List, opt, opt2);
 }
 
-void Sth2OptList::Send(Output& Out, const SimpleValue& Id,
+void Sth2Opt2List::Send(Output& Out, const SimpleValue& Id,
     const std::vector<std::string>& List) const
 {
-    listmessage(Out, Id, sth, sth2, List, opt);
+    listmessage(Out, Id, sth, sth2, List, opt, opt2);
 }
 
 
-NullableSth2OptList::NullableSth2OptList(
+NullableSth2Opt2List::NullableSth2Opt2List(
     const char* const Sth, const char* const Sth2)
     : sth(Sth), sth2(Sth2)
 { }
 
-void NullableSth2OptList::Report(Output& Out) const {
+void NullableSth2Opt2List::Report(Output& Out) const {
     std::vector<std::string> dots;
     dots.push_back(Message::dots->String());
     Send(Out, &Message::id, dots);
     Send(Out, nullptr, dots);
 }
 
-void NullableSth2OptList::Send(Output& Out, const SimpleValue* Id,
+void NullableSth2Opt2List::Send(Output& Out, const SimpleValue* Id,
     const std::vector<std::string>& List) const
 {
     if (Id != nullptr)
@@ -230,4 +230,4 @@ Sth2Opt3 msg_channel_reset("channel", "reset");
 Sth2Opt3 msg_run_error_format("run", "error", "format");
 NullableSth2Opt3 msg_error_format("error", "format");
 
-NullableSth2OptList msg_data_stored("data", "stored");
+NullableSth2Opt2List msg_data_stored("data", "stored");

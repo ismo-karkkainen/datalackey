@@ -12,18 +12,15 @@
 
 
 FeedCommand::FeedCommand(const char *const Name, Output& Out, Processes& P)
-    : Command(Name, Out), processes(P), missing(Name, "missing")
+    : Command(Name, Out), processes(P), description(Name)
 { }
 
-FeedCommand::~FeedCommand() {
-}
+FeedCommand::~FeedCommand() { }
 
 void FeedCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    if (Arguments.empty()) {
-        missing.Send(out, Id);
+    if (!description.Validate(out, Id, Arguments))
         return;
-    }
     processes.Feed(out, Id, Arguments);
 }

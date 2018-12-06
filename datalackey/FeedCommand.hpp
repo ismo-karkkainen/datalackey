@@ -12,12 +12,13 @@
 #include "Command.hpp"
 #include "Processes.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class FeedCommand : public Command {
 private:
     Processes& processes;
-    CmdErrorArgumentSth missing;
+    FeedDescription description;
 
 public:
     FeedCommand(const char *const Name, Output& Out, Processes& P);

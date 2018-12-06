@@ -14,21 +14,20 @@
 #include <memory>
 
 
-StorageInfoCommand::StorageInfoCommand(const char *const Name, Output& Out, const Storage& S)
-    : Command(Name, Out), storage(S), unexpected(Name, "unexpected")
+StorageInfoCommand::StorageInfoCommand(
+    const char *const Name, Output& Out, const Storage& S)
+    : Command(Name, Out), storage(S),
+    msg_info(Name, "", "mapping label-to-mapping-format-to-size"),
+    description(Name)
 { }
 
-StorageInfoCommand::~StorageInfoCommand() {
-}
+StorageInfoCommand::~StorageInfoCommand() { }
 
 void StorageInfoCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    // An array with output identifier that was given after the command.
-    if (!Arguments.empty()) {
-        unexpected.Send(out, Id);
+    if (!description.Validate(out, Id, Arguments))
         return;
-    }
     auto results = storage.Info();
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.

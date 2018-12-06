@@ -12,13 +12,14 @@
 #include "Command.hpp"
 #include "Storage.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class ListCommand : public Command {
 private:
     const Storage& storage;
-    CmdErrorArgumentSth unexpected;
-    Sth2OptList list;
+    Sth2Opt2List list;
+    ParameterlessDescription description;
 
 public:
     ListCommand(const char *const Name, Output& Out, const Storage& S);

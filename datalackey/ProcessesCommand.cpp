@@ -15,7 +15,8 @@
 
 
 ProcessesCommand::ProcessesCommand(const char *const Name, Output& Out, const Processes& P)
-    : Command(Name, Out), processes(P), unexpected(Name, "unexpected")
+    : Command(Name, Out), processes(P),
+    msg_reply(Name, "", "mapping id-to-pid"), description(Name)
 { }
 
 ProcessesCommand::~ProcessesCommand() {
@@ -24,11 +25,8 @@ ProcessesCommand::~ProcessesCommand() {
 void ProcessesCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    // An array with output identifier that was given after the command.
-    if (!Arguments.empty()) {
-        unexpected.Send(out, Id);
+    if (!description.Validate(out, Id, Arguments))
         return;
-    }
     auto results = processes.List();
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array; // Start message array.

@@ -12,13 +12,15 @@
 #include "Command.hpp"
 #include "Storage.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
+
 
 
 class DeleteCommand : public Command {
 private:
     Storage& storage;
-    CmdErrorArgumentSth err_missing;
-    Sth2OptList msg_invalid, msg_missing, msg_deleted;
+    Sth2Opt2List msg_missing, msg_deleted;
+    StringListDescription description;
 
 public:
     DeleteCommand(const char *const Name, Output& Out, Storage& S);

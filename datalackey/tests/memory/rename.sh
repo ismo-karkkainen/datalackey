@@ -23,7 +23,7 @@ sed 's/"running",.*]$/"running",pid]/' > $OUT
 cat > $EXP <<EOF
 [null,"data","stored","label","label2"]
 [1,"storage-info","",{"label":{"JSON":3},"label2":{"JSON":1}}]
-[2,"rename","error","argument","pairless"]
+[2,"error","pairless",2,"rename","label"]
 [3,"rename","renamed","label","label2"]
 [4,"storage-info","",{"label2":{"JSON":3}}]
 [5,"rename","renamed","label2","label3"]

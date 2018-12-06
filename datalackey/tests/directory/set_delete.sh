@@ -13,16 +13,21 @@ STORE="$(pwd)/td"
 rm -rf "$STORE"
 mkdir "$STORE"
 
-echo '{"label":1234}[1,"storage-info"][2,"delete","missing","label",null,4][3,"storage-info"]' |
-$DL -d "$STORE" -i stdin JSON -o stdout JSON > $OUT
+(
+echo '{"label":1234}'
+echo '[1,"storage-info"]'
+echo '[2,"delete","missing","label",null,4]'
+echo '[3,"delete","missing","label"]'
+echo '[4,"storage-info"]'
+) | $DL -d "$STORE" -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
 [null,"data","stored","label"]
 [1,"storage-info","",{"label":{"JSON":4}}]
-[2,"delete","invalid",null,4]
-[2,"delete","missing","missing"]
-[2,"delete","deleted","label"]
-[3,"storage-info","",{}]
+[2,"error","not-string",2,"delete","missing","label",null]
+[3,"delete","missing","missing"]
+[3,"delete","deleted","label"]
+[4,"storage-info","",{}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

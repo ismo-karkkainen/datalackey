@@ -88,15 +88,16 @@ public:
 };
 
 
-class Sth2OptList : public Message {
+class Sth2Opt2List : public Message {
 private:
     const char* const sth;
     const char* const sth2;
     const char* const opt;
+    const char* const opt2;
 
 public:
-    Sth2OptList(const char* const Sth, const char* const Sth2,
-        const char* const Opt = nullptr);
+    Sth2Opt2List(const char* const Sth, const char* const Sth2,
+        const char* const Opt = nullptr, const char* const Opt2 = nullptr);
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue& Id,
@@ -106,13 +107,13 @@ public:
 };
 
 
-class NullableSth2OptList : public Message {
+class NullableSth2Opt2List : public Message {
 private:
     const char* const sth;
     const char* const sth2;
 
 public:
-    NullableSth2OptList(const char* const Sth, const char* const Sth2);
+    NullableSth2Opt2List(const char* const Sth, const char* const Sth2);
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue* Id,
@@ -205,7 +206,7 @@ extern Sth2Opt3 msg_channel_reset;
 extern Sth2Opt3 msg_run_error_format;
 extern NullableSth2Opt3 msg_error_format;
 
-extern NullableSth2OptList msg_data_stored;
+extern NullableSth2Opt2List msg_data_stored;
 
 
 #endif /* Messages_hpp */

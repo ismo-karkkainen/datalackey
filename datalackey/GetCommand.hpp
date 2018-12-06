@@ -12,13 +12,15 @@
 #include "Command.hpp"
 #include "Storage.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class GetCommand : public Command {
 private:
     Storage& storage;
-    CmdErrorArgumentSth arg_missing;
-    Sth2OptList msg_invalid, msg_missing, msg_failed;
+    Sth2Opt2List msg_missing, msg_failed;
+    Sth2Opt3 msg_reply; // For message report only.
+    StringListDescription description;
 
 public:
     GetCommand(const char *const Name, Output& Out, Storage& S);

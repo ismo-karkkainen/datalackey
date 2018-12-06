@@ -107,11 +107,11 @@ void RunErrorSthArg2::Send(Output& Out, const SimpleValue& Id,
 
 
 
-Sth2OptList pm_end_feed("end-feed", "");;
-Sth2OptList pm_end_feed_missing("end-feed", "missing");
-Sth2OptList pm_end_feed_not_open("end-feed", "not-open");
-Sth2OptList pm_run_error_missing("run", "error", "missing");
-Sth2OptList pm_feed_error_missing("feed", "error", "missing");
+Sth2Opt2List pm_end_feed("end-feed", "");;
+Sth2Opt2List pm_end_feed_missing("end-feed", "missing");
+Sth2Opt2List pm_end_feed_not_open("end-feed", "not-open");
+Sth2Opt2List pm_run_error_missing("run", "error", "missing");
+Sth2Opt2List pm_feed_error_missing("feed", "error", "missing");
 
 NullNtfSthIdInt pm_process_started("process", "started");
 NullNtfSthIdInt pm_process_ended("process", "ended");
@@ -139,30 +139,16 @@ Sth2Opt3 pm_run_error_out_missing("run", "error", "out", "missing");
 Sth2Opt3 pm_feed_error_not_found("feed", "error", "not-found");
 Sth2Opt3 pm_feed_error_closed("feed", "error", "closed");
 
-CmdErrorArgArgumentSth pm_run_error_cmd_argument_missing("run", "missing");
-CmdErrorArgArgumentSth pm_feed_error_cmd_argument_missing("feed", "missing");
-CmdErrorArgArgumentSth pm_run_error_cmd_argument_not_string(
-    "run", "not-string");
-CmdErrorArgArgumentSth pm_feed_error_cmd_argument_not_string(
-    "feed", "not-string");
-CmdErrorArgArgumentSth pm_run_error_cmd_argument_not_string_null(
-    "run", "not-string-or-null");
 CmdErrorArgArgumentSth pm_run_error_cmd_argument_unknown("run", "unknown");
 CmdErrorArgArgumentSth pm_feed_error_cmd_argument_unknown("feed", "unknown");
 
 CmdErrorArgDuplicateArg pm_run_error_cmd_duplicate("run");
 CmdErrorArgDuplicateArg pm_feed_error_cmd_duplicate("feed");
 
-RunErrorSth2OptArg pm_run_error_in_unknown("in", "unknown");
-RunErrorSth2OptArg pm_run_error_out_unknown("out", "unknown");
-RunErrorSth2OptArg pm_run_error_notify_unknown("notify", "unknown");
 RunErrorSth2OptArg pm_run_error_env_invalid("env", "argument", "invalid");
 RunErrorSth2OptArg pm_run_error_env_duplicate("env", "argument", "duplicate");
-RunErrorSth2OptArg pm_run_error_in_format_unknown("in", "format", "unknown");
-RunErrorSth2OptArg pm_run_error_out_format_unknown("out", "format", "unknown");
 RunErrorSth2OptArg pm_run_error_out_duplicate("out", "duplicate");
 RunErrorSth2OptArg pm_run_error_output_duplicate("output", "duplicate");
-RunErrorSth2OptArg pm_run_error_argument_unknown("argument", "unknown");;
 
 RunErrorSthArg2 pm_run_error_cd_errmsg("change-directory", 2);
 RunErrorSthArg2 pm_run_error_program_errmsg("program", 2);

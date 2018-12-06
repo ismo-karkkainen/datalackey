@@ -18,6 +18,7 @@
 #include "Time.hpp"
 #include "File.hpp"
 #include "MessageReporter.hpp"
+#include "CommandReporter.hpp"
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,6 +35,7 @@ static const char* inputs[1] = { "stdin" };
 static const char* outputs[2] = { "stdout", "stderr" };
 static const char* formats[1] = { "JSON" };
 static const char* permissions[] = { "600", "660", "666" };
+static const char* reports[2] = { "messages", "commands" };
 
 static int HandleArguments(int argc, char** argv) {
     opt::Add('i', "command-in");
@@ -60,8 +62,10 @@ static int HandleArguments(int argc, char** argv) {
     opt::AddValue(1024, 0, std::numeric_limits<int>::max());
     opt::Usage(
         "Megabytes of total memory attempted to keep free. 0 for no limit.");
-    opt::AddFlag('r', "report", false);
-    opt::Usage("Report messages and notifications to command-out and exit.");
+    opt::Add('\0', "report");
+    opt::AddValue(0, 2, reports);
+    opt::Usage(
+        "Report messages/notifications or commands to command-out and exit.");
     opt::AddFlag('h', "help", false);
     opt::Usage("Print help and exit.");
     if (opt::GivenOption('h', "help", argc, argv)) {
@@ -161,7 +165,15 @@ int main(int argc, char** argv) {
     assert(scanner != nullptr);
 
     if (opt::Given("report")) {
-        MessageReporter::Get().Report(*out);
+        choice = opt::String("report", 1);
+        if (choice == "messages")
+            MessageReporter::Get().Report(*out);
+        else {
+            std::unique_ptr<OutputItem> writer(out->Writable());
+            *writer << Structure::Array;
+            CommandReporter::Get().Report(writer.get());
+            *writer << Structure::End;
+        }
         while (!out->Finished())
             Nap(20000000); // 20 ms.
     } else {

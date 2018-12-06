@@ -8,28 +8,26 @@
 
 #include "VersionCommand.hpp"
 #include "Version.hpp"
-#include "Messages.hpp"
 #include "Value_t.hpp"
 #include "Number_t.hpp"
 #include "NullValue.hpp"
+#include "CommandReporter.hpp"
 #include <memory>
 
 
 VersionCommand::VersionCommand(const char *const Name, Output& Out)
-    : Command(Name, Out), unexpected(Name, "unexpected")
+    : Command(Name, Out),
+    msg_version(Name, "", "mapping"),
+    description(Name)
 { }
 
-VersionCommand::~VersionCommand() {
-}
+VersionCommand::~VersionCommand() { }
 
 void VersionCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
-    // An array with output identifier and labels.
-    if (!Arguments.empty()) {
-        unexpected.Send(out, Id);
+    if (!description.Validate(out, Id, Arguments))
         return;
-    }
     std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
     *writer << Array;
     Message::Feed(*writer, Id);
@@ -38,5 +36,7 @@ void VersionCommand::Perform(
         << Dictionary
         << ValueRef<std::string>("datalackey") << NumberRef<int>(Version)
         << ValueRef<std::string>("interface") << NumberRef<int>(Interface)
-        << End << End; // Dictionary and array.
+        << ValueRef<std::string>("commands");
+    CommandReporter::Get().Report(writer.get());
+    *writer << End << End; // Dictionary and array.
 }

@@ -29,8 +29,6 @@ protected:
     static const char* const item;
     static std::shared_ptr<SimpleValue> dots;
 
-    Message();
-
     void msg(Output& Out, const SimpleValue* Id,
         const char *const Class, const char *const Kind,
         const char *const three, const char *const four,
@@ -70,31 +68,38 @@ protected:
     void listmsg(Output& Out, const SimpleValue* Id,
         const char *const Class, const char *const Kind,
         const std::vector<std::shared_ptr<SimpleValue>>& List,
-        const char *const OptPreList = nullptr) const;
+        const char *const OptPreList = nullptr,
+        const char *const OptPreList2 = nullptr) const;
     void listmsg(Output& Out, const SimpleValue* Id,
         const char *const Class, const char *const Kind,
         const std::vector<std::string>& List,
-        const char *const OptPreList = nullptr) const;
+        const char *const OptPreList = nullptr,
+        const char *const OptPreList2 = nullptr) const;
 
     void listmessage(Output& Out, const SimpleValue& Id,
         const char *const Class, const char *const Kind,
         const std::vector<std::shared_ptr<SimpleValue>>& List,
-        const char *const OptPreList = nullptr) const;
+        const char *const OptPreList = nullptr,
+        const char *const OptPreList2 = nullptr) const;
     void listmessage(Output& Out, const SimpleValue& Id,
         const char *const Class, const char *const Kind,
         const std::vector<std::string>& List,
-        const char *const OptPreList = nullptr) const;
+        const char *const OptPreList = nullptr,
+        const char *const OptPreList2 = nullptr) const;
 
     void listmessage(Output& Out,
         const char *const Class, const char *const Kind,
         const std::vector<std::shared_ptr<SimpleValue>>& List,
-        const char *const OptPreList = nullptr) const;
+        const char *const OptPreList = nullptr,
+        const char *const OptPreList2 = nullptr) const;
     void listmessage(Output& Out,
         const char *const Class, const char *const Kind,
         const std::vector<std::string>& List,
-        const char *const OptPreList = nullptr) const;
+        const char *const OptPreList = nullptr,
+        const char *const OptPreList2 = nullptr) const;
 
 public:
+    Message();
     virtual ~Message();
     virtual void Report(Output& Out) const = 0;
 

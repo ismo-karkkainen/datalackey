@@ -25,14 +25,15 @@ void NoOperationCommand::NoOpMessage::Send(Output& Out, const SimpleValue& Id)
 
 
 NoOperationCommand::NoOperationCommand(const char *const Name, Output& Out)
-    : Command(Name, Out), reply(Name)
+    : Command(Name, Out), reply(Name), description(Name)
 { }
 
-NoOperationCommand::~NoOperationCommand() {
-}
+NoOperationCommand::~NoOperationCommand() { }
 
 void NoOperationCommand::Perform(
     const SimpleValue& Id, std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
+    if (!description.Validate(out, Id, Arguments))
+        return;
     reply.Send(out, Id);
 }

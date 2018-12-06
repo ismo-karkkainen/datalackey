@@ -12,12 +12,14 @@
 #include "Command.hpp"
 #include "Storage.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class StorageInfoCommand : public Command {
 private:
     const Storage& storage;
-    CmdErrorArgumentSth unexpected;
+    Sth2Opt3 msg_info; // For message report only.
+    ParameterlessDescription description;
 
 public:
     StorageInfoCommand(const char *const Name, Output& Out, const Storage& S);

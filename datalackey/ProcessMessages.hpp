@@ -14,11 +14,11 @@
 #include "Messages.hpp"
 
 
-extern Sth2OptList pm_end_feed;
-extern Sth2OptList pm_end_feed_missing;
-extern Sth2OptList pm_end_feed_not_open;
-extern Sth2OptList pm_run_error_missing;
-extern Sth2OptList pm_feed_error_missing;
+extern Sth2Opt2List pm_end_feed;
+extern Sth2Opt2List pm_end_feed_missing;
+extern Sth2Opt2List pm_end_feed_not_open;
+extern Sth2Opt2List pm_run_error_missing;
+extern Sth2Opt2List pm_feed_error_missing;
 
 class NullNtfSthIdInt : public Message {
 private:
@@ -84,11 +84,6 @@ public:
     void Send(Output& Out, const SimpleValue& Id, const char* const Arg) const;
 };
 
-extern CmdErrorArgArgumentSth pm_run_error_cmd_argument_missing;
-extern CmdErrorArgArgumentSth pm_feed_error_cmd_argument_missing;
-extern CmdErrorArgArgumentSth pm_run_error_cmd_argument_not_string;
-extern CmdErrorArgArgumentSth pm_feed_error_cmd_argument_not_string;
-extern CmdErrorArgArgumentSth pm_run_error_cmd_argument_not_string_null;
 extern CmdErrorArgArgumentSth pm_run_error_cmd_argument_unknown;
 extern CmdErrorArgArgumentSth pm_feed_error_cmd_argument_unknown;
 
@@ -123,16 +118,10 @@ public:
 };
 
 
-extern RunErrorSth2OptArg pm_run_error_in_unknown;
-extern RunErrorSth2OptArg pm_run_error_out_unknown;
-extern RunErrorSth2OptArg pm_run_error_notify_unknown;
 extern RunErrorSth2OptArg pm_run_error_env_invalid;
 extern RunErrorSth2OptArg pm_run_error_env_duplicate;
-extern RunErrorSth2OptArg pm_run_error_in_format_unknown;
-extern RunErrorSth2OptArg pm_run_error_out_format_unknown;
 extern RunErrorSth2OptArg pm_run_error_out_duplicate;
 extern RunErrorSth2OptArg pm_run_error_output_duplicate;
-extern RunErrorSth2OptArg pm_run_error_argument_unknown;
 
 class RunErrorSthArg2 : public Message {
 private:

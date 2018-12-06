@@ -26,5 +26,3 @@ MessageReporter& MessageReporter::Get() {
     static MessageReporter reporter;
     return reporter;
 }
-
-

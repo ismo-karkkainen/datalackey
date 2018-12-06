@@ -12,11 +12,13 @@
 #include "Command.hpp"
 #include "Storage.hpp"
 #include "Messages.hpp"
+#include "CommandDescriptions.hpp"
 
 
 class VersionCommand : public Command {
 private:
-    CmdErrorArgumentSth unexpected;
+    Sth2Opt3 msg_version; // For message report only.
+    ParameterlessDescription description;
 
 public:
     VersionCommand(const char *const Name, Output& Out);
