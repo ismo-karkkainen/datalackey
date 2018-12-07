@@ -13,38 +13,12 @@
 #include "Message.hpp"
 
 
-class CmdErrorArgumentSth : public Message {
-private:
-    const char* const cmd;
-    const char* const sth;
-
-public:
-    CmdErrorArgumentSth(const char* const Cmd, const char* const Sth);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id) const;
-};
-
-
 class ArgErrorArgumentSth : public Message {
 private:
     const char* const sth;
 
 public:
     ArgErrorArgumentSth(const char* const Sth);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id, const char* const Arg) const;
-};
-
-
-class CmdErrorArgumentSthArg : public Message {
-private:
-    const char* const cmd;
-    const char* const sth;
-
-public:
-    CmdErrorArgumentSthArg(const char* const Cmd, const char* const Sth);
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue& Id, const char* const Arg) const;
@@ -64,18 +38,6 @@ public:
 };
 
 
-class ErrorCommandSth : public Message {
-private:
-    const char* const sth;
-
-public:
-    ErrorCommandSth(const char* const Sth);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id) const;
-};
-
-
 class ErrorCommandSthArg : public Message {
 private:
     const char* const sth;
@@ -84,7 +46,7 @@ public:
     ErrorCommandSthArg(const char* const Sth);
 
     void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id, const char* const Arg) const;
+    void Send(Output& Out, const SimpleValue& Id, const char* const Arg = nullptr) const;
 };
 
 
@@ -136,20 +98,6 @@ public:
 };
 
 
-class Sth2Arg2 : public Message {
-private:
-    const char* const sth;
-    const char* const sth2;
-
-public:
-    Sth2Arg2(const char* const Sth, const char* const Sth2);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id,
-        const char* const Arg, const char* const Arg2) const;
-};
-
-
 class Sth2Opt3 : public Message {
 private:
     const char* const sth;
@@ -192,8 +140,8 @@ public:
 extern NullErrorSthOpt msg_null_error_format;
 extern NullErrorSthOpt msg_error_identifier_missing;
 extern NullErrorSthOpt msg_error_identifier_invalid;
-extern ErrorCommandSth msg_error_command_missing;
-extern ErrorCommandSth msg_error_command_not_string;
+extern ErrorCommandSthArg msg_error_command_missing;
+extern ErrorCommandSthArg msg_error_command_not_string;
 extern ErrorCommandSthArg msg_error_command_unknown;
 extern ArgErrorArgumentSth msg_arg_error_argument_not_integer;
 extern ArgErrorArgumentSth msg_arg_error_argument_invalid;
