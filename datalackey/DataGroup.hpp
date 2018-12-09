@@ -35,10 +35,10 @@ public:
     bool Append(RawData::ConstIterator& Start, RawData::ConstIterator& End);
     bool Finish();
 
-    std::vector<std::string> Labels() const;
-
     const std::string& Format() const { return format; }
     std::pair<StringValue,std::shared_ptr<DataOwner>> Get();
+
+    size_t Size() const { return label2data.size(); }
 };
 
 

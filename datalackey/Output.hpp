@@ -97,7 +97,6 @@ private:
     std::set<OutputItemBuffer*> buffers;
 
     OutputChannel& channel;
-    bool terminate;
     std::thread* channel_feeder;
     std::condition_variable output_added;
     std::queue<std::shared_ptr<ProcessInput>> inputs;
@@ -111,6 +110,7 @@ private:
 
     void clear_buffers();
     void feeder();
+    void end(bool FromOutside);
 
 public:
     Output(const Encoder& E, OutputChannel& Main,
@@ -125,7 +125,7 @@ public:
 
     OutputItem* Writable(bool Discarder = false);
     void Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs);
-    void End();
+    void End() { end(true); }
     bool Closed() const { return eof; }
 
     // Failure on reading input data or write failure.

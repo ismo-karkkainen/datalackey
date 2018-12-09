@@ -24,17 +24,22 @@ public:
 
     virtual bool IsValid() const = 0;
 
-    virtual std::vector<std::string> List() const = 0;
+    virtual std::vector<std::tuple<std::string, unsigned long long int>> List()
+        const = 0;
 
     virtual bool Delete(const StringValue& L) = 0;
-    virtual bool Rename(const StringValue& Old, const StringValue& New) = 0;
-    virtual void Add(DataGroup& G) = 0;
+    virtual unsigned long long int Rename(
+        const StringValue& Old, const StringValue& New) = 0;
+    virtual std::vector<std::tuple<std::string, unsigned long long int>> Add(
+        DataGroup& G) = 0;
 
     virtual void Prepare(const char *const Format,
         std::vector<std::shared_ptr<ProcessInput>>& Inputs) = 0;
 
-    // Return label, format, size in bytes.
-    virtual std::vector<std::tuple<StringValue,std::string,size_t>> Info() const = 0;
+    // Return label, format, size in bytes, serial.
+    virtual std::vector<std::tuple<
+        StringValue, std::string, size_t, unsigned long long int>> Info()
+            const = 0;
 };
 
 

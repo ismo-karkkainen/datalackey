@@ -15,5 +15,4 @@ test $? -ne 10 && echo "Exit code != 10" && exit 1
 cat > $EXP <<EOF
 EOF
 
-compare-output $OUT $EXP &&
-rm -rf $OUT $EXP "$STORE"
+compare-output $OUT $EXP && rm -rf $OUT $EXP

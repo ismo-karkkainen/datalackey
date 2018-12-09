@@ -16,7 +16,7 @@ EOF
 chmod a+x _script.sh
 
 (
-echo '[1,"run","program","./_script.sh"]'
+echo '["1","run","program","./_script.sh"]'
 nap
 echo '[2,"processes"]'
 ps u | grep _script.sh | grep -v grep | awk '{ print $2 }' > _pid.txt
@@ -25,13 +25,12 @@ echo '[3,"processes"]'
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[1,"run","running",$(cat _pid.txt)]
-[1,"run","input","closed"]
-[2,"processes","",{1:$(cat _pid.txt)}]
-[1,"run","exit",0]
-[1,"run","finished"]
+["1","run","running",$(cat _pid.txt)]
+["1","run","input","closed"]
+[2,"processes","",{"1":$(cat _pid.txt)}]
+["1","run","exit",0]
+["1","run","finished"]
 [3,"processes","",{}]
 EOF
-rm -f _pid.txt
 
-compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh
+compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh _pid.txt

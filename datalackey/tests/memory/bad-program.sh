@@ -11,16 +11,16 @@ EXP="${B}_expected.txt"
 
 cat > _script.sh << EOF
 #!/bin/sh
-touch cwd
+exit 0
 EOF
 
 (
-echo '[1,"run","out","JSON","stdout","program","./_script.sh"]'
+echo '["1","run","out","JSON","stdout","program","./_script.sh"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"run","error","program","./_script.sh"]
+["1","run","error","program","./_script.sh"]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

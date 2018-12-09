@@ -254,8 +254,6 @@ add_exe(memory output.sh)
 new_test(output_get output.sh)
 add_exe(memory output_etc.sh)
 new_test(output_etc output_etc.sh)
-add_exe(memory null_terminate.sh)
-new_test(null_terminate null_terminate.sh)
 add_exe(memory feed_end.sh)
 new_test(feed_end feed_end.sh)
 

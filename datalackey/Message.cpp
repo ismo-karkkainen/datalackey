@@ -211,3 +211,31 @@ void Message::listmessage(Output& Out,
 {
     listmsg(Out, nullptr, Class, Kind, List, OptPreList, OptPreList2);
 }
+
+void Message::mapmessage(Output& Out, const SimpleValue* Id,
+    const char *const Class, const char *const Kind,
+    const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
+    bool ConvertZeroToNull) const
+{
+    std::unique_ptr<OutputItem> writer(
+        Out.Writable(Id != nullptr && IsNullValue(Id)));
+    *writer << Array;
+    if (Id == nullptr)
+        *writer << Structure::Null;
+    else
+        feed(*writer, *Id);
+    *writer << ValueRef<std::string>(Class)
+        << ValueRef<std::string>(Kind)
+        << Structure::Dictionary;
+    std::string key;
+    unsigned long long int value;
+    for (const auto& arg : Map) {
+        std::tie(key, value) = arg;
+        *writer << ValueRef<std::string>(key);
+        if (value == 0ULL && ConvertZeroToNull)
+            *writer << Structure::Null;
+        else
+            *writer << ValueRef<unsigned long long int>(value);
+    }
+    *writer << End << End;
+}

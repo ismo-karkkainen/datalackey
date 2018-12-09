@@ -139,6 +139,9 @@ Sth2Opt3 pm_run_error_out_missing("run", "error", "out", "missing");
 Sth2Opt3 pm_feed_error_not_found("feed", "error", "not-found");
 Sth2Opt3 pm_feed_error_closed("feed", "error", "closed");
 
+Sth2Opt3 pm_run_error_identifier_not_string(
+    "run", "error", "identifier-not-string");
+
 CmdErrorArgArgumentSth pm_run_error_cmd_argument_unknown("run", "unknown");
 CmdErrorArgArgumentSth pm_feed_error_cmd_argument_unknown("feed", "unknown");
 

@@ -14,6 +14,8 @@
 #include "StringValue.hpp"
 #include <memory>
 #include <string>
+#include <tuple>
+#include <vector>
 
 
 class Output;
@@ -75,7 +77,6 @@ protected:
         const std::vector<std::string>& List,
         const char *const OptPreList = nullptr,
         const char *const OptPreList2 = nullptr) const;
-
     void listmessage(Output& Out, const SimpleValue& Id,
         const char *const Class, const char *const Kind,
         const std::vector<std::shared_ptr<SimpleValue>>& List,
@@ -97,6 +98,12 @@ protected:
         const std::vector<std::string>& List,
         const char *const OptPreList = nullptr,
         const char *const OptPreList2 = nullptr) const;
+
+    void mapmessage(Output& Out, const SimpleValue* Id,
+        const char *const Class, const char *const Kind,
+        const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
+        bool ConvertZeroToNull = false)
+        const;
 
 public:
     Message();

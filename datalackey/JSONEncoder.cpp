@@ -93,6 +93,8 @@ bool JSONEncoder::Encode(RawData& Buffer, const ValueReference& VR) {
         std::string encoded(json(VR.String()).dump());
         Buffer.Append(encoded.c_str());
     } else {
+        // The key has to be a string.
+        assert(!(open.top() == Structure::Dictionary && counter.top() == 1));
         Buffer.Append(VR.String().c_str());
     }
     return true;

@@ -132,6 +132,10 @@ std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
 void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Parameters)
 {
+    if (!IsStringValue(&Id)) {
+        pm_run_error_identifier_not_string.Send(Out, Id);
+        return;
+    }
     std::unique_lock<std::mutex> lock(processes_mutex);
     // early check on identifier availability.
     SimpleValue* sv = Id.Clone();

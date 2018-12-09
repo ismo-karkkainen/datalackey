@@ -24,30 +24,30 @@ chmod a+x _script.sh
 
 (
 echo '{"label":123}'
-echo '[1,"run","in","JSON","stdin","out","JSON","stdout","output-prefix","fed-","program","./_script.sh"]'
+echo '["1","run","in","JSON","stdin","out","JSON","stdout","output-prefix","fed-","program","./_script.sh"]'
 nap
-echo '[2,"feed",1,"input","label","in1"]'
+echo '[2,"feed","1","input","label","in1"]'
 nap
-echo '[3,"feed",1,"input","label","in2"]'
+echo '[3,"feed","1","input","label","in2"]'
 nap
-echo '[4,"end-feed",1]'
+echo '[4,"end-feed","1"]'
 nap
 echo '[5,"list"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat << EOF > $EXP
-[null,"data","stored","label"]
-[1,"run","running",pid]
-[1,"data","stored","fed-in1"]
-[1,"data","stored","fed-in2"]
-[4,"end-feed","",1]
+[null,"data","stored",{"label":1}]
+["1","run","running",pid]
+["1","data","stored",{"fed-in1":2}]
+["1","data","stored",{"fed-in2":3}]
+[4,"end-feed","","1"]
 set
-[1,"run","exit",0]
-[1,"run","input","closed"]
+["1","run","exit",0]
+["1","run","input","closed"]
 end
-[1,"run","finished"]
-[5,"list","","fed-in1","fed-in2","label"]
+["1","run","finished"]
+[5,"list","",{"fed-in1":2,"fed-in2":3,"label":1}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

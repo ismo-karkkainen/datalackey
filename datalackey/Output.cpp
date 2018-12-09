@@ -115,7 +115,7 @@ void Output::feeder() {
     size_t slice_size = 32768; // Get from OutputChannel.
     bool in_input = false;
     std::unique_lock<std::mutex> lock(input_sets_mutex, std::defer_lock);
-    while (!terminate) {
+    while (true) {
         if (data != nullptr) { // Keep writing data we have.
             size_t left = data->Size() - written;
             if (slice_size < left)
@@ -125,9 +125,9 @@ void Output::feeder() {
             written += channel.Write(start, end);
             if (channel.Failed()) {
                 failed = true;
-                terminate = true;
-                End();
+                this->end(false);
                 written = data->Size();
+                break;
             }
             if (written == data->Size()) {
                 if (outbuf != nullptr && data == outbuf->Buffer()) {
@@ -164,8 +164,7 @@ void Output::feeder() {
                         // Must add format once supported.
                     }
                     failed = true;
-                    clear_buffers();
-                    return;
+                    break;
                 }
                 input = nullptr; // Finished this one.
             }
@@ -222,6 +221,10 @@ void Output::feeder() {
                 delete e;
                 continue;
             }
+            if (input->Name() == nullptr) {
+                input = nullptr; // Just a marker, nothing to output.
+                break;
+            }
             in_input = true;
             Encoder* e = encoder.Clone();
             e->Encode(deco, Dictionary);
@@ -231,24 +234,36 @@ void Output::feeder() {
             delete e;
             continue;
         }
-        if (eof) { // Requested closing channel, any pending items?
-            std::lock_guard<std::mutex> lock2(mutex);
-            if (buffers.empty())
-                break;
-        }
-        // We had nothing to write. Wait for something to arrive.
+        // We had nothing to write. Wait for something (unfinished) to arrive.
         channel.Flush();
         output_added.wait(lock);
         lock.unlock();
     }
     channel.Close();
+    // On failure we may have references to data in input queue.
+    if (lock)
+        lock.unlock();
+    clear_buffers();
+}
+
+void Output::end(bool FromOutside) {
+    if (!eof) {
+        eof = true;
+        if (!FromOutside)
+            return;
+        std::shared_ptr<ProcessInput> marker(new ProcessInput());
+        std::unique_lock<std::mutex> lock(input_sets_mutex);
+        inputs.push(marker);
+        lock.unlock();
+        output_added.notify_one();
+    }
 }
 
 Output::Output(const Encoder& E, OutputChannel& Main, bool DataNotify,
     bool ProcessNotify, Output* ControllerOutput, SimpleValue* Identifier)
     : controller_output(ControllerOutput),
     controller_output_identifier(Identifier), encoder(E), channel(Main),
-    terminate(false), channel_feeder(nullptr), eof(false), failed(false)
+    channel_feeder(nullptr), eof(false), failed(false)
 {
     if (encoder.Format() == nullptr)
         eof = true;
@@ -266,14 +281,12 @@ Output::Output(const Encoder& E, OutputChannel& Main, bool DataNotify,
 Output::~Output() {
     NoGlobalMessages();
     if (channel_feeder != nullptr) {
-        terminate = true;
-        output_added.notify_one();
+        End();
         channel_feeder->join();
         delete channel_feeder;
     }
     channel.Close();
-    for (auto buf : buffers)
-        delete buf;
+    assert(buffers.empty()); // There should be no incomplete writes anywhere.
     clear_buffers();
     // OutputChannel allocated and owned outside.
 }
@@ -297,19 +310,12 @@ void Output::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
     if (eof)
         return;
     std::unique_lock<std::mutex> lock(input_sets_mutex);
-    for (auto input : Inputs)
+    for (auto& input : Inputs)
         inputs.push(input);
     // This indicates that the input ended.
     inputs.push(std::shared_ptr<ProcessInput>());
     lock.unlock();
     output_added.notify_one();
-}
-
-void Output::End() {
-    if (!eof) {
-        eof = true;
-        output_added.notify_one();
-    }
 }
 
 bool Output::Finished() const {
@@ -320,14 +326,14 @@ bool Output::Finished() const {
 
 void Output::Ended(OutputItemBuffer& IB) {
     std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock2(input_sets_mutex);
     buffers.erase(&IB);
-    lock.unlock();
-    if (channel.Failed() || failed) {
+    if (channel.Failed() || failed || eof || channel.Closed()) {
         delete &IB;
         return;
     }
-    std::unique_lock<std::mutex> lock2(input_sets_mutex);
     ended_buffers.push(&IB);
     lock2.unlock();
+    lock.unlock();
     output_added.notify_one();
 }

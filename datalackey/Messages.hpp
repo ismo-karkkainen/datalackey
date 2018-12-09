@@ -69,17 +69,47 @@ public:
 };
 
 
-class NullableSth2Opt2List : public Message {
+class NullableSth2List : public Message {
 private:
     const char* const sth;
     const char* const sth2;
 
 public:
-    NullableSth2Opt2List(const char* const Sth, const char* const Sth2);
+    NullableSth2List(const char* const Sth, const char* const Sth2);
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue* Id,
         const std::vector<std::string>& List) const;
+};
+
+
+class Sth2PairMap : public Message {
+private:
+    const char* const sth;
+    const char* const sth2;
+
+public:
+    Sth2PairMap(const char* const Sth, const char* const Sth2);
+
+    void Report(Output& Out) const;
+    void Send(Output& Out, const SimpleValue& Id,
+        const std::vector<std::tuple<std::string, unsigned long long int>>& Map)
+            const;
+};
+
+
+class NullableSth2PairMap : public Message {
+private:
+    const char* const sth;
+    const char* const sth2;
+
+public:
+    NullableSth2PairMap(const char* const Sth, const char* const Sth2);
+
+    void Report(Output& Out) const;
+    void Send(Output& Out, const SimpleValue* Id,
+        const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
+        bool ConvertZeroToNull = false) const;
 };
 
 
@@ -95,6 +125,21 @@ public:
     void Send(Output& Out,
         const std::vector<std::shared_ptr<SimpleValue>>& List) const;
     void Send(Output& Out, const std::vector<std::string>& List) const;
+};
+
+
+class NullNtfSthPairMap : public Message {
+private:
+    const char* const ntf;
+    const char* const sth;
+
+public:
+    NullNtfSthPairMap(const char* const Ntf, const char* const Sth);
+
+    void Report(Output& Out) const;
+    void Send(Output& Out,
+        const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
+        bool ConvertZeroToNull = false) const;
 };
 
 
@@ -147,14 +192,12 @@ extern ArgErrorArgumentSth msg_arg_error_argument_not_integer;
 extern ArgErrorArgumentSth msg_arg_error_argument_invalid;
 
 extern NullNtfSthList ntf_data_deleted;
-extern NullNtfSthList ntf_data_renamed;
-extern NullNtfSthList ntf_data_stored;
+extern NullNtfSthPairMap ntf_data_renamed;
+extern NullableSth2PairMap ntf_data_stored;
 
 extern Sth2Opt3 msg_channel_reset;
 extern Sth2Opt3 msg_run_error_format;
 extern NullableSth2Opt3 msg_error_format;
-
-extern NullableSth2Opt2List msg_data_stored;
 
 
 #endif /* Messages_hpp */

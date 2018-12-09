@@ -16,12 +16,12 @@ EOF
 chmod a+x _script.sh
 
 (
-echo '[1,"run","out","JSON","stdout","change-directory","invalid","program","./_script.sh"]'
+echo '["1","run","out","JSON","stdout","change-directory","invalid","program","./_script.sh"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"run","error","change-directory","invalid","No such file or directory"]
+["1","run","error","change-directory","invalid","No such file or directory"]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

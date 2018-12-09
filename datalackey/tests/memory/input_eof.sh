@@ -36,19 +36,19 @@ chmod a+x _script.sh
 
 (
 echo '{"label":123}'
-echo '[1,"run","in","JSON","stdin","out","JSON","stdout","input","label","foo","output-prefix","fed-","end-feed","program","./_script.sh"]'
+echo '["1","run","in","JSON","stdin","out","JSON","stdout","input","label","foo","output-prefix","fed-","end-feed","program","./_script.sh"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[null,"data","stored","label"]
-[1,"run","running",pid]
-[1,"run","input","closed"]
+[null,"data","stored",{"label":1}]
+["1","run","running",pid]
+["1","run","input","closed"]
 set
-[1,"run","exit",0]
-[1,"data","stored","fed-foo-out"]
+["1","run","exit",0]
+["1","data","stored",{"fed-foo-out":2}]
 end
-[1,"run","finished"]
+["1","run","finished"]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

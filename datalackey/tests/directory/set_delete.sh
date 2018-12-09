@@ -22,8 +22,8 @@ echo '[4,"storage-info"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[null,"data","stored","label"]
-[1,"storage-info","",{"label":{"JSON":4}}]
+[null,"data","stored",{"label":1}]
+[1,"storage-info","",{"label":{"serial":1,"JSON":4}}]
 [2,"error","not-string",2,"delete","missing","label",null]
 [3,"delete","missing","missing"]
 [3,"delete","deleted","label"]

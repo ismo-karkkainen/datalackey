@@ -14,7 +14,9 @@
 
 
 MemoryStorage::Value::Value(
-    const std::string& Format, std::shared_ptr<DataOwner> Data)
+    const std::string& Format, std::shared_ptr<DataOwner> Data,
+    unsigned long long int Serial)
+    : serial(Serial)
 {
     values.push_back(std::pair<std::string,std::shared_ptr<DataOwner>>(
         Format, Data));
@@ -98,7 +100,7 @@ bool MemoryStorage::del(const StringValue& L) {
     return false;
 }
 
-MemoryStorage::MemoryStorage() { }
+MemoryStorage::MemoryStorage() : serial(1) { }
 
 MemoryStorage::~MemoryStorage() { }
 
@@ -106,11 +108,15 @@ bool MemoryStorage::IsValid() const {
     return true;
 }
 
-std::vector<std::string> MemoryStorage::List() const {
-    std::vector<std::string> results;
+std::vector<std::tuple<std::string, unsigned long long int>>
+    MemoryStorage::List() const
+{
+    std::vector<std::tuple<std::string, unsigned long long int>> results;
     std::lock_guard<std::mutex> lock(label2data_mutex);
-    for (auto& iter : label2data)
-        results.push_back(iter.first.String());
+    results.reserve(label2data.size());
+    for (const auto& iter : label2data)
+        results.push_back(std::tuple<std::string, unsigned long long int>(
+            iter.first.String(), iter.second->Serial()));
     return results;
 }
 
@@ -119,20 +125,26 @@ bool MemoryStorage::Delete(const StringValue& L) {
     return del(L);
 }
 
-bool MemoryStorage::Rename(const StringValue& Old, const StringValue& New) {
+unsigned long long int MemoryStorage::Rename(
+    const StringValue& Old, const StringValue& New)
+{
     std::lock_guard<std::mutex> lock(label2data_mutex);
     auto old = label2data.find(Old);
     if (old == label2data.end())
-        return false;
+        return 0;
     std::shared_ptr<Value> v = old->second;
     label2data.erase(old);
     del(New);
+    v->ReSerial(serial++);
     label2data[New] = v;
-    return true;
+    return v->Serial();
 }
 
-void MemoryStorage::Add(DataGroup& G) {
-    std::vector<std::string> labels;
+std::vector<std::tuple<std::string, unsigned long long int>> MemoryStorage::Add(
+    DataGroup& G)
+{
+    std::vector<std::tuple<std::string, unsigned long long int>> label_serial;
+    label_serial.reserve(G.Size());
     std::lock_guard<std::mutex> lock(label2data_mutex);
     while (true) {
         auto label_data = G.Get();
@@ -140,10 +152,13 @@ void MemoryStorage::Add(DataGroup& G) {
             break;
         del(label_data.first);
         label_data.second->Own(false);
-        label2data[label_data.first] = std::shared_ptr<Value>(
-            new MemoryStorage::Value(G.Format(), label_data.second));
-        labels.push_back(label_data.first);
+        std::shared_ptr<Value> v(
+            new MemoryStorage::Value(G.Format(), label_data.second, serial++));
+        label2data[label_data.first] = v;
+        label_serial.push_back(std::make_tuple(
+            label_data.first.String(), v->Serial()));
     }
+    return label_serial;
 }
 
 void MemoryStorage::Prepare(const char *const Format,
@@ -162,16 +177,21 @@ void MemoryStorage::Prepare(const char *const Format,
     }
 }
 
-std::vector<std::tuple<StringValue,std::string,size_t>> MemoryStorage::Info() const
+std::vector<std::tuple<
+    StringValue, std::string, size_t, unsigned long long int>>
+    MemoryStorage::Info()
+    const
 {
-    std::vector<std::tuple<StringValue,std::string,size_t>> results;
+    std::vector<std::tuple<
+        StringValue, std::string, size_t, unsigned long long int>> results;
     std::lock_guard<std::mutex> lock(label2data_mutex);
     for (auto& iter : label2data) {
         std::lock_guard<std::mutex> value_lock(iter.second->Mutex());
         const auto avail = iter.second->Values();
         for (const auto format_data : avail) {
             results.push_back(std::make_tuple(
-                iter.first, format_data.first, format_data.second->Size()));
+                iter.first, format_data.first, format_data.second->Size(),
+                iter.second->Serial()));
         }
     }
     return results;

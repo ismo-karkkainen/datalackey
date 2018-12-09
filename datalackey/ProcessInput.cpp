@@ -50,3 +50,5 @@ ProcessInput::ProcessInput(std::shared_ptr<SimpleValue>& Value, Encoder* E,
     std::shared_ptr<DataOwner> shared(rdo);
     SetData(rdo->Reader(shared));
 }
+
+ProcessInput::ProcessInput() : plabel(nullptr), pname(nullptr) { }

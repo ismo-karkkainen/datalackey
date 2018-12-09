@@ -18,7 +18,7 @@
 class EndFeedCommand : public Command {
 private:
     Processes& processes;
-    ListDescription description;
+    StringListDescription description;
 
 public:
     EndFeedCommand(const char *const Name, Output& Out, Processes& P);

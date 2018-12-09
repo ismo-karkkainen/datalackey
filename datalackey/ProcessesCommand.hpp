@@ -18,7 +18,7 @@
 class ProcessesCommand : public Command {
 private:
     const Processes& processes;
-    Sth2Opt3 msg_reply; // For message report only.
+    Sth2PairMap msg_reply;
     ParameterlessDescription description;
 
 public:

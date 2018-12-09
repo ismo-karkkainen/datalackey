@@ -71,6 +71,8 @@ extern Sth2Opt3 pm_run_error_out_missing;
 extern Sth2Opt3 pm_feed_error_not_found;
 extern Sth2Opt3 pm_feed_error_closed;
 
+extern Sth2Opt3 pm_run_error_identifier_not_string;
+
 
 class CmdErrorArgArgumentSth : public Message {
 private:

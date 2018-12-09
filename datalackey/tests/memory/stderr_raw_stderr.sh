@@ -19,18 +19,18 @@ done
 EOF
 chmod a+x _script.sh
 
-echo '[1,"run","out","bytes","stderr","program","./_script.sh"]' |
+echo '["1","run","out","bytes","stderr","program","./_script.sh"]' |
 $DL -m -i stdin JSON -o stderr JSON 2>&1 |
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"run","running",pid]
-[1,"run","input","closed"]
-[1,"run","bytes",97,10]
-[1,"run","bytes",97,98,10]
-[1,"run","bytes",97,98,99,10]
-[1,"run","exit",0]
-[1,"run","finished"]
+["1","run","running",pid]
+["1","run","input","closed"]
+["1","run","bytes",97,10]
+["1","run","bytes",97,98,10]
+["1","run","bytes",97,98,99,10]
+["1","run","exit",0]
+["1","run","finished"]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

@@ -26,7 +26,7 @@ EOF
 chmod a+x _script.sh
 
 (
-echo '[1,"run","out","JSON","stdout","output-prefix","pre-","output-postfix","-post","output","label","mapped","program","./_script.sh"]'
+echo '["1","run","out","JSON","stdout","output-prefix","pre-","output-postfix","-post","output","label","mapped","program","./_script.sh"]'
 sleep 1
 echo '[2,"storage-info"]'
 echo '[3,"get","mapped"]'
@@ -36,17 +36,17 @@ echo '[5,"storage-info"]'
 sed 's/"running",.*]$/"running",pid]/' > $OUT
 
 cat > $EXP <<EOF
-[1,"run","running",pid]
-[1,"run","input","closed"]
-[1,"data","stored","mapped"]
-[1,"data","stored","pre-label2-post"]
-[1,"data","stored","pre-label3-post"]
-[1,"run","exit",0]
-[1,"run","finished"]
-[2,"storage-info","",{"mapped":{"JSON":7},"pre-label2-post":{"JSON":2},"pre-label3-post":{"JSON":2}}]
+["1","run","running",pid]
+["1","run","input","closed"]
+["1","data","stored",{"mapped":1}]
+["1","data","stored",{"pre-label2-post":2}]
+["1","data","stored",{"pre-label3-post":3}]
+["1","run","exit",0]
+["1","run","finished"]
+[2,"storage-info","",{"mapped":{"serial":1,"JSON":7},"pre-label2-post":{"serial":2,"JSON":2},"pre-label3-post":{"serial":3,"JSON":2}}]
 [3,"get","",{"mapped":"value"}]
 [4,"delete","deleted","pre-label2-post"]
-[5,"storage-info","",{"mapped":{"JSON":7},"pre-label3-post":{"JSON":2}}]
+[5,"storage-info","",{"mapped":{"serial":1,"JSON":7},"pre-label3-post":{"serial":3,"JSON":2}}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

@@ -18,7 +18,7 @@
 class ListCommand : public Command {
 private:
     const Storage& storage;
-    Sth2Opt2List list;
+    Sth2PairMap list;
     ParameterlessDescription description;
 
 public:

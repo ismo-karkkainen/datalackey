@@ -16,7 +16,7 @@
 
 ProcessesCommand::ProcessesCommand(const char *const Name, Output& Out, const Processes& P)
     : Command(Name, Out), processes(P),
-    msg_reply(Name, "", "mapping id-to-pid"), description(Name)
+    msg_reply(Name, ""), description(Name)
 { }
 
 ProcessesCommand::~ProcessesCommand() {
@@ -28,19 +28,15 @@ void ProcessesCommand::Perform(
     if (!description.Validate(out, Id, Arguments))
         return;
     auto results = processes.List();
-    std::unique_ptr<OutputItem> writer(out.Writable(IsNullValue(&Id)));
-    *writer << Array; // Start message array.
-    Message::Feed(*writer, Id);
-    *writer << ValueRef<std::string>(Name())
-        << ValueRef<std::string>("")
-        << Dictionary; // Start process id to PID dictionary.
+    std::vector<std::tuple<std::string, unsigned long long int>> pairs;
+    pairs.reserve(results.size());
     SimpleValue* id(nullptr);
-    pid_t pid;
-    for (size_t k = 0; k < results.size(); ++k) {
-        std::tie(id, pid) = results[k];
-        Message::Feed(*writer, *id);
-        *writer << NumberRef<pid_t>(pid);
+    pid_t pid = 0;
+    for (const auto& pair : results) {
+        std::tie(id, pid) = pair;
+        pairs.push_back(std::make_tuple(
+            id->String(), static_cast<unsigned long long int>(pid)));
         delete id;
     }
-    *writer << End << End; // Close dictionary and message array.
+    msg_reply.Send(out, Id, pairs);
 }

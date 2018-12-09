@@ -49,13 +49,6 @@ bool DataGroup::Finish() {
     return true;
 }
 
-std::vector<std::string> DataGroup::Labels() const {
-    std::vector<std::string> labels;
-    for (auto iter : label2data)
-        labels.push_back(iter.first);
-    return labels;
-}
-
 std::pair<StringValue,std::shared_ptr<DataOwner>> DataGroup::Get() {
     if (label2data.empty())
         return std::pair<StringValue,std::shared_ptr<DataOwner>>(

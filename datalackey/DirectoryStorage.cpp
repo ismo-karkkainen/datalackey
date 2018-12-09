@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <cerrno>
 #include <fstream>
+#include <algorithm>
+#include <utility>
 #include <cassert>
 
 using json = nlohmann::json;
@@ -23,10 +25,14 @@ using json = nlohmann::json;
 static const char Catalog[] = "catalog";
 
 
-DirectoryStorage::Value::Value() { }
+DirectoryStorage::Value::Value(unsigned long long int Serial)
+    : serial(Serial)
+{ }
 
 DirectoryStorage::Value::Value(
-    const std::string& Format, std::shared_ptr<DataOwner> Data)
+    const std::string& Format, std::shared_ptr<DataOwner> Data,
+    unsigned long long int Serial)
+    : serial(Serial)
 {
     Add(Format, Data);
 }
@@ -119,17 +125,25 @@ bool DirectoryStorage::del(const StringValue& L) {
 bool DirectoryStorage::store() const {
     json j(json::object());
     std::unique_lock<std::mutex> lock(label2data_mutex);
-    for (auto& iter : label2data) {
+    // Find order from smallest serial to largest.
+    std::vector<std::pair<unsigned long long int, const StringValue*>> order;
+    order.reserve(label2data.size());
+    for (const auto& iter : label2data)
+         order.push_back(std::make_pair(iter.second->Serial(), &(iter.first)));
+    std::sort(order.begin(), order.end());
+    for (const auto& item : order) {
+        auto iter = label2data.find(*item.second);
+        const std::shared_ptr<Value> v(iter->second);
         json arr(json::array());
-        std::unique_lock<std::mutex> value_lock(iter.second->Mutex());
-        for (const auto& pair : iter.second->Values()) {
+        std::unique_lock<std::mutex> value_lock(v->Mutex());
+        for (const auto& pair : v->Values()) {
             arr.push_back(pair.first);
             FileOwner* fo = dynamic_cast<FileOwner*>(pair.second.get());
             assert(fo != nullptr);
             arr.push_back(fo->Index());
         }
         value_lock.unlock();
-        j[iter.first.String()] = arr;
+        j[item.second->String()] = arr;
     }
     lock.unlock();
     std::ofstream out(root + Catalog);
@@ -139,7 +153,7 @@ bool DirectoryStorage::store() const {
 
 DirectoryStorage::DirectoryStorage(
     const std::string& StorageRoot, mode_t FileMode)
-    : file_mode(FileMode), root(StorageRoot)
+    : serial(1), file_mode(FileMode), root(StorageRoot)
 {
     // Trust main program to hand us a valid data directory.
     // See if there is a catalog to be loaded. May be new storage.
@@ -191,7 +205,7 @@ DirectoryStorage::DirectoryStorage(
     buffer = nullptr;
     for (json::iterator item = j.begin(); item != j.end(); ++item) {
         StringValue label(item.key());
-        std::shared_ptr<Value> value(new Value());
+        std::shared_ptr<Value> value(new Value(serial++));
         label2data[label] = value;
         for (size_t k = 0; k < item.value().size(); k += 2) {
             std::string format = item.value()[k];
@@ -211,11 +225,15 @@ bool DirectoryStorage::IsValid() const {
     return !root.empty();
 }
 
-std::vector<std::string> DirectoryStorage::List() const {
-    std::vector<std::string> results;
+std::vector<std::tuple<std::string, unsigned long long int>>
+    DirectoryStorage::List() const
+{
+    std::vector<std::tuple<std::string, unsigned long long int>> results;
     std::lock_guard<std::mutex> lock(label2data_mutex);
-    for (auto& iter : label2data)
-        results.push_back(iter.first.String());
+    results.reserve(label2data.size());
+    for (const auto& iter : label2data)
+        results.push_back(std::tuple<std::string, unsigned long long int>(
+            iter.first.String(), iter.second->Serial()));
     return results;
 }
 
@@ -224,20 +242,26 @@ bool DirectoryStorage::Delete(const StringValue& L) {
     return del(L);
 }
 
-bool DirectoryStorage::Rename(const StringValue& Old, const StringValue& New) {
+unsigned long long int DirectoryStorage::Rename(
+    const StringValue& Old, const StringValue& New)
+{
     std::lock_guard<std::mutex> lock(label2data_mutex);
     auto old = label2data.find(Old);
     if (old == label2data.end())
-        return false;
+        return 0;
     std::shared_ptr<Value> v = old->second;
     label2data.erase(old);
     del(New);
+    v->ReSerial(serial++);
     label2data[New] = v;
-    return true;
+    return v->Serial();
 }
 
-void DirectoryStorage::Add(DataGroup& G) {
-    std::vector<std::string> labels;
+std::vector<std::tuple<std::string, unsigned long long int>>
+    DirectoryStorage::Add(DataGroup& G)
+{
+    std::vector<std::tuple<std::string, unsigned long long int>> label_serial;
+    label_serial.reserve(G.Size());
     std::lock_guard<std::mutex> lock(label2data_mutex);
     while (true) {
         auto label_data = G.Get();
@@ -245,10 +269,13 @@ void DirectoryStorage::Add(DataGroup& G) {
             break;
         del(label_data.first);
         label_data.second->Own(false);
-        label2data[label_data.first] = std::shared_ptr<Value>(
-            new DirectoryStorage::Value(G.Format(), label_data.second));
-        labels.push_back(label_data.first);
+        std::shared_ptr<Value> v(new DirectoryStorage::Value(
+            G.Format(), label_data.second, serial++));
+        label2data[label_data.first] = v;
+        label_serial.push_back(std::make_tuple(
+            label_data.first.String(), v->Serial()));
     }
+    return label_serial;
 }
 
 void DirectoryStorage::Prepare(const char *const Format,
@@ -267,16 +294,21 @@ void DirectoryStorage::Prepare(const char *const Format,
     }
 }
 
-std::vector<std::tuple<StringValue,std::string,size_t>> DirectoryStorage::Info() const
+std::vector<std::tuple<
+    StringValue, std::string, size_t, unsigned long long int>>
+    DirectoryStorage::Info()
+    const
 {
-    std::vector<std::tuple<StringValue,std::string,size_t>> results;
+    std::vector<std::tuple<
+        StringValue, std::string, size_t, unsigned long long int>> results;
     std::lock_guard<std::mutex> lock(label2data_mutex);
     for (auto& iter : label2data) {
         std::lock_guard<std::mutex> value_lock(iter.second->Mutex());
         const auto avail = iter.second->Values();
         for (const auto format_data : avail) {
             results.push_back(std::make_tuple(
-                iter.first, format_data.first, format_data.second->Size()));
+                iter.first, format_data.first, format_data.second->Size(),
+                iter.second->Serial()));
         }
     }
     return results;

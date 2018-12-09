@@ -29,9 +29,11 @@ public:
     // Both are expected to be StringValues.
     ProcessInput(std::shared_ptr<SimpleValue>& Label,
         std::shared_ptr<SimpleValue>& Name);
-    // First can be anything, the second is expected to be StringValue.
+    // Value can be anything, the name is expected to be StringValue.
     ProcessInput(std::shared_ptr<SimpleValue>& Value, Encoder* E,
         std::shared_ptr<SimpleValue>& Name);
+    // Special case used as end of file marker for output feeder thread.
+    ProcessInput();
 
     // For setting data from label.
     const StringValue* Label() const { return plabel; }

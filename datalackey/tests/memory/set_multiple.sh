@@ -17,12 +17,12 @@ echo '[2,"rename","label","name","miss","unused","label2","name2","miss2","unuse
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[null,"data","stored","label","label2"]
+[null,"data","stored",{"label":1,"label2":2}]
 [null,"error","format"]
 [null,"channel","reset"]
 [1,"error","not-string",1,"rename","label","name","miss","unused",4]
 [2,"rename","missing","miss","miss2"]
-[2,"rename","renamed","label","name","label2","name2"]
+[2,"rename","renamed",{"label":null,"label2":null,"name":3,"name2":4}]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP
