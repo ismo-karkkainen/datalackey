@@ -33,7 +33,7 @@ sleep 1
 echo '[6,"storage-info"]'
 echo '[7,"end-feed","m1","2"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' | oneline_keysort_json > $OUT
+sed 's/"running",.*]$/"running","pid"]/' | oneline-keysort-json > $OUT
 
 cat > $EXP <<EOF
 [null,"data","stored",{"label":1}]

@@ -29,7 +29,7 @@ echo '[3,"get","mapped"]'
 echo '[4,"delete","pre-label2-post"]'
 echo '[5,"storage-info"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' | oneline_keysort_json > $OUT
+sed 's/"running",.*]$/"running","pid"]/' | oneline-keysort-json > $OUT
 
 cat > $EXP <<EOF
 ["1","run","running","pid"]

@@ -215,6 +215,9 @@ add_exe(memory noop.sh)
 new_test(noop noop.sh)
 add_exe(memory version.sh)
 new_test_arg(version version.sh ${CMAKE_CURRENT_LIST_DIR}/datalackey/Version.hpp)
+add_exe(memory report.sh)
+new_test_arg(messages report.sh messages)
+new_test_arg(commands report.sh commands)
 
 # Processes
 #

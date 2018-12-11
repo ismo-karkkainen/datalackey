@@ -11,7 +11,7 @@ OUT="${B}_out.txt"
 EXP="${B}_expected.txt"
 
 echo '[1,"version"]' |
-$DL -m -i stdin JSON -o stdout JSON | oneline_keysort_json > $OUT
+$DL -m -i stdin JSON -o stdout JSON | oneline-keysort-json > $OUT
 
 VER=$(cat $VH | grep "Version " | sed 's/;//' | awk '{ printf("%s", $NF) }')
 INT=$(cat $VH | grep "Interface " | sed 's/;//' | awk '{ printf("%s", $NF) }')
