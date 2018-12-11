@@ -29,29 +29,33 @@ class Output;
 #include <thread>
 #include <condition_variable>
 #include <set>
+#include <memory>
 
 
 // This receives the data that OutputItem produces.
 class OutputItemBuffer {
 private:
     bool ended;
-    Output& master;
+    Output* master;
     RawData buffer;
+    std::mutex master_mutex;
 
     OutputItemBuffer(Output& Master);
     OutputItemBuffer(const OutputItemBuffer&) = delete;
     OutputItemBuffer& operator=(const OutputItemBuffer&) = delete;
-    ~OutputItemBuffer();
+
+    void Orphan();
 
     friend class Output;
 
 public:
+    ~OutputItemBuffer();
     RawData* Buffer() { return &buffer; }
 
     OutputItemBuffer& operator<<(const RawData& Data);
     void Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);
 
-    void End(); // Indicates there will be no more data.
+    void End(std::shared_ptr<OutputItemBuffer>& This); // No more data.
 };
 
 
@@ -60,10 +64,10 @@ class OutputItemWriter : public OutputItem {
 private:
     Encoder* encoder;
     RawData encoder_buffer;
-    OutputItemBuffer& buffer;
+    std::shared_ptr<OutputItemBuffer> buffer;
 
     // Owns Encoder.
-    OutputItemWriter(Encoder* E, OutputItemBuffer& B);
+    OutputItemWriter(Encoder* E, std::shared_ptr<OutputItemBuffer>& B);
     OutputItemWriter(const OutputItemWriter&) = delete;
     OutputItemWriter& operator=(const OutputItemWriter&) = delete;
 
@@ -92,15 +96,16 @@ private:
     Output* controller_output;
     SimpleValue* controller_output_identifier;
 
+    // Lock input_sets_mutex first, then this if you need both.
     mutable std::mutex mutex;
     const Encoder& encoder;
-    std::set<OutputItemBuffer*> buffers;
+    std::set<std::shared_ptr<OutputItemBuffer>> buffers;
 
     OutputChannel& channel;
     std::thread* channel_feeder;
     std::condition_variable output_added;
     std::queue<std::shared_ptr<ProcessInput>> inputs;
-    std::queue<OutputItemBuffer*> ended_buffers;
+    std::queue<std::shared_ptr<OutputItemBuffer>> ended_buffers;
     bool eof;
     mutable std::mutex input_sets_mutex;
 
@@ -108,6 +113,7 @@ private:
 
     ReadError read_error;
 
+    void orphan_buffers(); // Locks nothing. Lock as needed.
     void clear_buffers();
     void feeder();
     void end(bool FromOutside);
@@ -134,7 +140,7 @@ public:
     bool Finished() const;
 
     // For communication from OutputItemBuffer objects.
-    void Ended(OutputItemBuffer& IB);
+    void Ended(std::shared_ptr<OutputItemBuffer>& IB);
 };
 
 

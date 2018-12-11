@@ -14,11 +14,16 @@
 
 
 OutputItemBuffer::OutputItemBuffer(Output& Master)
-    : ended(false), master(Master)
+    : ended(false), master(&Master)
 { }
 
-OutputItemBuffer::~OutputItemBuffer() {
+void OutputItemBuffer::Orphan() {
+    std::lock_guard<std::mutex> lock(master_mutex);
+    master = nullptr;
+    ended = true; // Stops further accumulation of output.
 }
+
+OutputItemBuffer::~OutputItemBuffer() { }
 
 OutputItemBuffer& OutputItemBuffer::operator<<(const RawData& Data) {
     RawData::ConstIterator start = Data.CBegin();
@@ -30,31 +35,35 @@ OutputItemBuffer& OutputItemBuffer::operator<<(const RawData& Data) {
 void OutputItemBuffer::Write(
     RawData::ConstIterator& Start, RawData::ConstIterator& End)
 {
-    buffer.Append(Start, End);
+    if (!ended)
+        buffer.Append(Start, End);
 }
 
-void OutputItemBuffer::End() {
+void OutputItemBuffer::End(std::shared_ptr<OutputItemBuffer>& This) {
     if (!ended) {
         ended = true;
-        master.Ended(*this);
+        std::lock_guard<std::mutex> lock(master_mutex);
+        if (master)
+            master->Ended(This);
     }
 }
 
 
-OutputItemWriter::OutputItemWriter(Encoder* E, OutputItemBuffer& B)
+OutputItemWriter::OutputItemWriter(
+    Encoder* E, std::shared_ptr<OutputItemBuffer>& B)
     : encoder(E), buffer(B)
 { }
 
 OutputItemWriter::~OutputItemWriter() {
-    buffer.End();
+    buffer->End(buffer);
     delete encoder;
 }
 
 OutputItem& OutputItemWriter::operator<<(Structure S) {
     if (encoder->EncodeOutputsDirectly()) {
-        encoder->Encode(*buffer.Buffer(), S);
+        encoder->Encode(*(buffer->Buffer()), S);
     } else if (encoder->Encode(encoder_buffer, S)) {
-        buffer << encoder_buffer;
+        *buffer << encoder_buffer;
         encoder_buffer.Clear();
     }
     return *this;
@@ -62,9 +71,9 @@ OutputItem& OutputItemWriter::operator<<(Structure S) {
 
 OutputItem& OutputItemWriter::operator<<(const ValueReference& VR) {
     if (encoder->EncodeOutputsDirectly()) {
-        encoder->Encode(*buffer.Buffer(), VR);
+        encoder->Encode(*(buffer->Buffer()), VR);
     } else if (encoder->Encode(encoder_buffer, VR)) {
-        buffer << encoder_buffer;
+        *buffer << encoder_buffer;
         encoder_buffer.Clear();
     }
     return *this;
@@ -73,7 +82,7 @@ OutputItem& OutputItemWriter::operator<<(const ValueReference& VR) {
 void OutputItemWriter::Write(
     RawData::ConstIterator Start, RawData::ConstIterator End)
 {
-    buffer.Write(Start, End);
+    buffer->Write(Start, End);
 }
 
 
@@ -95,12 +104,18 @@ void Output::ReadError::Send(
 Output* Output::first = nullptr;
 
 
+void Output::orphan_buffers() {
+    for (auto& buf : buffers)
+        buf->Orphan();
+    buffers.clear();
+}
+
 void Output::clear_buffers() {
     std::lock_guard<std::mutex> lock(input_sets_mutex);
-    while (!ended_buffers.empty()) {
-        delete ended_buffers.front();
+    std::lock_guard<std::mutex> lock2(mutex);
+    orphan_buffers();
+    while (!ended_buffers.empty())
         ended_buffers.pop();
-    }
     while (!inputs.empty())
         inputs.pop();
 }
@@ -108,7 +123,7 @@ void Output::clear_buffers() {
 void Output::feeder() {
     std::shared_ptr<ProcessInput> input;
     std::shared_ptr<const RawData> rd;
-    OutputItemBuffer* outbuf = nullptr;
+    std::shared_ptr<OutputItemBuffer> outbuf = nullptr;
     const RawData* data = nullptr;
     RawData deco;
     size_t written = 0;
@@ -131,7 +146,6 @@ void Output::feeder() {
             }
             if (written == data->Size()) {
                 if (outbuf != nullptr && data == outbuf->Buffer()) {
-                    delete outbuf;
                     outbuf = nullptr;
                 } else if (data == rd.get()) {
                     rd = nullptr;
@@ -254,6 +268,7 @@ void Output::end(bool FromOutside) {
         std::shared_ptr<ProcessInput> marker(new ProcessInput());
         std::unique_lock<std::mutex> lock(input_sets_mutex);
         inputs.push(marker);
+        orphan_buffers();
         lock.unlock();
         output_added.notify_one();
     }
@@ -286,7 +301,6 @@ Output::~Output() {
         delete channel_feeder;
     }
     channel.Close();
-    assert(buffers.empty()); // There should be no incomplete writes anywhere.
     clear_buffers();
     // OutputChannel allocated and owned outside.
 }
@@ -299,11 +313,11 @@ void Output::NoGlobalMessages() {
 OutputItem* Output::Writable(bool Discarder) {
     if (Discarder || channel.Failed() || eof)
         return new OutputItemDiscarder();
-    OutputItemBuffer* buffer = new OutputItemBuffer(*this);
+    std::shared_ptr<OutputItemBuffer> buffer(new OutputItemBuffer(*this));
     std::unique_lock<std::mutex> lock(mutex);
     buffers.insert(buffer);
     lock.unlock();
-    return new OutputItemWriter(encoder.Clone(), *buffer);
+    return new OutputItemWriter(encoder.Clone(), buffer);
 }
 
 void Output::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
@@ -312,28 +326,26 @@ void Output::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
     std::unique_lock<std::mutex> lock(input_sets_mutex);
     for (auto& input : Inputs)
         inputs.push(input);
-    // This indicates that the input ended.
+    // This indicates that the input group ended.
     inputs.push(std::shared_ptr<ProcessInput>());
     lock.unlock();
     output_added.notify_one();
 }
 
 bool Output::Finished() const {
-    std::lock_guard<std::mutex> lock(mutex);
     std::lock_guard<std::mutex> lock2(input_sets_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     return buffers.empty() && ended_buffers.empty();
 }
 
-void Output::Ended(OutputItemBuffer& IB) {
-    std::unique_lock<std::mutex> lock(mutex);
+void Output::Ended(std::shared_ptr<OutputItemBuffer>& IB) {
     std::unique_lock<std::mutex> lock2(input_sets_mutex);
-    buffers.erase(&IB);
-    if (channel.Failed() || failed || eof || channel.Closed()) {
-        delete &IB;
+    std::unique_lock<std::mutex> lock(mutex);
+    buffers.erase(IB);
+    if (channel.Failed() || failed || eof || channel.Closed())
         return;
-    }
-    ended_buffers.push(&IB);
-    lock2.unlock();
+    ended_buffers.push(IB);
     lock.unlock();
+    lock2.unlock();
     output_added.notify_one();
 }
