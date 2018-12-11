@@ -34,11 +34,11 @@ echo '[4,"end-feed","1"]'
 nap
 echo '[5,"list"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running",pid]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' > $OUT
 
 cat << EOF > $EXP
 [null,"data","stored",{"label":1}]
-["1","run","running",pid]
+["1","run","running","pid"]
 ["1","data","stored",{"fed-in1":2}]
 ["1","data","stored",{"fed-in2":3}]
 [4,"end-feed","","1"]

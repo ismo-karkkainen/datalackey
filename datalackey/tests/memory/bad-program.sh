@@ -17,7 +17,7 @@ EOF
 (
 echo '["1","run","out","JSON","stdout","program","./_script.sh"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running",pid]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' > $OUT
 
 cat > $EXP <<EOF
 ["1","run","error","program","./_script.sh"]

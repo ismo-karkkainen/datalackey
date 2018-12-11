@@ -23,7 +23,7 @@ echo '["sub","run","end-feed","out","JSON","stdout","program","./_subscript.sh"]
 rm -f $OUT_SCR
 while read L
 do
-    echo \$L | sed 's/"running",.*]$/"running",pid]/' >> $OUT_SCR
+    echo \$L | sed 's/"running",.*]$/"running","pid"]/' >> $OUT_SCR
 done
 nap
 EOF
@@ -45,13 +45,13 @@ echo '{"name":0}'
 echo '[3,"end-feed","1"]'
 echo '[4,"feed","1"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed -e 's/"running",.*]$/"running",pid]/' -e 's/"sub",.*]$/"sub",pid]/' > "$OUT"
+sed -e 's/"running",.*]$/"running","pid"]/' -e 's/"sub",.*]$/"sub","pid"]/' > "$OUT"
 
 cat > "$EXP" << EOF
-["1","run","running",pid]
-[null,"process","started","sub",pid]
+["1","run","running","pid"]
+[null,"process","started","sub","pid"]
 [null,"data","stored",{"item":1,"item2":2}]
-[null,"process","ended","sub",pid]
+[null,"process","ended","sub","pid"]
 [2,"feed","error","not-found"]
 [5,"error","unknown",5,"feed","1","invalid"]
 [6,"error","missing",6,"feed","1","input"]
@@ -72,7 +72,7 @@ end
 EOF
 
 cat > "$EXP_SCR" << EOF
-["sub","run","running",pid]
+["sub","run","running","pid"]
 ["sub","run","input","closed"]
 set
 ["sub","data","stored",{"item":1,"item2":2}]

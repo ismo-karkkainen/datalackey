@@ -29,10 +29,10 @@ echo '[3,"get","mapped"]'
 echo '[4,"delete","pre-label2-post"]'
 echo '[5,"storage-info"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running",pid]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' > $OUT
 
 cat > $EXP <<EOF
-["1","run","running",pid]
+["1","run","running","pid"]
 ["1","run","input","closed"]
 ["1","data","stored",{"mapped":1}]
 ["1","data","stored",{"pre-label2-post":2}]

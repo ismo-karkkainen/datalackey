@@ -45,10 +45,10 @@ echo '["19","run","program","./invld"]'
 echo '["20","run","out","JSON","stdout","out","JSON","stdout"]'
 echo '["21","run","out","JSON","stderr","out","JSON","stderr"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed -e 's/"running",.*]$/"running",pid]/' -e 's/invld",.*]$/invld",err]/' > "$OUT"
+sed -e 's/"running",.*]$/"running","pid"]/' -e 's/invld",.*]$/invld",err]/' > "$OUT"
 
 cat > "$EXP" << EOF
-["1","run","running",pid]
+["1","run","running","pid"]
 ["1","run","error","identifier","in-use"]
 ["1","end-feed","","1"]
 set

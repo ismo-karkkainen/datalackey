@@ -22,10 +22,10 @@ echo '[2,"storage-info"]'
 echo '[3,"get","mapped","miss",4]'
 echo '[4,"get","mapped","miss"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running",pid]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' > $OUT
 
 cat > $EXP <<EOF
-["1","run","running",pid]
+["1","run","running","pid"]
 ["1","run","input","closed"]
 set
 ["1","data","stored",{"mapped":1}]

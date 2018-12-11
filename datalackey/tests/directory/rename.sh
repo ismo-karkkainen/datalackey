@@ -22,7 +22,7 @@ echo '[4,"storage-info"]'
 echo '[5,"rename","label2","label3"]'
 echo '[6,"storage-info"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running",pid]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' > $OUT
 
 cat > $EXP <<EOF
 [null,"data","stored",{"label":1,"label2":2}]

@@ -25,10 +25,10 @@ echo '[2,"terminate","1","2","3"]'
 nap
 echo '[3,"processes"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running",pid]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' > $OUT
 
 cat > $EXP <<EOF
-["1","run","running",pid]
+["1","run","running","pid"]
 ["1","run","input","closed"]
 [2,"terminate","missing","2","3"]
 [2,"terminate","terminated","1"]
