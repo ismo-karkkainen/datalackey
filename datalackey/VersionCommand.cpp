@@ -36,7 +36,8 @@ void VersionCommand::Perform(
         << Dictionary
         << ValueRef<std::string>("datalackey") << NumberRef<int>(Version)
         << ValueRef<std::string>("interface") << NumberRef<int>(Interface)
-        << ValueRef<std::string>("commands");
+        << ValueRef<std::string>("commands")
+        << Dictionary;
     CommandReporter::Get().Report(writer.get());
-    *writer << End << End; // Dictionary and array.
+    *writer << End << End << End; // Dictionary, dictionary, and array.
 }

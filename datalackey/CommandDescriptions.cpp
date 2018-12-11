@@ -190,19 +190,21 @@ std::string FeedDescription::angle(const char* const Str) const {
     return std::string("<") + Str + ">";
 }
 
-void FeedDescription::report_subcommands(OutputItem* Writer) const {
+void FeedDescription::report_subcommands(OutputItem* Writer,
+    const std::string& subcommand, const std::string& subcommands) const
+{
     std::string angled;
-    *Writer << ValueRef<std::string>(report::subcommands)
+    *Writer << ValueRef<std::string>(subcommands)
         << Structure::Array
         << Structure::Array
-        << ValueRef<std::string>(report::subcommand)
-        << ValueRef<std::string>(report::subcommands)
+        << ValueRef<std::string>(subcommand)
+        << ValueRef<std::string>(subcommands)
         << Structure::End
         << Structure::Array
-        << ValueRef<std::string>(report::subcommand)
+        << ValueRef<std::string>(subcommand)
         << Structure::End
         << Structure::End;
-    *Writer << ValueRef<std::string>(report::subcommand)
+    *Writer << ValueRef<std::string>(subcommand)
         << Structure::Array;
     for (const auto& sub : subs) {
         angled = angle(sub->Name());
@@ -232,14 +234,14 @@ FeedDescription::FeedDescription(const char* const Name)
 void FeedDescription::Report(OutputItem* Writer) const {
     std::string angled = angle(name);
     *Writer << Structure::Dictionary
-        << ValueRef<std::string>(name)
+        << ValueRef<std::string>(angled)
         << Structure::Array
         << ValueRef<std::string>(report::id)
-        << ValueRef<std::string>(angled)
+        << ValueRef<std::string>(name)
         << ValueRef<std::string>(report::process_id)
-        << ValueRef<std::string>(report::subcommands)
+        << ValueRef<std::string>("<feed-subcommands>")
         << Structure::End;
-    report_subcommands(Writer);
+    report_subcommands(Writer, "<feed-subcommand>", "<feed-subcommands>");
     *Writer << Structure::End;
 }
 
@@ -336,13 +338,13 @@ RunDescription::RunDescription(const char* const Name)
 void RunDescription::Report(OutputItem* Writer) const {
     std::string angled = angle(name);
     *Writer << Structure::Dictionary
-        << ValueRef<std::string>(name)
+        << ValueRef<std::string>(angled)
         << Structure::Array
         << ValueRef<std::string>(report::id)
-        << ValueRef<std::string>(angled)
-        << ValueRef<std::string>(report::subcommands)
+        << ValueRef<std::string>(name)
+        << ValueRef<std::string>("<run-subcommands>")
         << Structure::End;
-    report_subcommands(Writer);
+    report_subcommands(Writer, "<run-subcommand>", "<run-subcommands>");
     *Writer << Structure::End;
 }
 

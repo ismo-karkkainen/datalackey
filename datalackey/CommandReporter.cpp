@@ -7,6 +7,7 @@
 //
 
 #include "CommandReporter.hpp"
+#include "Value_t.hpp"
 #include <memory>
 #include <cassert>
 
@@ -19,8 +20,10 @@ void CommandReporter::Register(const CommandDescription* D) {
 }
 
 void CommandReporter::Report(OutputItem* Writer) const {
-    for (auto iter : registered)
+    for (auto iter : registered) {
+        *Writer << ValueRef<std::string>(iter->Name());
         iter->Report(Writer);
+    }
 }
 
 CommandReporter& CommandReporter::Get() {

@@ -137,7 +137,8 @@ protected:
     std::vector<std::unique_ptr<SubCommand>> subs;
 
     std::string angle(const char* const Str) const;
-    void report_subcommands(OutputItem* Writer) const;
+    void report_subcommands(OutputItem* Writer,
+        const std::string& subcommand, const std::string& subcommands) const;
 
 public:
     FeedDescription(const char* const Name);

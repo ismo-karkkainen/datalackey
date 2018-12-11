@@ -36,6 +36,7 @@ public:
     CommandDescription(const char* const Name);
     virtual ~CommandDescription();
     virtual void Report(OutputItem* Writer) const = 0;
+    const char* const Name() const { return name; }
 };
 
 

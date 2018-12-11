@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
             MessageReporter::Get().Report(*out);
         else {
             std::unique_ptr<OutputItem> writer(out->Writable());
-            *writer << Structure::Array;
+            *writer << Structure::Dictionary;
             CommandReporter::Get().Report(writer.get());
             *writer << Structure::End;
         }
