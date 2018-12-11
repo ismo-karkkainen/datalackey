@@ -34,7 +34,7 @@ echo '[4,"end-feed","1"]'
 nap
 echo '[5,"list"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' | oneline_keysort_json > $OUT
 
 cat << EOF > $EXP
 [null,"data","stored",{"label":1}]

@@ -1,0 +1,11 @@
+#!/usr/bin/python
+
+import sys
+import json
+
+for line in sys.stdin.readlines():
+    try:
+        j = json.loads(line)
+        print(json.dumps(j, separators=(',',':'), sort_keys=True))
+    except ValueError, e:
+        sys.exit("Not JSON: " + line) # Could print line but JSON is expected.

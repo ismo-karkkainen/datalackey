@@ -33,7 +33,7 @@ echo '[3,"get","mapped"]'
 echo '[4,"delete","pre-label2-post"]'
 echo '[5,"storage-info"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' | oneline_keysort_json > $OUT
 
 cat > $EXP <<EOF
 ["1","run","running","pid"]
@@ -43,10 +43,10 @@ cat > $EXP <<EOF
 ["1","data","stored",{"pre-label3-post":3}]
 ["1","run","exit",0]
 ["1","run","finished"]
-[2,"storage-info","",{"mapped":{"serial":1,"JSON":7},"pre-label2-post":{"serial":2,"JSON":2},"pre-label3-post":{"serial":3,"JSON":2}}]
+[2,"storage-info","",{"mapped":{"JSON":7,"serial":1},"pre-label2-post":{"JSON":2,"serial":2},"pre-label3-post":{"JSON":2,"serial":3}}]
 [3,"get","",{"mapped":"value"}]
 [4,"delete","deleted","pre-label2-post"]
-[5,"storage-info","",{"mapped":{"serial":1,"JSON":7},"pre-label3-post":{"serial":3,"JSON":2}}]
+[5,"storage-info","",{"mapped":{"JSON":7,"serial":1},"pre-label3-post":{"JSON":2,"serial":3}}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

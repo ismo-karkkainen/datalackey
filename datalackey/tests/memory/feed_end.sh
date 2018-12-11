@@ -33,7 +33,7 @@ sleep 1
 echo '[6,"storage-info"]'
 echo '[7,"end-feed","m1","2"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' > $OUT
+sed 's/"running",.*]$/"running","pid"]/' | oneline_keysort_json > $OUT
 
 cat > $EXP <<EOF
 [null,"data","stored",{"label":1}]
@@ -47,7 +47,7 @@ set
 ["1","run","finished"]
 [5,"end-feed","not-open","1"]
 end
-[6,"storage-info","",{"fed-in1":{"serial":2,"JSON":3},"fed-in2":{"serial":3,"JSON":3},"label":{"serial":1,"JSON":3}}]
+[6,"storage-info","",{"fed-in1":{"JSON":3,"serial":2},"fed-in2":{"JSON":3,"serial":3},"label":{"JSON":3,"serial":1}}]
 [7,"end-feed","missing","m1","2"]
 EOF
 
