@@ -19,7 +19,6 @@ class RenameCommand : public Command {
 private:
     Storage& storage;
     Sth2Opt2List msg_missing;
-    NullableSth2PairMap msg_renamed;
     StringListDescription description;
 
 public:

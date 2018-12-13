@@ -20,7 +20,7 @@ chmod a+x _script.sh
 cat > _controller.sh << EOF
 #!/bin/sh
 echo '["a","run","out","JSON","stdout","program","./_script.sh"]'
-cat | sed 's/"running",.*]$/"running","pid"]/' > $CTOUT
+cat | replace-pid > $CTOUT
 EOF
 chmod a+x _controller.sh
 
@@ -31,15 +31,15 @@ echo '[2,"end-feed","1"]'
 nap
 echo '[3,"get","label"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' |
-sed 's/,"a",.*]$/,"a","pid"]/' > $OUT
+replace-pid > $OUT
 
 cat > $EXP <<EOF
 ["1","run","running","pid"]
+[null,"process","started","1","pid"]
 [null,"process","started","a","pid"]
 set
 [null,"process","ended","a","pid"]
-[null,"data","stored",{"label":1}]
+[null,"data","stored","label",1]
 end
 [2,"end-feed","","1"]
 set
@@ -47,6 +47,7 @@ set
 ["1","run","input","closed"]
 end
 ["1","run","finished"]
+[null,"process","ended","1","pid"]
 [3,"get","",{"label":"value"}]
 EOF
 
@@ -54,7 +55,7 @@ cat > $CTEXP <<EOF
 ["a","run","running","pid"]
 ["a","run","input","closed"]
 ["a","run","exit",0]
-["a","data","stored",{"label":1}]
+[null,"data","stored","label",1]
 ["a","run","finished"]
 EOF
 

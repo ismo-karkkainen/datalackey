@@ -10,6 +10,7 @@
 #include "OutputCollection.hpp"
 #include "Value_t.hpp"
 #include "Structure.hpp"
+#include "Messages.hpp"
 #include <cassert>
 
 
@@ -86,24 +87,6 @@ void OutputItemWriter::Write(
 }
 
 
-void Output::ReadError::Report(Output& Out) const {
-    Send(Out, &Message::id, Message::item);
-    Send(Out, nullptr, Message::item);
-}
-
-void Output::ReadError::Send(
-    Output& Out, const SimpleValue* Id, const char* const Label) const
-{
-    if (Id == nullptr)
-        message(Out, "read", "error", Label);
-    else
-        message(Out, Id, "read", "error", Label);
-}
-
-
-Output* Output::first = nullptr;
-
-
 void Output::orphan_buffers() {
     for (auto& buf : buffers)
         buf->Orphan();
@@ -163,20 +146,10 @@ void Output::feeder() {
                 data = rd.get();
             } else {
                 if (input->Data()->Error()) {
-                    if (this != Output::first) {
-                        DataNotifiedOutputs.Notify(controller_output,
-                            [this, &input](Output* Out) { read_error.Send(
-                                *Out, controller_output_identifier,
-                                input->Label()->String().c_str()); },
-                            [this, &input](Output* Out) {
-                                if (Out == Output::first) read_error.Send(
-                                    *Out, nullptr,
-                                    input->Label()->String().c_str()); });
-                        // No idea what the command is. Run, feed, get?
-                        // Technically bad enough to warrant special handling
-                        // in controller. Identifier is that of run command.
-                        // Must add format once supported.
-                    }
+                    DataNotifiedOutputs.Notify([&input](Output* Out) {
+                        ntf_data_error.Send(*Out,
+                            input->Label()->String().c_str(), 0);
+                    });
                     failed = true;
                     break;
                 }
@@ -275,17 +248,14 @@ void Output::end(bool FromOutside) {
 }
 
 Output::Output(const Encoder& E, OutputChannel& Main, bool DataNotify,
-    bool ProcessNotify, Output* ControllerOutput, SimpleValue* Identifier)
-    : controller_output(ControllerOutput),
-    controller_output_identifier(Identifier), encoder(E), channel(Main),
-    channel_feeder(nullptr), eof(false), failed(false)
+    bool ProcessNotify)
+    : encoder(E), channel(Main), channel_feeder(nullptr),
+    eof(false), failed(false)
 {
     if (encoder.Format() == nullptr)
         eof = true;
     else {
         channel_feeder = new std::thread(&Output::feeder, this);
-        if (Output::first == nullptr)
-            Output::first = this;
         if (DataNotify)
             DataNotifiedOutputs.Add(this);
         if (ProcessNotify)

@@ -19,14 +19,14 @@ echo '[1,"storage-info"]'
 echo '[2,"delete","missing","label",null,4]'
 echo '[3,"delete","missing","label"]'
 echo '[4,"storage-info"]'
-) | $DL -d "$STORE" -i stdin JSON -o stdout JSON > $OUT
+) | $DL -d "$STORE" -i stdin JSON -o stdout JSON | oneline-keysort-json > $OUT
 
 cat > $EXP <<EOF
-[null,"data","stored",{"label":1}]
-[1,"storage-info","",{"label":{"serial":1,"JSON":4}}]
+[null,"data","stored","label",1]
+[1,"storage-info","",{"label":{"JSON":4,"serial":1}}]
 [2,"error","not-string",2,"delete","missing","label",null]
+[null,"data","deleted","label",1]
 [3,"delete","missing","missing"]
-[3,"delete","deleted","label"]
 [4,"storage-info","",{}]
 EOF
 

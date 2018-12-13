@@ -45,10 +45,11 @@ echo '["19","run","program","./invld"]'
 echo '["20","run","out","JSON","stdout","out","JSON","stdout"]'
 echo '["21","run","out","JSON","stderr","out","JSON","stderr"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed -e 's/"running",.*]$/"running","pid"]/' -e 's/invld",.*]$/invld",err]/' > "$OUT"
+sed 's/invld",.*]$/invld","err"]/' | replace-pid > "$OUT"
 
 cat > "$EXP" << EOF
 ["1","run","running","pid"]
+[null,"process","started","1","pid"]
 ["1","run","error","identifier","in-use"]
 ["1","end-feed","","1"]
 set
@@ -56,6 +57,7 @@ set
 ["1","run","exit",0]
 end
 ["1","run","finished"]
+[null,"process","ended","1","pid"]
 ["2","error","unknown","2","run","invalid"]
 ["3","error","missing","3","run","env"]
 ["4","error","not-string","4","run","env",1]
@@ -69,12 +71,12 @@ end
 ["12","error","unknown","12","run","out","JSON","invalid"]
 ["13","error","unknown","13","run","notify","invalid"]
 ["14","run","error","notify","no-input"]
-["15","run","error","change-directory","/invld",err]
+["15","run","error","change-directory","/invld","err"]
 ["16","run","error","output","duplicate","data"]
 ["17","run","error","in","missing"]
 ["18","run","error","out","missing"]
 subset
-["19","run","error","program","./invld",err]
+["19","run","error","program","./invld","err"]
 ["19","run","error","program","./invld"]
 end
 ["20","run","error","out","duplicate","stdout"]

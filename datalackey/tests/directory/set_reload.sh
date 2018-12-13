@@ -17,15 +17,15 @@ mkdir "$STORE"
 echo '{"label":1234}'
 nap
 echo '[1,"storage-info"]'
-) | $DL -d "$STORE" -i stdin JSON -o stdout JSON > $OUT
+) | $DL -d "$STORE" -i stdin JSON -o stdout JSON | oneline-keysort-json > $OUT
 
 echo '[2,"storage-info"]' |
-$DL -d "$STORE" -i stdin JSON -o stdout JSON >> $OUT
+$DL -d "$STORE" -i stdin JSON -o stdout JSON | oneline-keysort-json >> $OUT
 
 cat > $EXP <<EOF
-[null,"data","stored",{"label":1}]
-[1,"storage-info","",{"label":{"serial":1,"JSON":4}}]
-[2,"storage-info","",{"label":{"serial":1,"JSON":4}}]
+[null,"data","stored","label",1]
+[1,"storage-info","",{"label":{"JSON":4,"serial":1}}]
+[2,"storage-info","",{"label":{"JSON":4,"serial":1}}]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

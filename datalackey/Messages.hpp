@@ -83,21 +83,6 @@ public:
 };
 
 
-class Sth2PairMap : public Message {
-private:
-    const char* const sth;
-    const char* const sth2;
-
-public:
-    Sth2PairMap(const char* const Sth, const char* const Sth2);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id,
-        const std::vector<std::tuple<std::string, unsigned long long int>>& Map)
-            const;
-};
-
-
 class NullableSth2PairMap : public Message {
 private:
     const char* const sth;
@@ -108,38 +93,21 @@ public:
 
     void Report(Output& Out) const;
     void Send(Output& Out, const SimpleValue* Id,
-        const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
+        const std::vector<std::tuple<std::string, long long int>>& Map,
         bool ConvertZeroToNull = false) const;
 };
 
 
-class NullNtfSthList : public Message {
+class NullNtfSthArgLL : public Message {
 private:
     const char* const ntf;
     const char* const sth;
 
 public:
-    NullNtfSthList(const char* const Ntf, const char* const Sth);
+    NullNtfSthArgLL(const char* const Ntf, const char* const Sth);
 
     void Report(Output& Out) const;
-    void Send(Output& Out,
-        const std::vector<std::shared_ptr<SimpleValue>>& List) const;
-    void Send(Output& Out, const std::vector<std::string>& List) const;
-};
-
-
-class NullNtfSthPairMap : public Message {
-private:
-    const char* const ntf;
-    const char* const sth;
-
-public:
-    NullNtfSthPairMap(const char* const Ntf, const char* const Sth);
-
-    void Report(Output& Out) const;
-    void Send(Output& Out,
-        const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
-        bool ConvertZeroToNull = false) const;
+    void Send(Output& Out, const char* const Arg, long long int LL) const;
 };
 
 
@@ -191,9 +159,9 @@ extern ErrorCommandSthArg msg_error_command_unknown;
 extern ArgErrorArgumentSth msg_arg_error_argument_not_integer;
 extern ArgErrorArgumentSth msg_arg_error_argument_invalid;
 
-extern NullNtfSthList ntf_data_deleted;
-extern NullNtfSthPairMap ntf_data_renamed;
-extern NullableSth2PairMap ntf_data_stored;
+extern NullNtfSthArgLL ntf_data_deleted;
+extern NullNtfSthArgLL ntf_data_stored;
+extern NullNtfSthArgLL ntf_data_error;
 
 extern Sth2Opt3 msg_channel_reset;
 extern Sth2Opt3 msg_run_error_format;

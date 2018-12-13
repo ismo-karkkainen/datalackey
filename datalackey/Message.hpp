@@ -101,7 +101,7 @@ protected:
 
     void mapmessage(Output& Out, const SimpleValue* Id,
         const char *const Class, const char *const Kind,
-        const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
+        const std::vector<std::tuple<std::string, long long int>>& Map,
         bool ConvertZeroToNull = false)
         const;
 

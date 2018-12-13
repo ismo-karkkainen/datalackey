@@ -12,9 +12,7 @@
 #include <cassert>
 
 
-OutputCollection DataNotifiedOutputs;
-OutputCollection ProcessNotifiedOutputs;
-
+OutputCollection::OutputCollection() { }
 
 void OutputCollection::Add(Output* O) {
     std::lock_guard<std::mutex> lock(mutex);
@@ -26,24 +24,11 @@ void OutputCollection::Remove(Output* O) {
     collection.erase(O);
 }
 
-void OutputCollection::Notify(Output* MessageOutput,
-    std::function<void(Output*)> MessageToOutput,
-    std::function<void(Output*)> NotificationToOthers)
-{
-    std::lock_guard<std::mutex> lock(mutex);
-    for (Output* out : collection) {
-        if (out == MessageOutput)
-            MessageToOutput(out);
-        else
-            NotificationToOthers(out);
-    }
-}
-
-void OutputCollection::Notify(Output* SkipOutput,
-    std::function<void(Output*)> NotificationToOthers)
-{
+void OutputCollection::Notify(std::function<void(Output*)> Sender) {
     std::lock_guard<std::mutex> lock(mutex);
     for (Output* out : collection)
-        if (out != SkipOutput)
-            NotificationToOthers(out);
+        Sender(out);
 }
+
+OutputCollection DataNotifiedOutputs;
+OutputCollection ProcessNotifiedOutputs;

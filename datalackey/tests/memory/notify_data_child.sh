@@ -21,16 +21,23 @@ chmod a+x _script.sh
 (
 echo '["1","run","out","JSON","stdout","program","./_script.sh"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' > "$OUT"
+replace-pid > "$OUT"
 
 cat > "$EXP" << EOF
 ["1","run","running","pid"]
+[null,"process","started","1","pid"]
 ["1","run","input","closed"]
-["1","data","stored",{"item":1,"item2":2}]
+[null,"data","stored","item",1]
+[null,"data","stored","item2",2]
 ["1","run","exit",0]
-[null,"data","renamed",{"item":null,"item2":null,"name":3,"name2":4}]
-[null,"data","deleted","name","name2"]
+[null,"data","deleted","item",1]
+[null,"data","stored","name",3]
+[null,"data","deleted","item2",2]
+[null,"data","stored","name2",4]
+[null,"data","deleted","name",1]
+[null,"data","deleted","name2",1]
 ["1","run","finished"]
+[null,"process","ended","1","pid"]
 EOF
 
 compare-output "$OUT" "$EXP" && rm -f "$OUT" "$EXP" _script.sh

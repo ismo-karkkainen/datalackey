@@ -7,5 +7,28 @@
 //
 
 #include "Processes.hpp"
+#include "ProcessMessages.hpp"
+#include "OutputCollection.hpp"
+
 
 Processes::~Processes() { }
+
+void Processes::NotifyStart(const std::string& Id, pid_t PID, Output* Out) const
+{
+    if (Out == nullptr)
+        ProcessNotifiedOutputs.Notify([&Id,PID](Output* Out) {
+            pm_process_started.Send(*Out, Id, PID);
+        });
+    else
+        pm_process_started.Send(*Out, Id, PID);
+}
+
+void Processes::NotifyEnd(const std::string& Id, pid_t PID, Output* Out) const
+{
+    if (Out == nullptr)
+        ProcessNotifiedOutputs.Notify([&Id,PID](Output* Out) {
+            pm_process_ended.Send(*Out, Id, PID);
+        });
+    else
+        pm_process_ended.Send(*Out, Id, PID);
+}

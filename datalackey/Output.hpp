@@ -83,19 +83,6 @@ public:
 
 class Output {
 private:
-    class ReadError : public Message {
-    public:
-        void Report(Output& Out) const;
-        void Send(Output& Out, const SimpleValue* Id, const char* const Label)
-            const;
-    };
-
-    static Output* first;
-
-    // Not necessarily valid, use DataNotifiedOutputs or ProcessNotifiedOutputs.
-    Output* controller_output;
-    SimpleValue* controller_output_identifier;
-
     // Lock input_sets_mutex first, then this if you need both.
     mutable std::mutex mutex;
     const Encoder& encoder;
@@ -111,8 +98,6 @@ private:
 
     bool failed;
 
-    ReadError read_error;
-
     void orphan_buffers(); // Locks nothing. Lock as needed.
     void clear_buffers();
     void feeder();
@@ -120,12 +105,10 @@ private:
 
 public:
     Output(const Encoder& E, OutputChannel& Main,
-        bool DataNotify = true, bool ProcessNotify = true,
-        Output* ControllerOutput = nullptr, SimpleValue* Identifier = nullptr);
+        bool DataNotify = true, bool ProcessNotify = true);
     ~Output();
 
     void NoGlobalMessages();
-    Output* ControllerOutput() { return controller_output; }
 
     const char *const Format() const { return encoder.Format(); }
 

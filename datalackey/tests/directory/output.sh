@@ -26,14 +26,16 @@ sleep 1
 echo '[2,"storage-info"]'
 echo '[3,"get","mapped"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' > $OUT
+replace-pid > $OUT
 
 cat > $EXP <<EOF
 ["1","run","running","pid"]
+[null,"process","started","1","pid"]
 ["1","run","input","closed"]
-["1","data","stored",{"mapped":1}]
+[null,"data","stored","mapped",1]
 ["1","run","exit",0]
 ["1","run","finished"]
+[null,"process","ended","1","pid"]
 [2,"storage-info","",{"mapped":{"serial":1,"JSON":7}}]
 [3,"get","",{"mapped":"value"}]
 EOF

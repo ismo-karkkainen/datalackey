@@ -12,9 +12,10 @@
 #include "StringValue.hpp"
 #include "DataGroup.hpp"
 #include "ProcessInput.hpp"
+#include "Output.hpp"
 #include <memory>
 #include <vector>
-#include <tuple>
+#include <utility>
 
 
 // Base class for Storage classes.
@@ -24,22 +25,29 @@ public:
 
     virtual bool IsValid() const = 0;
 
-    virtual std::vector<std::tuple<std::string, unsigned long long int>> List()
+    virtual std::vector<std::pair<std::string, long long int>> List()
         const = 0;
 
     virtual bool Delete(const StringValue& L) = 0;
-    virtual unsigned long long int Rename(
-        const StringValue& Old, const StringValue& New) = 0;
-    virtual std::vector<std::tuple<std::string, unsigned long long int>> Add(
-        DataGroup& G) = 0;
+    virtual bool Rename(const StringValue& Old, const StringValue& New) = 0;
+    virtual void Add(DataGroup& G) = 0;
 
     virtual void Prepare(const char *const Format,
         std::vector<std::shared_ptr<ProcessInput>>& Inputs) = 0;
 
     // Return label, format, size in bytes, serial.
     virtual std::vector<std::tuple<
-        StringValue, std::string, size_t, unsigned long long int>> Info()
-            const = 0;
+        StringValue, std::string, size_t, long long int>> Info() const = 0;
+
+    // Methods that do not depend on what the storage is.
+
+    // Send notification to all or the given output.
+    void NotifyDelete(const std::string& Label, long long int Serial,
+        Output* Out = nullptr) const;
+    void NotifyStore(const std::string& Label, long long int Serial,
+        Output* Out = nullptr) const;
+    void NotifyError(const std::string& Label, long long int Serial,
+        Output* Out = nullptr) const;
 };
 
 

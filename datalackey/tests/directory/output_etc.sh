@@ -33,19 +33,21 @@ echo '[3,"get","mapped"]'
 echo '[4,"delete","pre-label2-post"]'
 echo '[5,"storage-info"]'
 ) | $DL -d "$STORE" -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' | oneline-keysort-json > $OUT
+replace-pid | oneline-keysort-json > $OUT
 
 cat > $EXP <<EOF
 ["1","run","running","pid"]
+[null,"process","started","1","pid"]
 ["1","run","input","closed"]
-["1","data","stored",{"mapped":1}]
-["1","data","stored",{"pre-label2-post":2}]
-["1","data","stored",{"pre-label3-post":3}]
+[null,"data","stored","mapped",1]
+[null,"data","stored","pre-label2-post",2]
+[null,"data","stored","pre-label3-post",3]
 ["1","run","exit",0]
 ["1","run","finished"]
+[null,"process","ended","1","pid"]
 [2,"storage-info","",{"mapped":{"JSON":7,"serial":1},"pre-label2-post":{"JSON":2,"serial":2},"pre-label3-post":{"JSON":2,"serial":3}}]
 [3,"get","",{"mapped":"value"}]
-[4,"delete","deleted","pre-label2-post"]
+[null,"data","deleted","pre-label2-post",2]
 [5,"storage-info","",{"mapped":{"JSON":7,"serial":1},"pre-label3-post":{"JSON":2,"serial":3}}]
 EOF
 

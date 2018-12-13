@@ -14,7 +14,6 @@
 DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)
     : Command(Name, Out), storage(S),
     msg_missing(Name, "missing"),
-    msg_deleted(Name, "deleted"),
     description(Name)
 { }
 
@@ -25,20 +24,13 @@ void DeleteCommand::Perform(
 {
     if (!description.Validate(out, Id, Arguments))
         return;
-    std::vector<std::shared_ptr<SimpleValue>> deleted, missing;
+    std::vector<std::shared_ptr<SimpleValue>> missing;
     for (auto arg : Arguments) {
         StringValue* label(dynamic_cast<StringValue*>(arg.get()));
         assert(label != nullptr);
-        if (storage.Delete(*label))
-            deleted.push_back(arg);
-        else
+        if (!storage.Delete(*label))
             missing.push_back(arg);
     }
     if (!missing.empty())
         msg_missing.Send(out, Id, missing);
-    if (!deleted.empty()) {
-        msg_deleted.Send(out, Id, deleted);
-        DataNotifiedOutputs.Notify(&out,
-            [deleted](Output* Out) { ntf_data_deleted.Send(*Out, deleted); });
-    }
 }

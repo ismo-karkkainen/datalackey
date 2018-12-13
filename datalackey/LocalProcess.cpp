@@ -127,7 +127,7 @@ void LocalProcess::real_runner() {
         child_input = new NullOutput();
     }
     child_feed = new Output(*child_input_enc, *child_input,
-        notify_data, notify_process, &out, id);
+        notify_data, notify_process);
     // Create output handling objects for each output.
     child_output.reserve(outputs_info.size() < 2 ? 2 : outputs_info.size());
     bool used_std[2] = { false, false };
@@ -240,9 +240,17 @@ void LocalProcess::real_runner() {
         exit(54); // Something else.
     }
     pm_run_running.Send(out, *id, pid); // Not necessarily notified.
-    ProcessNotifiedOutputs.Notify(&out,
-        [this](Output* Out) {
-            if (Out != child_feed) pm_process_started.Send(*Out, *id, pid); });
+    if (notify_data) {
+        std::vector<std::pair<std::string, long long int>> ls = storage.List();
+        for (auto& iter : ls)
+            storage.NotifyStore(iter.first, iter.second, child_feed);
+    }
+    if (notify_process) {
+        std::vector<std::pair<std::string,pid_t>> ip = owner->List();
+        for (auto& iter : ip)
+            owner->NotifyStart(iter.first, iter.second, child_feed);
+    }
+    owner->NotifyStart(id->String(), pid);
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
     bool feed_open = !child_feed->Failed();
@@ -297,8 +305,7 @@ void LocalProcess::runner() {
         pm_run_terminated.Send(out, *id); // Not necessarily notified.
     else
         pm_run_finished.Send(out, *id); // Not necessarily notified.
-    ProcessNotifiedOutputs.Notify(&out,
-        [this](Output* Out) { pm_process_ended.Send(*Out, *id, pid); });
+    owner->NotifyEnd(id->String(), pid);
     pid = 0;
     owner->HasFinished(*id);
 }

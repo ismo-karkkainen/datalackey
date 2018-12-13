@@ -18,8 +18,8 @@ void NullNtfSthIdInt::Report(Output& Out) const {
     Send(Out, Message::id, 0);
 }
 
-void NullNtfSthIdInt::Send(Output& Out, const SimpleValue& Id, int Int) const {
-    message(Out, ntf, sth, Id, Int);
+void NullNtfSthIdInt::Send(Output& Out, const std::string& Id, int Int) const {
+    msg(Out, nullptr, ntf, sth, Id.c_str(), nullptr, nullptr, nullptr, &Int);
 }
 
 

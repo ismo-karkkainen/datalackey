@@ -55,15 +55,8 @@ void StorageDataSinkJSON::end_item() {
 }
 
 void StorageDataSinkJSON::end_group() {
-    if (open_dicts == 0 && group != nullptr && part != BadInput) {
-        std::vector<std::tuple<std::string, unsigned long long int>>
-            label_serial = storage.Add(*group);
-        DataNotifiedOutputs.Notify(notifications.ControllerOutput(),
-            [this, &label_serial](Output* Out) {
-                ntf_data_stored.Send(*Out, identifier, label_serial); },
-            [&label_serial](Output* Out) {
-                ntf_data_stored.Send(*Out, nullptr, label_serial); });
-    }
+    if (open_dicts == 0 && group != nullptr && part != BadInput)
+        storage.Add(*group);
     delete group;
     group = nullptr;
 }

@@ -29,7 +29,7 @@ public:
     NullNtfSthIdInt(const char* const Ntf, const char* const Sth);
 
     void Report(Output& Out) const;
-    void Send(Output& Out, const SimpleValue& Id, int Int) const;
+    void Send(Output& Out, const std::string& Id, int Int) const;
 };
 
 extern NullNtfSthIdInt pm_process_started;

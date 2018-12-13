@@ -15,17 +15,15 @@ echo '[1,"storage-info"]'
 echo '[2,"delete","missing","label",null,4]'
 echo '[3,"delete","missing","label",4]'
 echo '[4,"delete","missing","label"]'
-echo '[5,"list"]'
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
 
 cat > $EXP <<EOF
-[null,"data","stored",{"label":1}]
+[null,"data","stored","label",1]
 [1,"storage-info","",{"label":{"serial":1,"JSON":4}}]
 [2,"error","not-string",2,"delete","missing","label",null]
 [3,"error","not-string",3,"delete","missing","label",4]
+[null,"data","deleted","label",1]
 [4,"delete","missing","missing"]
-[4,"delete","deleted","label"]
-[5,"list","",{}]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP

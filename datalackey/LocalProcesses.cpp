@@ -55,13 +55,13 @@ bool LocalProcesses::Finished() const {
     return processes.empty();
 }
 
-std::vector<std::tuple<SimpleValue*,pid_t>> LocalProcesses::List() const {
-    std::vector<std::tuple<SimpleValue*,pid_t>> results;
+std::vector<std::pair<std::string,pid_t>> LocalProcesses::List() const {
+    std::vector<std::pair<std::string,pid_t>> results;
     std::lock_guard<std::mutex> lock(processes_mutex);
     for (auto proc : processes) {
         if (!proc.second->Finished())
             results.push_back(
-                std::make_tuple(proc.first->Clone(), proc.second->PID()));
+                std::make_pair(proc.first->String(), proc.second->PID()));
     }
     return results;
 }
@@ -342,7 +342,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         input, outputs, renamer.release());
 
     // Checks if feed inputs are valid.
-    auto inputs = feed(Out, Id, feed_params, p->EncoderClone(), "run");
+    auto inputs = feed(Out, Id, feed_params, p->EncoderClone(), false);
 
     if (!inputs.first || !p->Run()) {
         // Error has been reported.
@@ -371,7 +371,7 @@ void LocalProcesses::Feed(Output& Out, const SimpleValue& Id,
         return;
     }
     auto inputs =
-        feed(Out, Id, Parameters, proc->second->EncoderClone(), "feed");
+        feed(Out, Id, Parameters, proc->second->EncoderClone(), true);
     if (inputs.first)
         proc->second->Feed(inputs.second);
 }

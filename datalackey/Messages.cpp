@@ -8,6 +8,7 @@
 
 #include "Messages.hpp"
 #include "StringValue.hpp"
+#include "ReportConstants.hpp"
 #include <vector>
 #include <memory>
 #include <cassert>
@@ -102,83 +103,38 @@ void NullableSth2List::Send(Output& Out, const SimpleValue* Id,
 }
 
 
-Sth2PairMap::Sth2PairMap(const char* const Sth, const char* const Sth2)
-    : sth(Sth), sth2(Sth2)
-{ }
-
-void Sth2PairMap::Report(Output& Out) const {
-    std::vector<std::tuple<std::string, unsigned long long int>> map;
-    map.push_back(std::make_tuple(Message::id.String(), 0ULL));
-    Send(Out, Message::id, map);
-}
-
-void Sth2PairMap::Send(Output& Out, const SimpleValue& Id,
-    const std::vector<std::tuple<std::string, unsigned long long int>>& Map)
-    const
-{
-    mapmessage(Out, &Id, sth, sth2, Map);
-}
-
-
 NullableSth2PairMap::NullableSth2PairMap(
     const char* const Sth, const char* const Sth2)
     : sth(Sth), sth2(Sth2)
 { }
 
 void NullableSth2PairMap::Report(Output& Out) const {
-    std::vector<std::tuple<std::string, unsigned long long int>> map;
+    std::vector<std::tuple<std::string, long long int>> map;
     map.push_back(std::make_tuple(Message::id.String(), 0ULL));
     Send(Out, &Message::id, map);
     Send(Out, nullptr, map);
 }
 
 void NullableSth2PairMap::Send(Output& Out, const SimpleValue* Id,
-    const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
+    const std::vector<std::tuple<std::string, long long int>>& Map,
     bool ConvertZeroToNull) const
 {
     mapmessage(Out, Id, sth, sth2, Map, ConvertZeroToNull);
 }
 
 
-NullNtfSthList::NullNtfSthList(const char* const Ntf, const char* const Sth)
+NullNtfSthArgLL::NullNtfSthArgLL(const char* const Ntf, const char* const Sth)
     : ntf(Ntf), sth(Sth)
 { }
 
-void NullNtfSthList::Report(Output& Out) const {
-    std::vector<std::shared_ptr<SimpleValue>> dots;
-    dots.push_back(Message::dots);
-    Send(Out, dots);
+void NullNtfSthArgLL::Report(Output& Out) const {
+    Send(Out, report::string.c_str(), 0LL);
 }
 
-void NullNtfSthList::Send(Output& Out,
-    const std::vector<std::shared_ptr<SimpleValue>>& List) const
+void NullNtfSthArgLL::Send(Output& Out,
+    const char* const Arg, long long int LL) const
 {
-    listmessage(Out, ntf, sth, List);
-}
-
-void NullNtfSthList::Send(Output& Out, const std::vector<std::string>& List)
-    const
-{
-    listmessage(Out, ntf, sth, List);
-}
-
-
-NullNtfSthPairMap::NullNtfSthPairMap(
-    const char* const Ntf, const char* const Sth)
-    : ntf(Ntf), sth(Sth)
-{ }
-
-void NullNtfSthPairMap::Report(Output& Out) const {
-    std::vector<std::tuple<std::string, unsigned long long int>> map;
-    map.push_back(std::make_tuple(Message::id.String(), 0ULL));
-    Send(Out, map);
-}
-
-void NullNtfSthPairMap::Send(Output& Out,
-    const std::vector<std::tuple<std::string, unsigned long long int>>& Map,
-    bool ConvertZeroToNull) const
-{
-    mapmessage(Out, nullptr, ntf, sth, Map, ConvertZeroToNull);
+    msg(Out, nullptr, ntf, sth, Arg, nullptr, nullptr, nullptr, nullptr, &LL);
 }
 
 
@@ -221,9 +177,9 @@ ErrorCommandSthArg msg_error_command_unknown("unknown");
 ArgErrorArgumentSth msg_arg_error_argument_not_integer("not-integer");
 ArgErrorArgumentSth msg_arg_error_argument_invalid("invalid");
 
-NullNtfSthList ntf_data_deleted("data", "deleted");;
-NullNtfSthPairMap ntf_data_renamed("data", "renamed");
-NullableSth2PairMap ntf_data_stored("data", "stored");
+NullNtfSthArgLL ntf_data_deleted("data", "deleted");
+NullNtfSthArgLL ntf_data_stored("data", "stored");
+NullNtfSthArgLL ntf_data_error("data", "error");
 
 Sth2Opt3 msg_channel_reset("channel", "reset");
 Sth2Opt3 msg_run_error_format("run", "error", "format");

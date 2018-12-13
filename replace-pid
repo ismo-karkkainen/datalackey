@@ -1,0 +1,16 @@
+#!/usr/bin/python
+
+import sys
+import json
+
+for line in sys.stdin.readlines():
+    try:
+        j = json.loads(line)
+        if len(j) > 3:
+            if j[1] == "run" and j[2] == "running":
+                j[-1] = "pid"
+            elif j[0] == None and j[1] == "process":
+                j[-1] = "pid"
+        print(json.dumps(j, separators=(',',':')))
+    except ValueError, e:
+        sys.exit("Not JSON: " + line) # Could print line but JSON is expected.

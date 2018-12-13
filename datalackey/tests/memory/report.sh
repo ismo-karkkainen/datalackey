@@ -18,8 +18,6 @@ cat > $EXP <<EOF
 ["id","?","error","argument","invalid"]
 ["id","?","error","argument","not-integer"]
 ["id","channel","reset"]
-["id","data","stored",{"id":0}]
-["id","delete","deleted","..."]
 ["id","delete","missing","..."]
 ["id","end-feed","","..."]
 ["id","end-feed","missing","..."]
@@ -42,12 +40,8 @@ cat > $EXP <<EOF
 ["id","get","","mapping label-to-value"]
 ["id","get","failed","..."]
 ["id","get","missing","..."]
-["id","list","",{"id":0}]
 ["id","no-op",""]
-["id","processes","",{"id":0}]
-["id","read","error","?"]
 ["id","rename","missing","..."]
-["id","rename","renamed",{"id":0}]
 ["id","run","continued"]
 ["id","run","error","?","argument","unknown"]
 ["id","run","error","?","duplicate","?"]
@@ -81,22 +75,19 @@ cat > $EXP <<EOF
 ["id","run","terminated"]
 ["id","storage-info","","mapping label-to-mapping-format-to-size"]
 ["id","terminate","missing","..."]
-["id","terminate","terminated","..."]
 ["id","version","","mapping"]
-[null,"data","deleted","..."]
-[null,"data","renamed",{"id":0}]
-[null,"data","stored",{"id":0}]
+[null,"data","deleted","string",0]
+[null,"data","error","string",0]
+[null,"data","stored","string",0]
 [null,"error","format"]
 [null,"error","identifier","invalid"]
 [null,"error","identifier","missing"]
 [null,"process","ended","id",0]
 [null,"process","started","id",0]
-[null,"read","error","?"]
-[null,"rename","renamed",{"id":0}]
 EOF
 else
 cat > $EXP <<EOF
-{"delete":["id","delete","string,..."],"end-feed":["id","end-feed","string,..."],"feed":{"<direct>":["direct","value-string|integer|null","target-name"],"<feed-subcommand>":["<input>","<direct>"],"<feed-subcommands>":[["<feed-subcommand>","<feed-subcommands>"],["<feed-subcommand>"]],"<feed>":["id","feed","string-id","<feed-subcommands>"],"<input>":["input","source-label","target-name"]},"get":["id","get","string,..."],"list":["id","list"],"no-op":["id","no-op"],"processes":["id","processes"],"rename":["id","rename","string,string,..."],"run":{"<change-directory>":["change-directory","directory"],"<direct>":["direct","value-string|integer|null","target-name"],"<end-feed>":["end-feed"],"<env-clear>":["env-clear"],"<env>":["env","variable-name","value-string|integer|null"],"<in>":["in","JSON","stdin"],"<input>":["input","source-label","target-name"],"<notify>":["notify","data|process"],"<out>":["out","JSON|bytes","stdout|stderr"],"<output-postfix>":["output-postfix","unmapped-result-name-postfix"],"<output-prefix>":["output-prefix","prefix-for-unmapped-result-name"],"<output>":["output","result-name","label|null"],"<program>":["program","executable"],"<run-subcommand>":["<input>","<direct>","<env>","<env-clear>","<output>","<output-prefix>","<output-postfix>","<in>","<out>","<notify>","<end-feed>","<change-directory>","<program>"],"<run-subcommands>":[["<run-subcommand>","<run-subcommands>"],["<run-subcommand>"]],"<run>":["id","run","<run-subcommands>"]},"storage-info":["id","storage-info"],"terminate":["id","terminate","string,..."],"version":["id","version"]}
+{"delete":["id","delete","string,..."],"end-feed":["id","end-feed","string,..."],"feed":{"<direct>":["direct","value-string|integer|null","target-name"],"<feed-subcommand>":["<input>","<direct>"],"<feed-subcommands>":[["<feed-subcommand>","<feed-subcommands>"],["<feed-subcommand>"]],"<feed>":["id","feed","string-id","<feed-subcommands>"],"<input>":["input","source-label","target-name"]},"get":["id","get","string,..."],"no-op":["id","no-op"],"rename":["id","rename","string,string,..."],"run":{"<change-directory>":["change-directory","directory"],"<direct>":["direct","value-string|integer|null","target-name"],"<end-feed>":["end-feed"],"<env-clear>":["env-clear"],"<env>":["env","variable-name","value-string|integer|null"],"<in>":["in","JSON","stdin"],"<input>":["input","source-label","target-name"],"<notify>":["notify","data|process"],"<out>":["out","JSON|bytes","stdout|stderr"],"<output-postfix>":["output-postfix","unmapped-result-name-postfix"],"<output-prefix>":["output-prefix","prefix-for-unmapped-result-name"],"<output>":["output","result-name","label|null"],"<program>":["program","executable"],"<run-subcommand>":["<input>","<direct>","<env>","<env-clear>","<output>","<output-prefix>","<output-postfix>","<in>","<out>","<notify>","<end-feed>","<change-directory>","<program>"],"<run-subcommands>":[["<run-subcommand>","<run-subcommands>"],["<run-subcommand>"]],"<run>":["id","run","<run-subcommands>"]},"storage-info":["id","storage-info"],"terminate":["id","terminate","string,..."],"version":["id","version"]}
 EOF
 fi
 

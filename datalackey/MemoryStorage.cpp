@@ -15,7 +15,7 @@
 
 MemoryStorage::Value::Value(
     const std::string& Format, std::shared_ptr<DataOwner> Data,
-    unsigned long long int Serial)
+    long long int Serial)
     : serial(Serial)
 {
     values.push_back(std::pair<std::string,std::shared_ptr<DataOwner>>(
@@ -82,7 +82,7 @@ std::shared_ptr<DataReader> MemoryStorage::Value::Find(
 }
 
 void MemoryStorage::Value::Own(bool OwnData) {
-    for (auto iter : values) {
+    for (auto& iter : values) {
         iter.second->Own(OwnData);
     }
 }
@@ -108,44 +108,48 @@ bool MemoryStorage::IsValid() const {
     return true;
 }
 
-std::vector<std::tuple<std::string, unsigned long long int>>
-    MemoryStorage::List() const
-{
-    std::vector<std::tuple<std::string, unsigned long long int>> results;
+std::vector<std::pair<std::string, long long int>> MemoryStorage::List() const {
+    std::vector<std::pair<std::string, long long int>> results;
     std::lock_guard<std::mutex> lock(label2data_mutex);
     results.reserve(label2data.size());
     for (const auto& iter : label2data)
-        results.push_back(std::tuple<std::string, unsigned long long int>(
+        results.push_back(std::pair<std::string, long long int>(
             iter.first.String(), iter.second->Serial()));
     return results;
 }
 
 bool MemoryStorage::Delete(const StringValue& L) {
-    std::lock_guard<std::mutex> lock(label2data_mutex);
-    return del(L);
+    std::unique_lock<std::mutex> lock(label2data_mutex);
+    long long int item_serial = del(L);
+    lock.unlock();
+    if (item_serial) {
+        NotifyDelete(L.String(), item_serial);
+        return true;
+    }
+    return false;
 }
 
-unsigned long long int MemoryStorage::Rename(
-    const StringValue& Old, const StringValue& New)
-{
-    std::lock_guard<std::mutex> lock(label2data_mutex);
+bool MemoryStorage::Rename(const StringValue& Old, const StringValue& New) {
+    std::unique_lock<std::mutex> lock(label2data_mutex);
     auto old = label2data.find(Old);
     if (old == label2data.end())
-        return 0;
+        return false;
     std::shared_ptr<Value> v = old->second;
     label2data.erase(old);
     del(New);
+    long long int old_serial = v->Serial();
     v->ReSerial(serial++);
     label2data[New] = v;
-    return v->Serial();
+    lock.unlock();
+    NotifyDelete(Old.String(), old_serial);
+    NotifyStore(New.String(), v->Serial());
+    return true;
 }
 
-std::vector<std::tuple<std::string, unsigned long long int>> MemoryStorage::Add(
-    DataGroup& G)
-{
-    std::vector<std::tuple<std::string, unsigned long long int>> label_serial;
-    label_serial.reserve(G.Size());
-    std::lock_guard<std::mutex> lock(label2data_mutex);
+void MemoryStorage::Add(DataGroup& G) {
+    std::vector<std::pair<std::string, long long int>> messages;
+    messages.reserve(G.Size());
+    std::unique_lock<std::mutex> lock(label2data_mutex);
     while (true) {
         auto label_data = G.Get();
         if (label_data.second == nullptr)
@@ -155,10 +159,12 @@ std::vector<std::tuple<std::string, unsigned long long int>> MemoryStorage::Add(
         std::shared_ptr<Value> v(
             new MemoryStorage::Value(G.Format(), label_data.second, serial++));
         label2data[label_data.first] = v;
-        label_serial.push_back(std::make_tuple(
+        messages.push_back(std::pair<std::string, long long int>(
             label_data.first.String(), v->Serial()));
     }
-    return label_serial;
+    lock.unlock();
+    for (auto& iter : messages)
+        NotifyStore(iter.first, iter.second);
 }
 
 void MemoryStorage::Prepare(const char *const Format,
@@ -166,7 +172,7 @@ void MemoryStorage::Prepare(const char *const Format,
 {
     std::string fmt(Format);
     std::lock_guard<std::mutex> lock(label2data_mutex);
-    for (auto iter : Inputs) {
+    for (auto& iter : Inputs) {
         if (iter->Label() == nullptr)
             continue; // This one has direct value and is ok already.
         auto source = label2data.find(*(iter->Label()));
@@ -177,13 +183,11 @@ void MemoryStorage::Prepare(const char *const Format,
     }
 }
 
-std::vector<std::tuple<
-    StringValue, std::string, size_t, unsigned long long int>>
-    MemoryStorage::Info()
-    const
+std::vector<std::tuple<StringValue, std::string, size_t, long long int>>
+    MemoryStorage::Info() const
 {
     std::vector<std::tuple<
-        StringValue, std::string, size_t, unsigned long long int>> results;
+        StringValue, std::string, size_t, long long int>> results;
     std::lock_guard<std::mutex> lock(label2data_mutex);
     for (auto& iter : label2data) {
         std::lock_guard<std::mutex> value_lock(iter.second->Mutex());

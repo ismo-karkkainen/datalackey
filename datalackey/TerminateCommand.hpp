@@ -18,7 +18,7 @@
 class TerminateCommand : public Command {
 private:
     Processes& processes;
-    Sth2Opt2List msg_missing, msg_terminated;
+    Sth2Opt2List msg_missing;
     StringListDescription description;
 
 public:

@@ -7,12 +7,10 @@
 //
 
 #include "Factories.hpp"
-#include "ListCommand.hpp"
 #include "GetCommand.hpp"
 #include "DeleteCommand.hpp"
 #include "RenameCommand.hpp"
 #include "VersionCommand.hpp"
-#include "ProcessesCommand.hpp"
 #include "StorageInfoCommand.hpp"
 #include "RunCommand.hpp"
 #include "FeedCommand.hpp"
@@ -34,7 +32,6 @@ MessageHandler* MakeMessageHandler(const char *const Format,
 {
     if (Format == nullptr || !strcmp(Format, "JSON")) {
         CommandHandler* ch = new CommandHandlerJSON(Out);
-        ch->AddCommand(new ListCommand("list", Out, S));
         ch->AddCommand(new StorageInfoCommand("storage-info", Out, S));
         ch->AddCommand(new GetCommand("get", Out, S));
         ch->AddCommand(new DeleteCommand("delete", Out, S));
@@ -45,7 +42,6 @@ MessageHandler* MakeMessageHandler(const char *const Format,
         ch->AddCommand(new FeedCommand("feed", Out, P));
         ch->AddCommand(new EndFeedCommand("end-feed", Out, P));
         ch->AddCommand(new TerminateCommand("terminate", Out, P));
-        ch->AddCommand(new ProcessesCommand("processes", Out, P));
         return ch;
     }
     if (!strcmp(Format, "bytes")) {

@@ -12,7 +12,7 @@
 #include "Output.hpp"
 #include "SimpleValue.hpp"
 #include <vector>
-#include <tuple>
+#include <utility>
 #include <string>
 #include <unistd.h>
 
@@ -25,8 +25,8 @@ public:
     virtual bool Finished() const = 0;
 
     // Return a list of identifier to process id (or similar) mappings.
-    // Process ids are only for convenence reporting to user.
-    virtual std::vector<std::tuple<SimpleValue*,pid_t>> List() const = 0;
+    // Process ids are only for convenience reporting to user.
+    virtual std::vector<std::pair<std::string,pid_t>> List() const = 0;
 
     // Terminate process. Return true if process exists.
     virtual bool Terminate(const SimpleValue& Id) = 0;
@@ -43,6 +43,12 @@ public:
 
     // Running process reports it has finished using this.
     virtual void HasFinished(const SimpleValue& Id) = 0;
+
+    // Methods for sending notifications.
+    void NotifyStart(const std::string& Id, pid_t PID,
+        Output* Out = nullptr) const;
+    void NotifyEnd(const std::string& Id, pid_t PID,
+        Output* Out = nullptr) const;
 };
 
 

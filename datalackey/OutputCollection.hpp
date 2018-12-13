@@ -28,12 +28,12 @@ private:
     void Add(Output* O);
     void Remove(Output* O);
 
+    OutputCollection(const OutputCollection&) = delete;
+    OutputCollection& operator=(const OutputCollection&) = delete;
+
 public:
-    void Notify(Output* MessageOutput,
-        std::function<void(Output*)> MessageToOutput,
-        std::function<void(Output*)> NotificationToOthers);
-    void Notify(Output* SkipOutput,
-        std::function<void(Output*)> NotificationToOthers);
+    OutputCollection();
+    void Notify(std::function<void(Output*)> Sender);
 };
 
 extern OutputCollection DataNotifiedOutputs;

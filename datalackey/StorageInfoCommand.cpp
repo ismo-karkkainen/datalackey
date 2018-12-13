@@ -38,14 +38,14 @@ void StorageInfoCommand::Perform(
     StringValue label("");
     std::string format;
     size_t size;
-    unsigned long long int serial;
+    long long int serial;
     if (!results.empty()) {
         std::tie(label, format, size, serial) = results[0];
         *writer << ValueRef<std::string>(label) << Dictionary
             << ValueRef<std::string>("serial")
-            << NumberRef<unsigned long long int>(serial)
+            << NumberRef<long long int>(serial)
             << ValueRef<std::string>(format) << NumberRef<size_t>(size);
-        unsigned long long int previous(serial);
+        long long int previous(serial);
         for (size_t k = 1; k < results.size(); ++k) {
             std::tie(label, format, size, serial) = results[k];
             if (previous != serial) {
@@ -53,7 +53,7 @@ void StorageInfoCommand::Perform(
                 *writer << End
                     << ValueRef<std::string>(label) << Dictionary
                     << ValueRef<std::string>("serial")
-                    << NumberRef<unsigned long long int>(serial);
+                    << NumberRef<long long int>(serial);
                 previous = serial;
             }
             *writer << ValueRef<std::string>(format) << NumberRef<size_t>(size);

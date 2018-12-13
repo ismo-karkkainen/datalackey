@@ -19,7 +19,7 @@
 class DeleteCommand : public Command {
 private:
     Storage& storage;
-    Sth2Opt2List msg_missing, msg_deleted;
+    Sth2Opt2List msg_missing;
     StringListDescription description;
 
 public:

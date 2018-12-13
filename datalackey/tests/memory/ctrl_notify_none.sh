@@ -27,19 +27,20 @@ echo '["1","run","out","JSON","stdout","end-feed","program","./_controller.sh"]'
 sleep 1
 echo '[2,"get","label"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' |
-sed 's/,"a",.*]$/,"a","pid"]/' > $OUT
+replace-pid > $OUT
 
 cat > $EXP <<EOF
 ["1","run","running","pid"]
+[null,"process","started","1","pid"]
 ["1","run","input","closed"]
 [null,"process","started","a","pid"]
 set
 [null,"process","ended","a","pid"]
-[null,"data","stored",{"label":1}]
+[null,"data","stored","label",1]
 end
 ["1","run","exit",0]
 ["1","run","finished"]
+[null,"process","ended","1","pid"]
 [2,"get","",{"label":"value"}]
 EOF
 

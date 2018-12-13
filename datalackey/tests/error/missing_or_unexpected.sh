@@ -24,12 +24,6 @@ feed)
 get)
     echo '["id","get"]'
     ;;
-list)
-    echo '["id","list","unexpected"]'
-    ;;
-processes)
-    echo '["id","processes","unexpected"]'
-    ;;
 rename)
     echo '["id","rename"]'
     echo '["id","rename","pairless"]'
@@ -65,12 +59,6 @@ feed)
     ;;
 get)
     echo '["id","error","missing","id","get"]'
-    ;;
-list)
-    echo '["id","error","unexpected","id","list","unexpected"]'
-    ;;
-processes)
-    echo '["id","error","unexpected","id","processes","unexpected"]'
     ;;
 rename)
     echo '["id","error","missing","id","rename"]'

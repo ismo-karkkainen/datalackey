@@ -24,15 +24,17 @@ kill -s SIGSTOP $(cat $PID)
 sleep 1
 kill -s SIGCONT $(cat $PID)
 ) | $DL -m -i stdin JSON -o stdout JSON |
-sed 's/"running",.*]$/"running","pid"]/' > $OUT
+replace-pid > $OUT
 
 cat > $EXP <<EOF
 ["1","run","running","pid"]
+[null,"process","started","1","pid"]
 ["1","run","input","closed"]
 ["1","run","stopped",17]
 ["1","run","continued"]
 ["1","run","exit",0]
 ["1","run","finished"]
+[null,"process","ended","1","pid"]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh $PID
