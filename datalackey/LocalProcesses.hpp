@@ -45,7 +45,7 @@ public:
     bool CleanFinished();
     bool Finished() const;
 
-    std::vector<std::pair<std::string,pid_t>> List() const;
+    std::vector<std::pair<std::unique_ptr<SimpleValue>,pid_t>> List() const;
     bool Terminate(const SimpleValue& Id);
     void Run(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Parameters);

@@ -55,13 +55,16 @@ bool LocalProcesses::Finished() const {
     return processes.empty();
 }
 
-std::vector<std::pair<std::string,pid_t>> LocalProcesses::List() const {
-    std::vector<std::pair<std::string,pid_t>> results;
+std::vector<std::pair<std::unique_ptr<SimpleValue>,pid_t>>
+    LocalProcesses::List() const
+{
+    std::vector<std::pair<std::unique_ptr<SimpleValue>,pid_t>> results;
     std::lock_guard<std::mutex> lock(processes_mutex);
     for (auto proc : processes) {
         if (!proc.second->Finished())
-            results.push_back(
-                std::make_pair(proc.first->String(), proc.second->PID()));
+            results.push_back(std::make_pair(
+                std::unique_ptr<SimpleValue>(proc.first->Clone()),
+                proc.second->PID()));
     }
     return results;
 }
@@ -132,10 +135,6 @@ std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
 void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Parameters)
 {
-    if (!IsStringValue(&Id)) {
-        pm_run_error_identifier_not_string.Send(Out, Id);
-        return;
-    }
     std::unique_lock<std::mutex> lock(processes_mutex);
     // early check on identifier availability.
     SimpleValue* sv = Id.Clone();

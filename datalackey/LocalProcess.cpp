@@ -246,11 +246,12 @@ void LocalProcess::real_runner() {
             storage.NotifyStore(iter.first, iter.second, child_feed);
     }
     if (notify_process) {
-        std::vector<std::pair<std::string,pid_t>> ip = owner->List();
+        std::vector<std::pair<std::unique_ptr<SimpleValue>,pid_t>> ip =
+            owner->List();
         for (auto& iter : ip)
-            owner->NotifyStart(iter.first, iter.second, child_feed);
+            owner->NotifyStart(*iter.first, iter.second, child_feed);
     }
-    owner->NotifyStart(id->String(), pid);
+    owner->NotifyStart(*id, pid);
     ChildState child_state = Running;
     bool scanning = !child_output.empty();
     bool feed_open = !child_feed->Failed();
@@ -305,7 +306,7 @@ void LocalProcess::runner() {
         pm_run_terminated.Send(out, *id); // Not necessarily notified.
     else
         pm_run_finished.Send(out, *id); // Not necessarily notified.
-    owner->NotifyEnd(id->String(), pid);
+    owner->NotifyEnd(*id, pid);
     pid = 0;
     owner->HasFinished(*id);
 }

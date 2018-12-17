@@ -13,7 +13,7 @@
 
 Processes::~Processes() { }
 
-void Processes::NotifyStart(const std::string& Id, pid_t PID, Output* Out) const
+void Processes::NotifyStart(const SimpleValue& Id, pid_t PID, Output* Out) const
 {
     if (Out == nullptr)
         ProcessNotifiedOutputs.Notify([&Id,PID](Output* Out) {
@@ -23,7 +23,7 @@ void Processes::NotifyStart(const std::string& Id, pid_t PID, Output* Out) const
         pm_process_started.Send(*Out, Id, PID);
 }
 
-void Processes::NotifyEnd(const std::string& Id, pid_t PID, Output* Out) const
+void Processes::NotifyEnd(const SimpleValue& Id, pid_t PID, Output* Out) const
 {
     if (Out == nullptr)
         ProcessNotifiedOutputs.Notify([&Id,PID](Output* Out) {

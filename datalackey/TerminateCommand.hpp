@@ -19,7 +19,7 @@ class TerminateCommand : public Command {
 private:
     Processes& processes;
     Sth2Opt2List msg_missing;
-    StringListDescription description;
+    ListDescription description;
 
 public:
     TerminateCommand(const char *const Name, Output& Out, Processes& P);

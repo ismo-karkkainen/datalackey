@@ -277,6 +277,8 @@ add_exe(memory input_eof.sh)
 new_test(input_eof input_eof.sh)
 add_exe(memory notify_data_child.sh)
 new_test(notify_data_child notify_data_child.sh)
+add_exe(memory null_process_id.sh)
+new_test(null_id_child null_process_id.sh)
 
 # Directory storage tests
 #

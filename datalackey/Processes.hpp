@@ -13,7 +13,7 @@
 #include "SimpleValue.hpp"
 #include <vector>
 #include <utility>
-#include <string>
+#include <memory>
 #include <unistd.h>
 
 
@@ -26,7 +26,8 @@ public:
 
     // Return a list of identifier to process id (or similar) mappings.
     // Process ids are only for convenience reporting to user.
-    virtual std::vector<std::pair<std::string,pid_t>> List() const = 0;
+    virtual std::vector<std::pair<std::unique_ptr<SimpleValue>,pid_t>>
+        List() const = 0;
 
     // Terminate process. Return true if process exists.
     virtual bool Terminate(const SimpleValue& Id) = 0;
@@ -45,9 +46,9 @@ public:
     virtual void HasFinished(const SimpleValue& Id) = 0;
 
     // Methods for sending notifications.
-    void NotifyStart(const std::string& Id, pid_t PID,
+    void NotifyStart(const SimpleValue& Id, pid_t PID,
         Output* Out = nullptr) const;
-    void NotifyEnd(const std::string& Id, pid_t PID,
+    void NotifyEnd(const SimpleValue& Id, pid_t PID,
         Output* Out = nullptr) const;
 };
 
