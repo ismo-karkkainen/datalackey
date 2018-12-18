@@ -60,3 +60,12 @@ CommandDescription::CommandDescription(const char* const Name)
 }
 
 CommandDescription::~CommandDescription() { }
+
+bool CommandDescription::Validate(Output& Out, const SimpleValue& Id,
+    std::vector<std::shared_ptr<SimpleValue>>& Arguments)
+{
+    if (validate(Out, Id, Arguments))
+        return true;
+    msg_done.Send(Out, Id);
+    return false;
+}

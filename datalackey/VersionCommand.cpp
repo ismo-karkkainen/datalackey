@@ -40,4 +40,6 @@ void VersionCommand::Perform(
         << Dictionary;
     CommandReporter::Get().Report(writer.get());
     *writer << End << End << End; // Dictionary, dictionary, and array.
+    writer.reset();
+    msg_done.Send(out, Id);
 }

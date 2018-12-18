@@ -23,4 +23,5 @@ void FeedCommand::Perform(
     if (!description.Validate(out, Id, Arguments))
         return;
     processes.Feed(out, Id, Arguments);
+    msg_done.Send(out, Id);
 }

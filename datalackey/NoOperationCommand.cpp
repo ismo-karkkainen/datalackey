@@ -36,4 +36,5 @@ void NoOperationCommand::Perform(
     if (!description.Validate(out, Id, Arguments))
         return;
     reply.Send(out, Id);
+    msg_done.Send(out, Id);
 }

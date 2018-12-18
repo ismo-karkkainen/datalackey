@@ -33,8 +33,9 @@ cat > $EXP <<EOF
 ["1","run","stopped",17]
 ["1","run","continued"]
 ["1","run","exit",0]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh $PID

@@ -47,7 +47,7 @@ public:
 
     std::vector<std::pair<std::unique_ptr<SimpleValue>,pid_t>> List() const;
     bool Terminate(const SimpleValue& Id);
-    void Run(Output& Out, const SimpleValue& Id,
+    bool Run(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Parameters);
     void Feed(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Parameters);

@@ -22,7 +22,7 @@ void ParameterlessDescription::Report(OutputItem* Writer) const {
     *array_id_name(Writer) << Structure::End;
 }
 
-bool ParameterlessDescription::Validate(Output& Out, const SimpleValue& Id,
+bool ParameterlessDescription::validate(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (!Arguments.empty())
@@ -46,7 +46,7 @@ void StringListDescription::Report(OutputItem* Writer) const {
     *Writer << Structure::End;
 }
 
-bool StringListDescription::Validate(Output& Out, const SimpleValue& Id,
+bool StringListDescription::validate(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (Arguments.empty())
@@ -74,7 +74,7 @@ void ListDescription::Report(OutputItem* Writer) const {
         << Structure::End;
 }
 
-bool ListDescription::Validate(Output& Out, const SimpleValue& Id,
+bool ListDescription::validate(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (Arguments.empty())
@@ -245,7 +245,7 @@ void FeedDescription::Report(OutputItem* Writer) const {
     *Writer << Structure::End;
 }
 
-bool FeedDescription::Validate(Output& Out, const SimpleValue& Id,
+bool FeedDescription::validate(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (Arguments.empty())
@@ -348,7 +348,7 @@ void RunDescription::Report(OutputItem* Writer) const {
     *Writer << Structure::End;
 }
 
-bool RunDescription::Validate(Output& Out, const SimpleValue& Id,
+bool RunDescription::validate(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Arguments)
 {
     if (Arguments.empty())

@@ -32,4 +32,5 @@ void TerminateCommand::Perform(
     }
     if (!missing.empty())
         msg_missing.Send(out, Id, missing);
+    msg_done.Send(out, Id);
 }

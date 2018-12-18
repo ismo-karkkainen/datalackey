@@ -24,10 +24,14 @@ echo '[4,"storage-info"]'
 cat > $EXP <<EOF
 [null,"data","stored","label",1]
 [1,"storage-info","",{"label":{"JSON":4,"serial":1}}]
+[1,"done",""]
 [2,"error","not-string",2,"delete","missing","label",null]
+[2,"done",""]
 [null,"data","deleted","label",1]
 [3,"delete","missing","missing"]
+[3,"done",""]
 [4,"storage-info","",{}]
+[4,"done",""]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

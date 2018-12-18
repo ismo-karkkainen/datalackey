@@ -50,31 +50,41 @@ esac
 case $C in
 delete)
     echo '["id","error","missing","id","delete"]'
+    echo '["id","done",""]'
     ;;
 end-feed)
     echo '["id","error","missing","id","end-feed"]'
+    echo '["id","done",""]'
     ;;
 feed)
     echo '["id","error","missing","id","feed"]'
+    echo '["id","done",""]'
     ;;
 get)
     echo '["id","error","missing","id","get"]'
+    echo '["id","done",""]'
     ;;
 rename)
     echo '["id","error","missing","id","rename"]'
+    echo '["id","done",""]'
     echo '["id","error","pairless","id","rename","pairless"]'
+    echo '["id","done",""]'
     ;;
 run)
     echo '["id","error","missing","id","run"]'
+    echo '["id","done",""]'
     ;;
 storage-info)
     echo '["id","error","unexpected","id","storage-info","unexpected"]'
+    echo '["id","done",""]'
     ;;
 terminate)
     echo '["id","error","missing","id","terminate"]'
+    echo '["id","done",""]'
     ;;
 version)
     echo '["id","error","unexpected","id","version","unexpected"]'
+    echo '["id","done",""]'
     ;;
 *)
     echo "Invalid test script argument: $C"

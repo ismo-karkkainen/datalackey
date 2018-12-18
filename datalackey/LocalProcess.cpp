@@ -11,6 +11,7 @@
 #include "FileDescriptorInput.hpp"
 #include "FileDescriptorOutput.hpp"
 #include "Time.hpp"
+#include "Messages.hpp"
 #include "ProcessMessages.hpp"
 #include "JSONEncoder.hpp"
 #include "NullEncoder.hpp"
@@ -258,9 +259,8 @@ void LocalProcess::real_runner() {
     while (child_state != None || scanning) {
         ChildState prev = child_state;
         child_state = get_child_state(child_state);
-        if (prev != child_state && child_state == None) {
+        if (prev != child_state && child_state == None)
             child_feed->NoGlobalMessages(); // Child not reading anymore.
-        }
         // Scan for child output.
         scanning = false;
         for (auto& output : child_output) {
@@ -282,6 +282,7 @@ void LocalProcess::real_runner() {
         if (!scanning)
             Nap(20000000); // 20 ms.
     }
+    owner->NotifyEnd(*id, pid);
 }
 
 void LocalProcess::runner() {
@@ -296,17 +297,17 @@ void LocalProcess::runner() {
     delete child_writer;
     delete child_feed;
     delete child_input;
-    if (stdin_child[1] != -1)
-        close(stdin_child[1]);
-    if (stdouterr_child[0][0] != -1)
-        close(stdouterr_child[0][0]);
-    if (stdouterr_child[1][0] != -1)
-        close(stdouterr_child[1][0]);
+    for (size_t k = 0; k < 2; ++k) {
+        if (stdin_child[k] != -1)
+            close(stdin_child[k]);
+        for (size_t n = 0; n < 2; ++n)
+            if (stdouterr_child[k][n] != -1)
+                close(stdouterr_child[k][n]);
+    }
     if (terminate)
-        pm_run_terminated.Send(out, *id); // Not necessarily notified.
+        pm_run_terminated.Send(out, *id);
     else
-        pm_run_finished.Send(out, *id); // Not necessarily notified.
-    owner->NotifyEnd(*id, pid);
+        pm_run_finished.Send(out, *id);
     pid = 0;
     owner->HasFinished(*id);
 }
@@ -344,6 +345,7 @@ LocalProcess::LocalProcess(Processes* Owner,
 
 LocalProcess::~LocalProcess() {
     assert(!running);
+    msg_done.Send(out, *id);
     if (worker != nullptr) {
         worker->join();
         delete worker;

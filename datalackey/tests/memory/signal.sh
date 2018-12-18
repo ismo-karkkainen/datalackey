@@ -25,8 +25,9 @@ cat > $EXP <<EOF
 [null,"process","started","1","pid"]
 ["1","run","input","closed"]
 ["1","run","signal",$S]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

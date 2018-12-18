@@ -49,8 +49,9 @@ set
 ["1","run","exit",0]
 [null,"data","stored","fed-foo-out",2]
 end
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

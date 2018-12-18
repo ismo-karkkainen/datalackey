@@ -27,8 +27,9 @@ cat > $EXP <<EOF
 [null,"process","started","1",$(cat _pid.txt)]
 ["1","run","input","closed"]
 ["1","run","exit",0]
-["1","run","finished"]
 [null,"process","ended","1",$(cat _pid.txt)]
+["1","run","finished"]
+["1","done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh _pid.txt

@@ -31,8 +31,9 @@ cat > $EXP <<EOF
 [null,"process","started","1","pid"]
 ["1","run","input","closed"]
 ["1","run","exit",0]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 EOF
 
 test -f "$SUBDIR/cwd" &&

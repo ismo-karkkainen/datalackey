@@ -41,14 +41,16 @@ set
 [null,"process","ended","a","pid"]
 [null,"data","stored","label",1]
 end
-[2,"end-feed","",1]
+[2,"done",""]
 set
 [1,"run","exit",0]
 [1,"run","input","closed"]
 end
-[1,"run","finished"]
 [null,"process","ended",1,"pid"]
+[1,"run","finished"]
+[1,"done",""]
 [3,"get","",{"label":"value"}]
+[3,"done",""]
 EOF
 
 cat > $CTEXP <<EOF
@@ -57,6 +59,7 @@ cat > $CTEXP <<EOF
 ["a","run","exit",0]
 [null,"data","stored","label",1]
 ["a","run","finished"]
+["a","done",""]
 EOF
 
 compare-output $OUT $EXP && compare-output $CTOUT $CTEXP && rm -f $OUT $EXP $CTOUT $CTEXP _script.sh _controller.sh

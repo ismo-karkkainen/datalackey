@@ -34,10 +34,13 @@ cat > $EXP <<EOF
 ["1","run","input","closed"]
 [null,"data","stored","mapped",1]
 ["1","run","exit",0]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 [2,"storage-info","",{"mapped":{"serial":1,"JSON":7}}]
+[2,"done",""]
 [3,"get","",{"mapped":"value"}]
+[3,"done",""]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

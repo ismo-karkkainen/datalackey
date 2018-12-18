@@ -25,7 +25,9 @@ $DL -d "$STORE" -i stdin JSON -o stdout JSON | oneline-keysort-json >> $OUT
 cat > $EXP <<EOF
 [null,"data","stored","label",1]
 [1,"storage-info","",{"label":{"JSON":4,"serial":1}}]
+[1,"done",""]
 [2,"storage-info","",{"label":{"JSON":4,"serial":1}}]
+[2,"done",""]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

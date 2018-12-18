@@ -43,9 +43,11 @@ set
 [null,"process","ended","a","pid"]
 end
 ["1","run","exit",0]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 [2,"get","",{"label":"value"}]
+[2,"done",""]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

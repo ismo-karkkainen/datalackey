@@ -20,6 +20,7 @@ cat > $EXP <<EOF
 [null,"error","format"]
 [null,"channel","reset"]
 [2,"storage-info","",{}]
+[2,"done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP

@@ -68,8 +68,10 @@ void GetCommand::Perform(
         results[k] = nullptr;
     }
     *writer << End << End; // Close data dictionary and message array.
+    writer.reset();
     // If there were any failures, report them but the chances of the controller
     // getting these in any sensible manner are slim. Maybe with one-line JSON.
     if (!failed.empty())
         msg_failed.Send(out, Id, failed);
+    msg_done.Send(out, Id);
 }

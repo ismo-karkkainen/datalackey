@@ -32,11 +32,16 @@ protected:
         const std::vector<std::shared_ptr<SimpleValue>>& Arguments,
         size_t PastLastIndex);
 
+    virtual bool validate(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments) = 0;
 public:
     CommandDescription(const char* const Name);
     virtual ~CommandDescription();
     virtual void Report(OutputItem* Writer) const = 0;
     const char* const Name() const { return name; }
+    // Sends done message if validation fails.
+    bool Validate(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 

@@ -61,18 +61,23 @@ identifier_invalid_*)
     ;;
 command_missing)
     echo '["id","error","command","missing"]'
+    echo '["id","done",""]'
     ;;
 command_not_string)
     echo '["id","error","command","not-string"]'
+    echo '["id","done",""]'
     ;;
 command_unknown)
     echo '["id","error","command","unknown","'$UNKNOWN'"]'
+    echo '["id","done",""]'
     ;;
 argument_not_integer)
     echo '["id","run","error","argument","not-integer"]'
+    echo '["id","done",""]'
     ;;
 argument_invalid)
     echo '["id","run","error","argument","invalid"]'
+    echo '["id","done",""]'
     ;;
 data_identifier_*)
     echo '[null,"error","format"]'

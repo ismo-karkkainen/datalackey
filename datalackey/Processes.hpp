@@ -33,7 +33,7 @@ public:
     virtual bool Terminate(const SimpleValue& Id) = 0;
 
     // Start process. Ownership of parameters transfers.
-    virtual void Run(Output& Out, const SimpleValue& Id,
+    virtual bool Run(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Parameters) = 0;
 
     virtual void Feed(Output& Out, const SimpleValue& Id,

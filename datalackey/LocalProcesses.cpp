@@ -132,7 +132,7 @@ std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
         missing.empty(), input_values);
 }
 
-void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
+bool LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Parameters)
 {
     std::unique_lock<std::mutex> lock(processes_mutex);
@@ -142,7 +142,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     delete sv;
     if (proc != processes.end()) {
         pm_run_error_identifier_in_use.Send(Out, Id);
-        return;
+        return false;
     }
     lock.unlock();
 
@@ -173,13 +173,13 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
             std::string name = Parameters[k + 1]->String();
             if (name.find('=') != std::string::npos) {
                 pm_run_error_env_invalid.Send(Out, Id, name.c_str());
-                return;
+                return false;
             }
             auto result = env2value.insert(std::pair<std::string,std::string>(
                 name, Parameters[k + 2]->String()));
             if (!result.second) {
                 pm_run_error_env_duplicate.Send(Out, Id, name.c_str());
-                return;
+                return false;
             }
             k += 3;
         } else if (command == "env-clear") {
@@ -214,7 +214,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
             ++k;
             if (!input.empty()) {
                 pm_run_error_in_multiple.Send(Out, Id);
-                return;
+                return false;
             }
             std::string format = Parameters[k]->String();
             input.push_back(format);
@@ -228,7 +228,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
             for (const auto& earlier : outputs)
                 if (earlier[1] == channel) {
                     pm_run_error_out_duplicate.Send(Out, Id, channel.c_str());
-                    return;
+                    return false;
                 }
             outputs.push_back(std::vector<std::string>());
             outputs.back().push_back(format);
@@ -260,7 +260,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
 
     if ((notify_data || notify_process) && input.empty()) {
         pm_run_error_notify_no_input.Send(Out, Id);
-        return;
+        return false;
     }
 
     if (!directory.empty()) {
@@ -268,7 +268,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         if (absolute.empty()) {
             pm_run_error_cd_errmsg.Send(
                 Out, Id, directory.c_str(), strerror(errno));
-            return;
+            return false;
         }
         directory = absolute;
     }
@@ -280,7 +280,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
             if (!renamer->Map(nl.first, nl.second)) {
                 pm_run_error_output_duplicate.Send(
                     Out, Id, nl.first.String().c_str());
-                return;
+                return false;
             }
         }
     }
@@ -288,7 +288,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     if (feed_params.size() > 1) {
         if (input.empty()) {
             pm_run_error_in_missing.Send(Out, Id);
-            return;
+            return false;
         }
     }
 
@@ -296,7 +296,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         !(name_label.empty() && prefix.empty() && postfix.empty()))
     {
         pm_run_error_out_missing.Send(Out, Id);
-        return;
+        return false;
     }
 
     std::string absolute = AbsoluteFile(program_name, true);
@@ -306,7 +306,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
                 Out, Id, program_name.c_str(), strerror(errno));
         else
             pm_run_error_program.Send(Out, Id, program_name.c_str());
-        return;
+        return false;
     }
     program_name = absolute;
 
@@ -334,7 +334,7 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     delete sv;
     if (proc != processes.end()) {
         pm_run_error_identifier_in_use.Send(Out, Id);
-        return;
+        return false;
     }
     Process* p = new LocalProcess(this, Out, notify_data, notify_process,
         storage, Id, program_name, program_args, env2value, directory,
@@ -346,13 +346,14 @@ void LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     if (!inputs.first || !p->Run()) {
         // Error has been reported.
         delete p;
-        return;
+        return true; // The done message is sent by p destructor.
     }
     if (!inputs.second.empty())
         p->Feed(inputs.second); // Valid, pass directly.
     if (end_feed) // Ignore possible lack of channel in.
         p->EndFeed();
     processes.insert(std::pair<SimpleValue*,Process*>(Id.Clone(), p));
+    return true;
 }
 
 void LocalProcesses::Feed(Output& Out, const SimpleValue& Id,
@@ -378,15 +379,14 @@ void LocalProcesses::Feed(Output& Out, const SimpleValue& Id,
 void LocalProcesses::EndFeed(Output& Out, const SimpleValue& Id,
     std::vector<std::shared_ptr<SimpleValue>>& Parameters)
 {
-    std::vector<std::shared_ptr<SimpleValue>> not_found, ended, not_open;
+    std::vector<std::shared_ptr<SimpleValue>> not_found, not_open;
     std::unique_lock<std::mutex> lock(processes_mutex);
     for (auto& param : Parameters) {
         auto proc = processes.find(param.get());
         if (proc != processes.end()) {
-            if (!proc->second->Closed()) {
+            if (!proc->second->Closed())
                 proc->second->EndFeed();
-                ended.push_back(param);
-            } else
+            else
                 not_open.push_back(param);
         } else
             not_found.push_back(param);
@@ -396,8 +396,6 @@ void LocalProcesses::EndFeed(Output& Out, const SimpleValue& Id,
         pm_end_feed_missing.Send(Out, Id, not_found);
     if (!not_open.empty())
         pm_end_feed_not_open.Send(Out, Id, not_open);
-    if (!ended.empty())
-        pm_end_feed.Send(Out, Id, ended);
 }
 
 void LocalProcesses::HasFinished(const SimpleValue& Id) {

@@ -39,9 +39,11 @@ set
 [null,"data","stored","label",1]
 end
 ["1","run","exit",0]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 [2,"get","",{"label":"value"}]
+[2,"done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh _controller.sh

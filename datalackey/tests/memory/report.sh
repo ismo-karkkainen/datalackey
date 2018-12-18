@@ -19,7 +19,7 @@ cat > $EXP <<EOF
 ["id","?","error","argument","not-integer"]
 ["id","channel","reset"]
 ["id","delete","missing","..."]
-["id","end-feed","","..."]
+["id","done",""]
 ["id","end-feed","missing","..."]
 ["id","end-feed","not-open","..."]
 ["id","error","command","missing","?"]

@@ -23,5 +23,7 @@ void RunCommand::Perform(
 {
     if (!description.Validate(out, Id, Arguments))
         return;
-    processes.Run(out, Id, Arguments);
+    if (processes.Run(out, Id, Arguments))
+        return;
+    msg_done.Send(out, Id);
 }

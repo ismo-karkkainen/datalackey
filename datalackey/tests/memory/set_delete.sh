@@ -20,10 +20,14 @@ echo '[4,"delete","missing","label"]'
 cat > $EXP <<EOF
 [null,"data","stored","label",1]
 [1,"storage-info","",{"label":{"serial":1,"JSON":4}}]
+[1,"done",""]
 [2,"error","not-string",2,"delete","missing","label",null]
+[2,"done",""]
 [3,"error","not-string",3,"delete","missing","label",4]
+[3,"done",""]
 [null,"data","deleted","label",1]
 [4,"delete","missing","missing"]
+[4,"done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP

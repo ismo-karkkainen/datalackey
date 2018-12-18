@@ -25,4 +25,5 @@ void EndFeedCommand::Perform(
     if (!description.Validate(out, Id, Arguments))
         return;
     processes.EndFeed(out, Id, Arguments);
+    msg_done.Send(out, Id);
 }

@@ -14,7 +14,6 @@
 #include "Messages.hpp"
 
 
-extern Sth2Opt2List pm_end_feed;
 extern Sth2Opt2List pm_end_feed_missing;
 extern Sth2Opt2List pm_end_feed_not_open;
 extern Sth2Opt2List pm_run_error_missing;

@@ -184,3 +184,5 @@ NullNtfSthArgLL ntf_data_error("data", "error");
 Sth2Opt3 msg_channel_reset("channel", "reset");
 Sth2Opt3 msg_run_error_format("run", "error", "format");
 NullableSth2Opt3 msg_error_format("error", "format");
+
+Sth2Opt3 msg_done("done", "");

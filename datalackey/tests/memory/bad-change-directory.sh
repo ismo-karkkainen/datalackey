@@ -22,6 +22,7 @@ replace-pid > $OUT
 
 cat > $EXP <<EOF
 ["1","run","error","change-directory","invalid","No such file or directory"]
+["1","done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

@@ -43,12 +43,17 @@ cat > $EXP <<EOF
 [null,"data","stored","pre-label2-post",2]
 [null,"data","stored","pre-label3-post",3]
 ["1","run","exit",0]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 [2,"storage-info","",{"mapped":{"JSON":7,"serial":1},"pre-label2-post":{"JSON":2,"serial":2},"pre-label3-post":{"JSON":2,"serial":3}}]
+[2,"done",""]
 [3,"get","",{"mapped":"value"}]
+[3,"done",""]
 [null,"data","deleted","pre-label2-post",2]
+[4,"done",""]
 [5,"storage-info","",{"mapped":{"JSON":7,"serial":1},"pre-label3-post":{"JSON":2,"serial":3}}]
+[5,"done",""]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

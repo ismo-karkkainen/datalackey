@@ -22,11 +22,13 @@ cat > $EXP <<EOF
 [null,"error","format"]
 [null,"channel","reset"]
 [1,"error","not-string",1,"rename","label","name","miss","unused",4]
+[1,"done",""]
 [null,"data","deleted","label",1]
 [null,"data","stored","name",3]
 [null,"data","deleted","label2",2]
 [null,"data","stored","name2",4]
 [2,"rename","missing","miss","miss2"]
+[2,"done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP

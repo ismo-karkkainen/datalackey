@@ -76,16 +76,19 @@ bool CommandHandlerJSON::End() {
     }
     if (cmd.size() == 1) {
         msg_error_command_missing.Send(out, *identifier.get());
+        msg_done.Send(out, *identifier.get());
         return true;
     }
     if (!cmd[1].is_string()) {
         msg_error_command_not_string.Send(out, *identifier.get());
+        msg_done.Send(out, *identifier.get());
         return true;
     }
     std::string command = cmd[1];
     auto iter = handlers.find(command);
     if (iter == handlers.end()) {
         msg_error_command_unknown.Send(out, *identifier.get(), command.c_str());
+        msg_done.Send(out, *identifier.get());
         return true;
     }
     std::vector<std::shared_ptr<SimpleValue>> args;
@@ -98,6 +101,7 @@ bool CommandHandlerJSON::End() {
             if (0.0 != std::modf(d, &i)) {
                 msg_arg_error_argument_not_integer.Send(
                     out, *identifier.get(), command.c_str());
+                msg_done.Send(out, *identifier.get());
                 return true;
             }
             args.push_back(std::shared_ptr<SimpleValue>(
@@ -107,6 +111,7 @@ bool CommandHandlerJSON::End() {
         } else {
             msg_arg_error_argument_invalid.Send(
                 out, *identifier.get(), command.c_str());
+            msg_done.Send(out, *identifier.get());
             return true;
         }
     }

@@ -32,12 +32,16 @@ set
 [null,"data","stored","mapped",1]
 ["1","run","exit",0]
 end
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 [2,"storage-info","",{"mapped":{"JSON":7,"serial":1}}]
+[2,"done",""]
 [3,"error","not-string",3,"get","mapped","miss",4]
+[3,"done",""]
 [4,"get","missing","miss"]
 [4,"get","",{"mapped":"value"}]
+[4,"done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

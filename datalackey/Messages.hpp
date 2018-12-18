@@ -167,5 +167,7 @@ extern Sth2Opt3 msg_channel_reset;
 extern Sth2Opt3 msg_run_error_format;
 extern NullableSth2Opt3 msg_error_format;
 
+extern Sth2Opt3 msg_done;
+
 
 #endif /* Messages_hpp */

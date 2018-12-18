@@ -61,4 +61,6 @@ void StorageInfoCommand::Perform(
         *writer << End; // Close previous format:size dictionary.
     }
     *writer << End << End; // Close label dictionary and message array.
+    writer.reset();
+    msg_done.Send(out, Id);
 }

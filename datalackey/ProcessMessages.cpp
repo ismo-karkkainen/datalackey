@@ -106,8 +106,6 @@ void RunErrorSthArg2::Send(Output& Out, const SimpleValue& Id,
 }
 
 
-
-Sth2Opt2List pm_end_feed("end-feed", "");;
 Sth2Opt2List pm_end_feed_missing("end-feed", "missing");
 Sth2Opt2List pm_end_feed_not_open("end-feed", "not-open");
 Sth2Opt2List pm_run_error_missing("run", "error", "missing");

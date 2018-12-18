@@ -38,15 +38,18 @@ cat << EOF > $EXP
 [null,"data","stored","label",1]
 ["1","run","running","pid"]
 [null,"process","started","1","pid"]
+[2,"done",""]
 [null,"data","stored","fed-in1",2]
+[3,"done",""]
 [null,"data","stored","fed-in2",3]
-[4,"end-feed","","1"]
+[4,"done",""]
 set
 ["1","run","exit",0]
 ["1","run","input","closed"]
 end
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 EOF
 
 COUT="$(pwd)/td/.datalackey/catalog"

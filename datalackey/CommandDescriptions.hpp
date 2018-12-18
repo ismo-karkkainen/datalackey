@@ -19,11 +19,13 @@
 
 
 class ParameterlessDescription : public CommandDescription {
+protected:
+    bool validate(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
+
 public:
     ParameterlessDescription(const char* const Name);
     void Report(OutputItem* Writer) const;
-    bool Validate(Output& Out, const SimpleValue& Id,
-        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 
@@ -31,20 +33,24 @@ class StringListDescription : public CommandDescription {
 private:
     bool paired;
 
+protected:
+    bool validate(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
+
 public:
     StringListDescription(const char* const Name, bool Paired = false);
     void Report(OutputItem* Writer) const;
-    bool Validate(Output& Out, const SimpleValue& Id,
-        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 
 class ListDescription : public CommandDescription {
+protected:
+    bool validate(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
+
 public:
     ListDescription(const char* const Name);
     void Report(OutputItem* Writer) const;
-    bool Validate(Output& Out, const SimpleValue& Id,
-        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 
@@ -139,21 +145,23 @@ protected:
     std::string angle(const char* const Str) const;
     void report_subcommands(OutputItem* Writer,
         const std::string& subcommand, const std::string& subcommands) const;
+    bool validate(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 
 public:
     FeedDescription(const char* const Name);
     void Report(OutputItem* Writer) const;
-    bool Validate(Output& Out, const SimpleValue& Id,
-        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 
 class RunDescription : public FeedDescription {
+protected:
+    bool validate(Output& Out, const SimpleValue& Id,
+        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
+
 public:
     RunDescription(const char* const Name);
     void Report(OutputItem* Writer) const;
-    bool Validate(Output& Out, const SimpleValue& Id,
-        std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 };
 
 

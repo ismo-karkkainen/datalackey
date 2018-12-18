@@ -24,13 +24,19 @@ cat > $EXP <<EOF
 [null,"data","stored","label",1]
 [null,"data","stored","label2",2]
 [1,"storage-info","",{"label":{"JSON":3,"serial":1},"label2":{"JSON":1,"serial":2}}]
+[1,"done",""]
 [2,"error","pairless",2,"rename","label"]
+[2,"done",""]
 [null,"data","deleted","label",1]
 [null,"data","stored","label2",3]
+[3,"done",""]
 [4,"storage-info","",{"label2":{"JSON":3,"serial":3}}]
+[4,"done",""]
 [null,"data","deleted","label2",3]
 [null,"data","stored","label3",4]
+[5,"done",""]
 [6,"storage-info","",{"label3":{"JSON":3,"serial":4}}]
+[6,"done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP

@@ -39,18 +39,24 @@ cat > $EXP <<EOF
 [null,"data","stored","label",1]
 ["1","run","running","pid"]
 [null,"process","started","1","pid"]
+[2,"done",""]
 [null,"data","stored","fed-in1",2]
+[3,"done",""]
 [null,"data","stored","fed-in2",3]
-[4,"end-feed","","1"]
+[4,"done",""]
 set
 ["1","run","input","closed"]
 ["1","run","exit",0]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 [5,"end-feed","not-open","1"]
+[5,"done",""]
 end
 [6,"storage-info","",{"fed-in1":{"JSON":3,"serial":2},"fed-in2":{"JSON":3,"serial":3},"label":{"JSON":3,"serial":1}}]
+[6,"done",""]
 [7,"end-feed","missing","m1","2"]
+[7,"done",""]
 EOF
 
 compare-output $OUT $EXP && rm -f $OUT $EXP _script.sh

@@ -36,8 +36,9 @@ cat > "$EXP" << EOF
 [null,"data","stored","name2",4]
 [null,"data","deleted","name",1]
 [null,"data","deleted","name2",1]
-["1","run","finished"]
 [null,"process","ended","1","pid"]
+["1","run","finished"]
+["1","done",""]
 EOF
 
 compare-output "$OUT" "$EXP" && rm -f "$OUT" "$EXP" _script.sh
