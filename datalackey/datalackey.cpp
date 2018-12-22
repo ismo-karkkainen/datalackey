@@ -177,7 +177,10 @@ int main(int argc, char** argv) {
         while (!out->Finished())
             Nap(20000000); // 20 ms.
     } else {
-        // Run normally.
+        // Run normally. Send data notifications to parent.
+        std::vector<std::pair<std::string, long long int>> ls = storage->List();
+        for (auto& iter : ls)
+            storage->NotifyStore(iter.first, iter.second, out);
         while (!scanner->Ended() || !procs->Finished() || !out->Finished()) {
             bool did_something = scanner->Scan();
             did_something = procs->CleanFinished() || did_something;

@@ -287,7 +287,6 @@ void DirectoryStorage::Add(DataGroup& G) {
     lock.unlock();
     for (auto& iter : messages)
         NotifyStore(iter.first, iter.second);
-
 }
 
 void DirectoryStorage::Prepare(const char *const Format,

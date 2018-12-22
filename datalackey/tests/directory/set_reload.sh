@@ -26,6 +26,7 @@ cat > $EXP <<EOF
 [null,"data","stored","label",1]
 [1,"storage-info","",{"label":{"JSON":4,"serial":1}}]
 [1,"done",""]
+[null,"data","stored","label",1]
 [2,"storage-info","",{"label":{"JSON":4,"serial":1}}]
 [2,"done",""]
 EOF

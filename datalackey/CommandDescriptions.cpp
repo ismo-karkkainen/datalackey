@@ -250,7 +250,7 @@ bool FeedDescription::validate(Output& Out, const SimpleValue& Id,
 {
     if (Arguments.empty())
         return error(CommandDescription::error_missing, Out, Id, Arguments, 0);
-    size_t loc = 1;
+    size_t loc = 1; // First item is the receiving process ID.
     while (loc < Arguments.size()) {
         bool found = false;
         for (const auto& sub : subs) {
