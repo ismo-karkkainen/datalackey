@@ -46,7 +46,7 @@ cat > $EXP <<EOF
 [2,"done",""]
 [3,"get","",{"mapped":"value"}]
 [3,"done",""]
-[null,"data","deleted","pre-label2-post",1]
+[null,"data","deleted","pre-label2-post",2]
 [4,"done",""]
 [5,"storage-info","",{"mapped":{"JSON":7,"serial":1},"pre-label3-post":{"JSON":2,"serial":3}}]
 [5,"done",""]

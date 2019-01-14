@@ -88,16 +88,17 @@ void MemoryStorage::Value::Own(bool OwnData) {
 }
 
 
-bool MemoryStorage::del(const StringValue& L) {
+long long int MemoryStorage::del(const StringValue& L) {
     auto iter = label2data.find(L);
     if (iter != label2data.end()) {
         std::unique_lock<std::mutex> value_lock(iter->second->Mutex());
         iter->second->Own(true);
+        long long int serial = iter->second->Serial();
         value_lock.unlock();
         label2data.erase(iter);
-        return true;
+        return serial;
     }
-    return false;
+    return 0;
 }
 
 MemoryStorage::MemoryStorage() : serial(1) { }

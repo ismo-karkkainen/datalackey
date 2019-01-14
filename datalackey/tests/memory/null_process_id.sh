@@ -31,8 +31,8 @@ cat > "$EXP" << EOF
 [null,"data","stored","name",3]
 [null,"data","deleted","item2",2]
 [null,"data","stored","name2",4]
-[null,"data","deleted","name",1]
-[null,"data","deleted","name2",1]
+[null,"data","deleted","name",3]
+[null,"data","deleted","name2",4]
 [null,"process","ended",null,"pid"]
 EOF
 

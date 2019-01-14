@@ -43,7 +43,7 @@ private:
     long long int serial;
     mutable std::mutex label2data_mutex;
 
-    bool del(const StringValue& L);
+    long long int del(const StringValue& L);
 
 public:
     MemoryStorage();
