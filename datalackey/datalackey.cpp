@@ -27,9 +27,7 @@
 #include <limits>
 #include <iostream>
 #include <cassert>
-#if defined(__linux__)
 #include <signal.h>
-#endif
 
 static const char* inputs[1] = { "stdin" };
 static const char* outputs[2] = { "stdout", "stderr" };
@@ -81,9 +79,7 @@ int main(int argc, char** argv) {
     if (rv >= 0)
         return rv;
 
-#if defined(__linux__)
     signal(SIGPIPE, SIG_IGN);
-#endif
     Storage* storage = nullptr;
     if (opt::Given("directory", 1)) {
         mode_t mode = S_IRUSR | S_IWUSR;
@@ -160,10 +156,12 @@ int main(int argc, char** argv) {
     MessageHandler* command_handler =
         MakeMessageHandler(choice.c_str(), *out, *storage, *procs, nullptr);
     assert(command_handler != nullptr);
+    CommandReporter::Get().StopRegistrations();
     InputScanner* scanner = MakeInputScanner(
         choice.c_str(), *in_channel, *command_handler, *sink, *out, nullptr);
     assert(scanner != nullptr);
 
+    MessageReporter::Get().StopRegistrations();
     if (opt::Given("report")) {
         choice = opt::String("report", 1);
         if (choice == "messages")

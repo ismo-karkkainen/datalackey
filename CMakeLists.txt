@@ -331,3 +331,8 @@ add_exe(error feed.sh)
 new_test(feed_errors feed.sh)
 add_exe(error run.sh)
 new_test(run_errors run.sh)
+
+# Tests against found bugs.
+#
+add_exe(memory version_repeat.sh)
+new_test(version_crash version_repeat.sh)

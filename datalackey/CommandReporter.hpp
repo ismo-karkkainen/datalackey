@@ -12,19 +12,21 @@
 
 #include "CommandDescription.hpp"
 #include "OutputItem.hpp"
-#include <set>
+#include <vector>
 
 
 // Used for asking a report of all messages that can be sent.
 class CommandReporter {
 private:
-    std::set<const CommandDescription*> registered;
+    std::vector<const CommandDescription*> registered;
+    bool registering;
 
     CommandReporter();
 
 public:
     void Register(const CommandDescription* D);
     void Report(OutputItem* Writer) const;
+    void StopRegistrations() { registering = false; }
 
     static CommandReporter& Get();
 };

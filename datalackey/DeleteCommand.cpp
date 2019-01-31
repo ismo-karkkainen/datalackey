@@ -9,6 +9,7 @@
 #include "DeleteCommand.hpp"
 #include "Value_t.hpp"
 #include "OutputCollection.hpp"
+#include <cassert>
 
 
 DeleteCommand::DeleteCommand(const char *const Name, Output& Out, Storage& S)

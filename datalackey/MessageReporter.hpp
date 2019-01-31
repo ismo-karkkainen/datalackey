@@ -12,19 +12,21 @@
 
 #include "Message.hpp"
 #include "Output.hpp"
-#include <set>
+#include <vector>
 
 
 // Used for asking a report of all messages that can be sent.
 class MessageReporter {
 private:
-    std::set<const Message*> registered;
+    std::vector<const Message*> registered;
+    bool registering;
 
     MessageReporter();
 
 public:
     void Register(const Message* M);
     void Report(Output& Out) const;
+    void StopRegistrations() { registering = false; }
 
     static MessageReporter& Get();
 };

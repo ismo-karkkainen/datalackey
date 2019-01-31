@@ -7,14 +7,13 @@
 //
 
 #include "MessageReporter.hpp"
-#include <cassert>
 
 
-MessageReporter::MessageReporter() { }
+MessageReporter::MessageReporter() : registering(true) { }
 
 void MessageReporter::Register(const Message* M) {
-    auto result = registered.insert(M);
-    assert(result.second);
+    if (registering)
+        registered.push_back(M);
 }
 
 void MessageReporter::Report(Output& Out) const {

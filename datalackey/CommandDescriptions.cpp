@@ -12,6 +12,8 @@
 #include "NullValue.hpp"
 #include "NumberValue.hpp"
 #include "StringValue.hpp"
+#include <cstring>
+#include <cassert>
 
 
 ParameterlessDescription::ParameterlessDescription(const char* const Name)

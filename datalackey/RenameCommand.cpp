@@ -10,6 +10,7 @@
 #include "Value_t.hpp"
 #include "OutputCollection.hpp"
 #include <map>
+#include <cassert>
 
 
 RenameCommand::RenameCommand(const char *const Name, Output& Out, Storage& S)

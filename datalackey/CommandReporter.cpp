@@ -9,14 +9,13 @@
 #include "CommandReporter.hpp"
 #include "Value_t.hpp"
 #include <memory>
-#include <cassert>
 
 
-CommandReporter::CommandReporter() { }
+CommandReporter::CommandReporter() : registering(true) { }
 
 void CommandReporter::Register(const CommandDescription* D) {
-    auto result = registered.insert(D);
-    assert(result.second);
+    if (registering)
+        registered.push_back(D);
 }
 
 void CommandReporter::Report(OutputItem* Writer) const {
