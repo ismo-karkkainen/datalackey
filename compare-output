@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# For comparing dtalackey output with expected one. Solves the problem of
+# variation in output from multi-threaded program.
+
 import sys
 
 if len(sys.argv) != 3:

@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# For replacing pid in command output to eliminate variation in test output.
+
 import sys
 import json
 

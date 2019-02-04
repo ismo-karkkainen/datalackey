@@ -1,3 +1,11 @@
+//
+//  Options.hpp
+//  datalackey
+//
+//  Created by Ismo Kärkkäinen on 16.3.17.
+//  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
+//
+
 #if !defined(OPTIONS_HPP)
 #define OPTIONS_HPP
 

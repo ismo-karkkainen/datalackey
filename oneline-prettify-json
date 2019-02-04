@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# Exists to make output more readable by humans for the rare occurrences
+# when output needs to be understood.
+
 import sys
 import json
 

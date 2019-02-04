@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Tests that multiple rpeetitions of version command from separate processes
+# Tests that multiple repetitions of version command from separate processes
 # do not crash datalackey.
 
 if [ $# -ne 1 ]; then

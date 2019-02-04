@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# To eliminate key order variation in test output. Expects each line to be
+# JSON object or array, to match datalackey output.
+
 import sys
 import json
 
