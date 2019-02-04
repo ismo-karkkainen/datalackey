@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 21.1.18.
 //  Copyright © 2018 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #ifndef FileReader_hpp
 #define FileReader_hpp

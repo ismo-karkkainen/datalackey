@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 14.3.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #include "Storage.hpp"
 #include "OutputCollection.hpp"

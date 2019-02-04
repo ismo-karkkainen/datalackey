@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 23.10.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #ifndef StringValueMapperSimple_hpp
 #define StringValueMapperSimple_hpp

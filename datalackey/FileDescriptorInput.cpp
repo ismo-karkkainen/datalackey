@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 24.5.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #include "FileDescriptorInput.hpp"
 #include <sys/select.h>

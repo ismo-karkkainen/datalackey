@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 30.3.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #ifndef Command_hpp
 #define Command_hpp

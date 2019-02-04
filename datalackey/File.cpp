@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 11.2.18.
 //  Copyright © 2018 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #include "File.hpp"
 #include <dirent.h>

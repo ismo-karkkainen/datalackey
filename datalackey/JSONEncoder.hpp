@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 9.5.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #ifndef JSONEncoder_hpp
 #define JSONEncoder_hpp

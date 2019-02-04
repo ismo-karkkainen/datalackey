@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 10.5.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #ifndef InputScanner_hpp
 #define InputScanner_hpp

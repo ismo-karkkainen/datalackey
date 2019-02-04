@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 8.1.18.
 //  Copyright © 2018 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #ifndef DataOwner_hpp
 #define DataOwner_hpp

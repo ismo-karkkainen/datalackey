@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 26.5.17.
 //  Copyright © 2017 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #ifndef StorageDataSinkJSON_hpp
 #define StorageDataSinkJSON_hpp

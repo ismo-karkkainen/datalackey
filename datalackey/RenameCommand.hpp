@@ -5,6 +5,7 @@
 //  Created by Ismo Kärkkäinen on 5.2.18.
 //  Copyright © 2018 Ismo Kärkkäinen. All rights reserved.
 //
+// Licensed under Universal Permissive License. See License.txt.
 
 #ifndef RenameCommand_hpp
 #define RenameCommand_hpp
