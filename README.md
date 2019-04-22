@@ -12,16 +12,27 @@ a couple scripts to gather file contents into single JSON object and pass
 it to your program and to split a JSON object into separate files.
 
 You are not supposed to run this manually, instead this is meant to be used
-by other programs. Hence default install location to /usr/local/libexec.
+by other programs. Hence default install location is /usr/local/libexec.
 
 See datalackeyshell repository located where this repository is, for some
 simple tools that use datalackey.
+
+# Requirements
+
+The https://github.com/nlohmann/json is required.
+
+On macOS with Homebrew (https://docs.brew.sh):
+
+    brew tap nlohmann/json
+    brew install nlohmann_json --with-cmake
+
+On Linux distributions you can probably find it via package manager.
 
 # Building.
 
 You need cmake and compiler for C++14. Currently clang on macOS, and clang
 and gcc on Ubuntu have been tried. Assuming a build directory parallel to
-datalackey directory, you can use:
+main datalackey directory, you can use:
 
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=DEBUG ../datalackey
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../datalackey

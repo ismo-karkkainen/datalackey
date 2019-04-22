@@ -29,6 +29,7 @@ cat > "$EXP" << EOF
 ["1","run","input","closed"]
 [null,"data","stored","item",1]
 [null,"data","stored","item2",2]
+set
 ["1","run","exit",0]
 [null,"data","deleted","item",1]
 [null,"data","stored","name",3]
@@ -36,6 +37,7 @@ cat > "$EXP" << EOF
 [null,"data","stored","name2",4]
 [null,"data","deleted","name",3]
 [null,"data","deleted","name2",4]
+end
 [null,"process","ended","1","pid"]
 ["1","run","finished"]
 ["1","done",""]

@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.5)
 project(datalackey CXX)
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(GenericOptions -std=c++14 -Wall)
+    set(GenericOptions -Wall)
     set(ReleaseOptions -O2)
     set(AlwaysSmallOptions -Os)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(GenericOptions -std=c++14 -Wall)
+    set(GenericOptions -Wall)
     set(ReleaseOptions -O2)
     set(AlwaysSmallOptions -Os)
 #elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
@@ -18,150 +18,151 @@ else()
     set(ReleaseOptions "")
 endif()
 
+find_package(nlohmann_json 3.4.0 REQUIRED)
 if (UNIX AND NOT APPLE)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
 endif()
 
-add_compile_options( ${GenericOptions} )
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
-    add_compile_options( ${ReleaseOptions} )
-endif()
-
-include_directories( /usr/local/include/ )
-include_directories( datalackey )
-link_directories( /usr/local/lib/ )
-
 enable_testing()
 
-set(Sources datalackey/SimpleValue.cpp)
-list(APPEND Sources datalackey/StringValue.cpp)
-list(APPEND Sources datalackey/NumberValue.cpp)
-list(APPEND Sources datalackey/NullValue.cpp)
-list(APPEND Sources datalackey/Time.cpp)
-list(APPEND Sources datalackey/File.cpp)
-list(APPEND Sources datalackey/RawData.cpp)
-list(APPEND Sources datalackey/DataReader.cpp)
-list(APPEND Sources datalackey/DataOwner.cpp)
-list(APPEND Sources datalackey/MemoryReader.cpp)
-list(APPEND Sources datalackey/RawDataOwner.cpp)
-list(APPEND Sources datalackey/MemoryOwner.cpp)
-list(APPEND Sources datalackey/FileOwner.cpp)
-list(APPEND Sources datalackey/FileReader.cpp)
-list(APPEND Sources datalackey/DataGroup.cpp)
-list(APPEND Sources datalackey/Storage.cpp)
-list(APPEND Sources datalackey/MemoryStorage.cpp)
-list(APPEND Sources datalackey/DirectoryStorage.cpp)
-list(APPEND Sources datalackey/StorageDataSink.cpp)
-list(APPEND Sources datalackey/StorageDataSinkJSON.cpp)
+set(Sources src/SimpleValue.cpp)
+list(APPEND Sources src/StringValue.cpp)
+list(APPEND Sources src/NumberValue.cpp)
+list(APPEND Sources src/NullValue.cpp)
+list(APPEND Sources src/Time.cpp)
+list(APPEND Sources src/File.cpp)
+list(APPEND Sources src/RawData.cpp)
+list(APPEND Sources src/DataReader.cpp)
+list(APPEND Sources src/DataOwner.cpp)
+list(APPEND Sources src/MemoryReader.cpp)
+list(APPEND Sources src/RawDataOwner.cpp)
+list(APPEND Sources src/MemoryOwner.cpp)
+list(APPEND Sources src/FileOwner.cpp)
+list(APPEND Sources src/FileReader.cpp)
+list(APPEND Sources src/DataGroup.cpp)
+list(APPEND Sources src/Storage.cpp)
+list(APPEND Sources src/MemoryStorage.cpp)
+list(APPEND Sources src/DirectoryStorage.cpp)
+list(APPEND Sources src/StorageDataSink.cpp)
+list(APPEND Sources src/StorageDataSinkJSON.cpp)
 
-list(APPEND Sources datalackey/Literal.cpp)
-list(APPEND Sources datalackey/ValueReference.cpp)
-list(APPEND Sources datalackey/Encoder.cpp)
-list(APPEND Sources datalackey/NullEncoder.cpp)
-list(APPEND Sources datalackey/OutputChannel.cpp)
-list(APPEND Sources datalackey/NullOutput.cpp)
-list(APPEND Sources datalackey/OutputItem.cpp)
-list(APPEND Sources datalackey/Output.cpp)
-list(APPEND Sources datalackey/OutputCollection.cpp)
-list(APPEND Sources datalackey/ReportConstants.cpp)
-list(APPEND Sources datalackey/Message.cpp)
-list(APPEND Sources datalackey/Messages.cpp)
-list(APPEND Sources datalackey/ProcessMessages.cpp)
-list(APPEND Sources datalackey/MessageReporter.cpp)
-list(APPEND Sources datalackey/CommandDescription.cpp)
-list(APPEND Sources datalackey/CommandDescriptions.cpp)
-list(APPEND Sources datalackey/CommandReporter.cpp)
-list(APPEND Sources datalackey/FileDescriptorOutput.cpp)
-list(APPEND Sources datalackey/MessageHandler.cpp)
-list(APPEND Sources datalackey/StorageDataSink.cpp)
-list(APPEND Sources datalackey/InputChannel.cpp)
-list(APPEND Sources datalackey/InputScanner.cpp)
-list(APPEND Sources datalackey/InputScannerRawMessage.cpp)
-list(APPEND Sources datalackey/InputScannerDiscard.cpp)
-list(APPEND Sources datalackey/FileDescriptorInput.cpp)
-list(APPEND Sources datalackey/StringValueMapper.cpp)
-list(APPEND Sources datalackey/StringValueMapperSimple.cpp)
+list(APPEND Sources src/Literal.cpp)
+list(APPEND Sources src/ValueReference.cpp)
+list(APPEND Sources src/Encoder.cpp)
+list(APPEND Sources src/NullEncoder.cpp)
+list(APPEND Sources src/OutputChannel.cpp)
+list(APPEND Sources src/NullOutput.cpp)
+list(APPEND Sources src/OutputItem.cpp)
+list(APPEND Sources src/Output.cpp)
+list(APPEND Sources src/OutputCollection.cpp)
+list(APPEND Sources src/ReportConstants.cpp)
+list(APPEND Sources src/Message.cpp)
+list(APPEND Sources src/Messages.cpp)
+list(APPEND Sources src/ProcessMessages.cpp)
+list(APPEND Sources src/MessageReporter.cpp)
+list(APPEND Sources src/CommandDescription.cpp)
+list(APPEND Sources src/CommandDescriptions.cpp)
+list(APPEND Sources src/CommandReporter.cpp)
+list(APPEND Sources src/FileDescriptorOutput.cpp)
+list(APPEND Sources src/MessageHandler.cpp)
+list(APPEND Sources src/StorageDataSink.cpp)
+list(APPEND Sources src/InputChannel.cpp)
+list(APPEND Sources src/InputScanner.cpp)
+list(APPEND Sources src/InputScannerRawMessage.cpp)
+list(APPEND Sources src/InputScannerDiscard.cpp)
+list(APPEND Sources src/FileDescriptorInput.cpp)
+list(APPEND Sources src/StringValueMapper.cpp)
+list(APPEND Sources src/StringValueMapperSimple.cpp)
 
-list(APPEND Sources datalackey/JSONEncoder.cpp)
-list(APPEND Sources datalackey/StorageDataSinkJSON.cpp)
-list(APPEND Sources datalackey/InputScannerJSON.cpp)
-list(APPEND Sources datalackey/MessageRawJSON.cpp)
+list(APPEND Sources src/JSONEncoder.cpp)
+list(APPEND Sources src/StorageDataSinkJSON.cpp)
+list(APPEND Sources src/InputScannerJSON.cpp)
+list(APPEND Sources src/MessageRawJSON.cpp)
 
-list(APPEND Sources datalackey/Command.cpp)
-list(APPEND Sources datalackey/CommandHandler.cpp)
-list(APPEND Sources datalackey/StorageInfoCommand.cpp)
-list(APPEND Sources datalackey/GetCommand.cpp)
-list(APPEND Sources datalackey/DeleteCommand.cpp)
-list(APPEND Sources datalackey/RenameCommand.cpp)
-list(APPEND Sources datalackey/VersionCommand.cpp)
-list(APPEND Sources datalackey/NoOperationCommand.cpp)
+list(APPEND Sources src/Command.cpp)
+list(APPEND Sources src/CommandHandler.cpp)
+list(APPEND Sources src/StorageInfoCommand.cpp)
+list(APPEND Sources src/GetCommand.cpp)
+list(APPEND Sources src/DeleteCommand.cpp)
+list(APPEND Sources src/RenameCommand.cpp)
+list(APPEND Sources src/VersionCommand.cpp)
+list(APPEND Sources src/NoOperationCommand.cpp)
 
-list(APPEND Sources datalackey/ProcessInput.cpp)
-list(APPEND Sources datalackey/Process.cpp)
-list(APPEND Sources datalackey/Processes.cpp)
-list(APPEND Sources datalackey/LocalProcess.cpp)
-list(APPEND Sources datalackey/CommandHandlerJSON.cpp)
-list(APPEND Sources datalackey/Factories.cpp)
-list(APPEND Sources datalackey/LocalProcesses.cpp)
-list(APPEND Sources datalackey/RunCommand.cpp)
-list(APPEND Sources datalackey/FeedCommand.cpp)
-list(APPEND Sources datalackey/EndFeedCommand.cpp)
-list(APPEND Sources datalackey/TerminateCommand.cpp)
+list(APPEND Sources src/ProcessInput.cpp)
+list(APPEND Sources src/Process.cpp)
+list(APPEND Sources src/Processes.cpp)
+list(APPEND Sources src/LocalProcess.cpp)
+list(APPEND Sources src/CommandHandlerJSON.cpp)
+list(APPEND Sources src/Factories.cpp)
+list(APPEND Sources src/LocalProcesses.cpp)
+list(APPEND Sources src/RunCommand.cpp)
+list(APPEND Sources src/FeedCommand.cpp)
+list(APPEND Sources src/EndFeedCommand.cpp)
+list(APPEND Sources src/TerminateCommand.cpp)
 
-list(APPEND Sources datalackey/Options.cpp)
-list(APPEND Sources datalackey/datalackey.cpp)
+list(APPEND Sources src/Options.cpp)
+list(APPEND Sources src/datalackey.cpp)
 
 add_executable( datalackey ${Sources} )
+target_compile_features(datalackey PRIVATE cxx_std_14)
+target_include_directories(datalackey PRIVATE src )
+target_link_libraries(datalackey PRIVATE nlohmann_json::nlohmann_json )
+
+target_compile_options(datalackey PRIVATE ${GenericOptions} )
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
+    target_compile_options(datalackey PRIVATE ${ReleaseOptions} )
+endif()
+
 if (UNIX AND NOT APPLE)
     target_link_libraries(datalackey Threads::Threads)
 endif()
 
 list(APPEND AlwaysSmall ${Sources})
-list(REMOVE_ITEM AlwaysSmall datalackey/RawData.cpp)
-#list(REMOVE_ITEM AlwaysSmall datalackey/FileOwner.cpp) # File I/O
-list(REMOVE_ITEM AlwaysSmall datalackey/DataGroup.cpp)
-#list(REMOVE_ITEM AlwaysSmall datalackey/Storage.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/StorageDataSink.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/Literal.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/ValueReference.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/Encoder.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/NullEncoder.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/OutputChannel.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/NullOutput.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/OutputItem.cpp) # Base
-list(REMOVE_ITEM AlwaysSmall datalackey/Output.cpp)
-#list(REMOVE_ITEM AlwaysSmall datalackey/Messages.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/FileDescriptorOutput.cpp) # File I/O
-#list(REMOVE_ITEM AlwaysSmall datalackey/MessageHandler.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/StorageDataSink.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/InputChannel.cpp) # Base
-list(REMOVE_ITEM AlwaysSmall datalackey/InputScanner.cpp)
-#list(REMOVE_ITEM AlwaysSmall datalackey/InputScannerRawMessage.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/InputScannerDiscard.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/FileDescriptorInput.cpp) # File I/O
-#list(REMOVE_ITEM AlwaysSmall datalackey/StringValueMapper.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/StringValueMapperSimple.cpp) # Simple
-list(REMOVE_ITEM AlwaysSmall datalackey/JSONEncoder.cpp)
-list(REMOVE_ITEM AlwaysSmall datalackey/StorageDataSinkJSON.cpp)
-list(REMOVE_ITEM AlwaysSmall datalackey/InputScannerJSON.cpp)
-list(REMOVE_ITEM AlwaysSmall datalackey/MessageRawJSON.cpp)
-#list(REMOVE_ITEM AlwaysSmall datalackey/Command.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/CommandHandler.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/ListCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/StorageInfoCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/GetCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/DeleteCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/RenameCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/VersionCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/NoOperationCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/ProcessInput.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall datalackey/Process.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall datalackey/Processes.cpp) # Base
-list(REMOVE_ITEM AlwaysSmall datalackey/LocalProcess.cpp)
-list(REMOVE_ITEM AlwaysSmall datalackey/CommandHandlerJSON.cpp)
-#list(REMOVE_ITEM AlwaysSmall datalackey/Factories.cpp) # Simple
-list(REMOVE_ITEM AlwaysSmall datalackey/LocalProcesses.cpp)
+list(REMOVE_ITEM AlwaysSmall src/RawData.cpp)
+#list(REMOVE_ITEM AlwaysSmall src/FileOwner.cpp) # File I/O
+list(REMOVE_ITEM AlwaysSmall src/DataGroup.cpp)
+#list(REMOVE_ITEM AlwaysSmall src/Storage.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/StorageDataSink.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/Literal.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/ValueReference.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/Encoder.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/NullEncoder.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/OutputChannel.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/NullOutput.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/OutputItem.cpp) # Base
+list(REMOVE_ITEM AlwaysSmall src/Output.cpp)
+#list(REMOVE_ITEM AlwaysSmall src/Messages.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/FileDescriptorOutput.cpp) # File I/O
+#list(REMOVE_ITEM AlwaysSmall src/MessageHandler.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/StorageDataSink.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/InputChannel.cpp) # Base
+list(REMOVE_ITEM AlwaysSmall src/InputScanner.cpp)
+#list(REMOVE_ITEM AlwaysSmall src/InputScannerRawMessage.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/InputScannerDiscard.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/FileDescriptorInput.cpp) # File I/O
+#list(REMOVE_ITEM AlwaysSmall src/StringValueMapper.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/StringValueMapperSimple.cpp) # Simple
+list(REMOVE_ITEM AlwaysSmall src/JSONEncoder.cpp)
+list(REMOVE_ITEM AlwaysSmall src/StorageDataSinkJSON.cpp)
+list(REMOVE_ITEM AlwaysSmall src/InputScannerJSON.cpp)
+list(REMOVE_ITEM AlwaysSmall src/MessageRawJSON.cpp)
+#list(REMOVE_ITEM AlwaysSmall src/Command.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/CommandHandler.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/ListCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/StorageInfoCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/GetCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/DeleteCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/RenameCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/VersionCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/NoOperationCommand.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/ProcessInput.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/Process.cpp) # Base
+#list(REMOVE_ITEM AlwaysSmall src/Processes.cpp) # Base
+list(REMOVE_ITEM AlwaysSmall src/LocalProcess.cpp)
+list(REMOVE_ITEM AlwaysSmall src/CommandHandlerJSON.cpp)
+#list(REMOVE_ITEM AlwaysSmall src/Factories.cpp) # Simple
+list(REMOVE_ITEM AlwaysSmall src/LocalProcesses.cpp)
 #message(${AlwaysSmall})
 
 #set_source_files_properties(${AlwaysSmall} PROPERTIES COMPILE_FLAGS ${AlwaysSmallOptions})
@@ -180,7 +181,7 @@ function(add_exe SUBDIR PREFIX)
         set(BASE_NAME ${PREFIX})
     endif()
     add_executable(${FULL} IMPORTED)
-    set_property(TARGET ${FULL} PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/datalackey/tests/${SUBDIR}/${BASE_NAME})
+    set_property(TARGET ${FULL} PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/tests/${SUBDIR}/${BASE_NAME})
 endfunction()
 
 function(new_test TEST_NAME EXE)
@@ -190,6 +191,11 @@ endfunction()
 
 function(new_test_arg TEST_NAME EXE ARG)
     add_test(NAME ${TEST_NAME} COMMAND ${EXE} ${ARG} $<TARGET_FILE:datalackey>)
+    set_property(TEST ${TEST_NAME} PROPERTY ENVIRONMENT "PATH=${CMAKE_CURRENT_LIST_DIR}:$ENV{PATH}")
+endfunction()
+
+function(new_test_arg3 TEST_NAME EXE ARG ARG2 ARG3)
+    add_test(NAME ${TEST_NAME} COMMAND ${EXE} ${ARG} ${ARG2} ${ARG3} $<TARGET_FILE:datalackey>)
     set_property(TEST ${TEST_NAME} PROPERTY ENVIRONMENT "PATH=${CMAKE_CURRENT_LIST_DIR}:$ENV{PATH}")
 endfunction()
 
@@ -212,7 +218,7 @@ new_test(stopcont stop.sh)
 add_exe(memory noop.sh)
 new_test(noop noop.sh)
 add_exe(memory version.sh)
-new_test_arg(version version.sh ${CMAKE_CURRENT_LIST_DIR}/datalackey/Version.hpp)
+new_test_arg(version version.sh ${CMAKE_CURRENT_LIST_DIR}/src/Version.hpp)
 add_exe(memory report.sh)
 new_test_arg(messages report.sh messages)
 new_test_arg(commands report.sh commands)
@@ -336,3 +342,10 @@ new_test(run_errors run.sh)
 #
 add_exe(memory version_repeat.sh)
 new_test(version_crash version_repeat.sh)
+
+# Light stress tests
+#
+add_exe(stress overwrite.sh)
+new_test_arg3(overwrite overwrite.sh 5 5 5)
+add_exe(stress parallel_overwrite.sh)
+new_test_arg3(parallel_overwrite parallel_overwrite.sh 10 10 10)
