@@ -28,7 +28,7 @@ On macOS with Homebrew (https://docs.brew.sh):
 
 On Linux distributions you can probably find it via package manager.
 
-# Building.
+# Building
 
 You need cmake and compiler for C++14. Currently clang on macOS, and clang
 and gcc on Ubuntu have been tried. Assuming a build directory parallel to
@@ -50,7 +50,7 @@ To build, assuming Unix Makefiles:
     sudo make install
 
 
-# Notes.
+# Notes
 
 This is supposed to be able to handle other formats than JSON in the
 future. Currently only JSON is supported. Hence options that have just one
@@ -60,7 +60,7 @@ than relying on default values.
 Scripts at the top level are for testing purposes. Hence they work good
 enough for current purposes.
 
-# Running.
+# Running
 
 You are not supposed to run this manually. Look for datalackeyshell
 repository in the same place where you found this repository.
@@ -93,3 +93,9 @@ Datalackey outputs each reply to command (an array) or requested data
 (JSON object) in single line. Hence the programs that communicate with
 datalackey can expect each line to contain something fully recognizable as
 JSON.
+
+# License
+
+Copyright (C) 2019 Ismo Kärkkäinen
+
+Licensed under Universal Permissive License. See License.txt.
