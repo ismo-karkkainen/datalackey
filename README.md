@@ -1,11 +1,13 @@
 # What is datalackey?
 
-One day I figured I had written enough code that stores data just because
-I have to store it someplace while it is being tossed around. Take a JSON
-object, pass it to datalackey and it splits it by using key as data label
-and the value as data. You can instruct datalackey to take labels and
-contruct a JSON object, allowing re-naming of the labels to whatever the
-program is expecting.
+Datalackey stores data, runs programs, passes data to them, and stores data
+coming from the programs. Each data input and output is a JSON object. Each
+data output get split at top level so that each key is used as data label
+and each value is the data itself.
+
+When passing data to programs, you can map labels to keys you want, and
+the key/value pairs are passed to the program in one JSON object. In the
+order you specified in the command.
 
 This is not in any way a database or anything like that. You could write
 a couple scripts to gather file contents into single JSON object and pass
@@ -15,7 +17,9 @@ You are not supposed to run this manually, instead this is meant to be used
 by other programs. Hence default install location is /usr/local/libexec.
 
 See datalackeyshell repository located where this repository is, for some
-simple tools that use datalackey.
+simple tools that use datalackey. Including a pair of ruby scripts that
+construct a JSON object out of file contents and split JSON object into
+files.
 
 # Requirements
 
@@ -49,7 +53,6 @@ To build, assuming Unix Makefiles:
     make test
     sudo make install
 
-
 # Notes
 
 This is supposed to be able to handle other formats than JSON in the
@@ -58,7 +61,7 @@ allowed value at the moment. I preferred stating things explicitly rather
 than relying on default values.
 
 Scripts at the top level are for testing purposes. Hence they work good
-enough for current purposes.
+enough for current purposes in the current context.
 
 # Running
 
@@ -76,7 +79,7 @@ where data storage directory is placed. The former is fine if all you need
 is temporary storage, the latter of course can handle persistent and large
 data.
 
-The commands are output via:
+The commands you can use are output via:
 
     datalackey -m --report commands | oneline-prettify-json
 
@@ -84,7 +87,12 @@ Either figure out the syntax (at the moment lacks things such as count
 information for parts that can only be input once) or see note about
 datalackeyshell above.
 
-To pass data in, just pass a JSON object and it will be split up.
+To pass data in, just pass a JSON object and it will be split up. Each JSON
+object is treated as atomic. Either all items are stored or none are. Hence
+bad output from source program will not result in partial updates. In case of
+invalid JSON sent to datalackey, a zero byte can be used to reset the input
+so that proper JSON can be set after the zero byte. White-space outside
+strings is ignored.
 
 To figure out actual usage, I suggest you look at the test scripts. Also,
 datalackeyshell.
