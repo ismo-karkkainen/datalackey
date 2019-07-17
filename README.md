@@ -28,9 +28,11 @@ The https://github.com/nlohmann/json is required.
 On macOS with Homebrew (https://docs.brew.sh):
 
     brew tap nlohmann/json
-    brew install nlohmann_json --with-cmake
+    brew install nlohmann-json
 
-On Linux distributions you can probably find it via package manager.
+On Linux distributions you can probably find it via package manager. You may
+have to install cmake and the json from sources, depending on the versions
+that are available.
 
 # Building
 

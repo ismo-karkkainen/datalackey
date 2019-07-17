@@ -10,6 +10,7 @@ DL=$2
 OUT="${B}_out.txt"
 EXP="${B}_expected.txt"
 
+export LC_ALL=C
 $DL -m --report $REPORT -i stdin JSON -o stdout JSON |
 oneline-keysort-json | sort -u > $OUT
 

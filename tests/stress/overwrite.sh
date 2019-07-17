@@ -19,7 +19,7 @@ echo '{"data'\$1'":[0'
 while [ \$size -gt 0 ]
 do
     echo ",\$size,\$size,\$size,\$size,\$size,\$size,\$size,\$size,\$size,\$size"
-    let size=size-10
+    size=$((size-10))
 done
 echo ']}'
 EOF

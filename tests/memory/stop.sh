@@ -26,11 +26,16 @@ kill -s SIGCONT $(cat $PID)
 ) | $DL -m -i stdin JSON -o stdout JSON |
 replace-pid > $OUT
 
+STOP=17
+if [ "$(uname)" = "Linux" ]; then
+    STOP=19
+fi
+
 cat > $EXP <<EOF
 ["1","run","running","pid"]
 [null,"process","started","1","pid"]
 ["1","run","input","closed"]
-["1","run","stopped",17]
+["1","run","stopped",$STOP]
 ["1","run","continued"]
 ["1","run","exit",0]
 [null,"process","ended","1","pid"]

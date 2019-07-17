@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(datalackey CXX)
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -115,7 +115,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
 endif()
 
 if (UNIX AND NOT APPLE)
-    target_link_libraries(datalackey Threads::Threads)
+    target_link_libraries(datalackey PRIVATE Threads::Threads)
 endif()
 
 list(APPEND AlwaysSmall ${Sources})
