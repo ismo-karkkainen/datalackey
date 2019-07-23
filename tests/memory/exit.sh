@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -ne 2 ]; then
     echo "Usage: $(basename $0) code datalackey-executable"
@@ -12,7 +12,7 @@ EXP="${B}_expected.txt"
 
 cat > _script.sh << EOF
 #!/bin/sh
-exit $1
+exit \$1
 EOF
 chmod a+x _script.sh
 
@@ -22,8 +22,10 @@ $DL -m -i stdin JSON -o stdout JSON | replace-pid > $OUT
 cat > $EXP <<EOF
 ["1","run","running","pid"]
 [null,"process","started","1","pid"]
+set
 ["1","run","input","closed"]
 ["1","run","exit",$C]
+end
 [null,"process","ended","1","pid"]
 ["1","run","finished"]
 ["1","done",""]

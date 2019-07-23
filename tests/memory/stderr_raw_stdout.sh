@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -ne 1 ]; then
     echo "Usage: $(basename $0) datalackey-executable"
@@ -26,8 +26,10 @@ replace-pid > $OUT
 cat > $EXP <<EOF
 ["1","run","running","pid"]
 [null,"process","started","1","pid"]
+set
 ["1","run","input","closed"]
 ["1","run","bytes",97,10]
+end
 ["1","run","bytes",97,98,10]
 ["1","run","bytes",97,98,99,10]
 ["1","run","exit",0]

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -ne 1 ]; then
     echo "Usage: $(basename $0) datalackey-executable"
@@ -20,9 +20,9 @@ chmod a+x _script.sh
 (
 echo '["1","run","program","./_script.sh"]'
 nap
-kill -s SIGSTOP $(cat $PID)
+kill -s STOP $(cat $PID)
 sleep 1
-kill -s SIGCONT $(cat $PID)
+kill -s CONT $(cat $PID)
 ) | $DL -m -i stdin JSON -o stdout JSON |
 replace-pid > $OUT
 

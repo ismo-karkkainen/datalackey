@@ -1,126 +1,151 @@
-#!/usr/bin/python
+#!/usr/bin/env ruby
 
 # For comparing dtalackey output with expected one. Solves the problem of
 # variation in output from multi-threaded program.
 
-import sys
-
-if len(sys.argv) != 3:
-    print("Usage: compare-output output target")
-    print("Allowed target contents:")
-    print("line-used-as-is")
-    print("optional:line (marks line as optional)")
-    print("set (begins a set of lines in arbitrary order, no nested sets)")
-    print("subset (like set but all optional and at least one required)")
-    print("end (ends a set or subset)")
-    print("escape:line (allows line to start with any special word)")
-    print("Spaces are ignored before optional:, set, end, escape:")
-    sys.exit(5)
+if ARGV.length != 2
+  puts(%q(Usage: compare-output output target
+Allowed target contents:
+  line-used-as-is
+  optional:line (marks line as optional)
+  set (begins a set of lines in arbitrary order, no nested sets)
+  subset (like set but all optional and at least one required)
+  end (ends a set or subset)
+  escape:line (allows line to start with any special word)
+Spaces are ignored before optional:, set, end, escape:))
+  exit 5
+end
 
 # Handles line or lines in arbitrary order. Lines may be optional.
-class Target(object):
-    def __init__(self):
-        self._compulsory = []
-        self._optional = []
-        self._subset = False
-        self._max_optional_len = 0
+class Target
+  def initialize
+    @compulsory = []
+    @optional = []
+    @subset = false
+    @max_optional_length = 0
+  end
 
-    def Subset(self):
-        self._subset = True
+  def subset
+    @subset = true
+  end
 
-    def Add(self, Target, Optional):
-        if Optional or self._subset:
-            self._optional.append(Target)
-            self._max_optional_len = len(self._optional)
-        else:
-            self._compulsory.append(Target)
+  def add(target, optional)
+    if optional || @subset
+      @optional.push(target)
+      @max_optional_length = @optional.length
+    else
+      @compulsory.push(target)
+    end
+  end
 
-    def __len__(self):
-        return len(self._compulsory) + len(self._optional)
+  def length
+    return @compulsory.length + @optional.length
+  end
 
-    def Check(self, Output):
-        for lst in (self._compulsory, self._optional,):
-            try:
-                del lst[lst.index(Output)]
-                return True
-            except ValueError:
-                pass
-        return False
+  def check(output)
+    [ @compulsory, @optional ].each do |lst|
+      idx = lst.index output
+      next if idx.nil?
+      lst.delete_at idx
+      return true
+    end
+    return false
+  end
 
-    def Remains(self):
-        return len(self._compulsory) > 0 or self._subset and len(self._optional) == self._max_optional_len
+  def remains
+    return (@compulsory.length > 0) || @subset && (@optional.length == @max_optional_length)
+  end
+end
 
 # Read target data.
-try:
-    f = open(sys.argv[2], "r")
-except IOError, e:
-    print(str(e))
-    sys.exit(2)
+begin
+  f = File.new(ARGV.last, File::RDONLY)
+rescue Errno::ENOENT => e
+  $stderr.puts(e.to_s)
+  exit 2
+end
 targets = []
-in_set = False
-t = Target()
-for line in f.readlines():
-    optional = False
-    s = line.lstrip()
-    tgt = None
-    if s.startswith("escape:"):
-        tgt = s[len("escape:"):]
-    elif s.startswith("set"):
-        if in_set:
-            print("No nested (sub)sets allowed.")
-            sys.exit(4)
-        in_set = True
-    elif s.startswith("subset"):
-        if in_set:
-            print("No nested (sub)sets allowed.")
-            sys.exit(4)
-        in_set = True
-        t.Subset()
-    elif s.startswith("end"):
-        if not in_set:
-            print("end outside set.")
-            sys.exit(4)
-        if len(t) == 0:
-            print("Empty set not allowed.")
-            sys.exit(4)
-        in_set = False
-    elif s.startswith("optional:"):
-        optional = True
-        tgt = s[len("optional:"):]
-    else:
-        tgt = line
-    if not tgt is None:
-        t.Add(tgt.rstrip("\r\n"), optional)
-    if not in_set:
-        targets.append(t)
-        t = Target()
-f.close()
-if in_set:
-    print("Set remains open.")
-    sys.exit(4)
+in_set = false
+t = Target.new
+f.readlines.each do |line|
+  optional = false
+  s = line.lstrip
+  tgt = nil
+  if s.start_with? "escape:"
+    tgt = s.slice("escape:".length..-1)
+  elsif s.start_with? "set"
+    if in_set
+      $stderr.puts "No nested (sub)sets allowed."
+      exit 4
+    end
+    in_set = true
+  elsif s.start_with? "subset"
+    if in_set
+      $stderr.puts "No nested (sub)sets allowed."
+      exit 4
+    end
+    in_set = true
+    t.subset()
+  elsif s.start_with? "end"
+    unless in_set
+      $stderr.puts "end outside set."
+      exit 4
+    end
+    if t.length == 0
+      $stderr.puts "Empty set not allowed."
+      exit 4
+    end
+    in_set = false
+  elsif s.start_with? "optional:"
+    optional = true
+    tgt = s.slice("optional:".length..-1)
+  else
+    tgt = line
+  end
+  unless tgt.nil?
+    t.add(tgt.rstrip, optional)
+  end
+  unless in_set
+    targets.push(t)
+    t = Target.new
+  end
+end
+f.close
+if in_set
+  $stderr.puts "Set remains open."
+  exit 4
+end
 
 # Read source file line by line.
-try:
-    f = open(sys.argv[1], "r")
-except IOError, e:
-    print(str(e))
-    sys.exit(3)
+begin
+  f = File.new(ARGV.first, File::RDONLY)
+rescue Errno::ENOENT => e
+  $stderr.puts(e.to_s)
+  exit 2
+end
 idx = 0
-line = None
-for line in f.readlines():
-    if idx == len(targets):
-        print("Out of targets.")
-        sys.exit(1)
-    line = line.rstrip("\r\n")
-    while not targets[idx].Check(line):
-        if targets[idx].Remains():
-            print(line)
-            sys.exit(1)
-        idx = idx + 1
-        if idx == len(targets):
-            print("Out of targets.")
-            sys.exit(1)
-f.close()
-if line is None and len(targets) != 0:
-    print("No input but targets has items.")
-    sys.exit(1)
+had_input = false
+f.readlines.each do |line|
+  had_input = true
+  if idx == targets.length
+    $stderr.puts "Out of targets."
+    exit 1
+  end
+  line.rstrip!
+  while not(targets[idx].check(line))
+    if targets[idx].remains
+      $stderr.puts line
+      exit 1
+    end
+    idx = idx + 1
+    if idx == targets.length
+      $stderr.puts "Out of targets."
+      exit 1
+    end
+  end
+end
+f.close
+if not(had_input) && targets.length != 0
+  $stderr.puts "No input but targets has items."
+  exit 1
+end

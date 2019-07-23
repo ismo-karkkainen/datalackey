@@ -229,7 +229,9 @@ void LocalProcess::real_runner() {
         case EACCES:
         case ELOOP:
         case ENAMETOOLONG:
+            exit(56);
         case ENOENT:
+            exit(57); // Could be a script with interpreter that is not found.
         case ENOEXEC:
         case ENOTDIR:
         case ETXTBSY:
@@ -365,6 +367,7 @@ bool LocalProcess::Run() {
     try {
         child_start_lock.lock();
         worker = new std::thread(&LocalProcess::runner, this);
+        std::this_thread::yield();
     }
     catch (const std::system_error& e) {
         child_start_lock.unlock();

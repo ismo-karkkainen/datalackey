@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Tests that multiple repetitions of version command from separate processes
 # do not crash datalackey.

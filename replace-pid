@@ -1,18 +1,22 @@
-#!/usr/bin/python
+#!/usr/bin/env ruby
 
 # For replacing pid in command output to eliminate variation in test output.
 
-import sys
-import json
+require 'json'
 
-for line in sys.stdin.readlines():
-    try:
-        j = json.loads(line)
-        if len(j) > 3:
-            if j[1] == "run" and j[2] == "running":
-                j[-1] = "pid"
-            elif j[0] == None and j[1] == "process":
-                j[-1] = "pid"
-        print(json.dumps(j, separators=(',',':')))
-    except ValueError, e:
-        sys.exit("Not JSON: " + line) # Could print line but JSON is expected.
+$stdin.readlines.each do |line|
+  begin
+    j = JSON.parse(line)
+    if j.is_a?(Array) and j.size > 3
+      if j[1] == "run" and j[2] == "running"
+        j[-1] = 'pid'
+      elsif j[0].nil? and j[1] == "process"
+        j[-1] = 'pid'
+      end
+    end
+    puts JSON.generate(j)
+  rescue JSON::ParserError => e
+    $stderr.puts "Not JSON: " + line
+    exit 1
+  end
+end

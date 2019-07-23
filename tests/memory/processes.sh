@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -ne 1 ]; then
     echo "Usage: $(basename $0) datalackey-executable"
@@ -18,7 +18,7 @@ chmod a+x _script.sh
 (
 echo '["1","run","program","./_script.sh"]'
 nap
-ps u | grep _script.sh | grep -v grep | awk '{ print $2 }' > _pid.txt
+pgrep -f _script.sh > _pid.txt
 sleep 1
 ) | $DL -m -i stdin JSON -o stdout JSON > $OUT
 

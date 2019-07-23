@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -ne 2 ]; then
     echo "Usage: $(basename $0) signal datalackey-executable"
@@ -23,8 +23,10 @@ replace-pid > $OUT
 cat > $EXP <<EOF
 ["1","run","running","pid"]
 [null,"process","started","1","pid"]
+set
 ["1","run","input","closed"]
 ["1","run","signal",$S]
+end
 [null,"process","ended","1","pid"]
 ["1","run","finished"]
 ["1","done",""]

@@ -27,15 +27,15 @@ FileDescriptorInput::~FileDescriptorInput() {
 
 int FileDescriptorInput::Read(RawData& Buffer) {
     struct timespec ts;
-    fd_set stdin;
+    fd_set std_in;
     int total = 0;
     while (true) {
         ts.tv_sec = 0;
         ts.tv_nsec = 0;
-        FD_ZERO(&stdin);
-        FD_SET(fd, &stdin);
+        FD_ZERO(&std_in);
+        FD_SET(fd, &std_in);
         errno = 0;
-        int avail = pselect(fd + 1, &stdin, nullptr, nullptr, &ts, nullptr);
+        int avail = pselect(fd + 1, &std_in, nullptr, nullptr, &ts, nullptr);
         if (avail <= 0) {
             eof = avail < 0 && errno == EBADF;
             return 0;

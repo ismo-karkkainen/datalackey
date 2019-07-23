@@ -1,14 +1,56 @@
-#!/usr/bin/python
+#!/usr/bin/env ruby
 
 # To eliminate key order variation in test output. Expects each line to be
 # JSON object or array, to match datalackey output.
 
-import sys
-import json
+require 'json'
 
-for line in sys.stdin.readlines():
-    try:
-        j = json.loads(line)
-        print(json.dumps(j, separators=(',',':'), sort_keys=True))
-    except ValueError, e:
-        sys.exit("Not JSON: " + line) # Could print line but JSON is expected.
+# Over-riding to_json to sort object keys works because these two are the only
+# containers and hence once will call the other until simple value.
+module TweakHash
+  def self.included base
+    base.class_eval do
+      def to_json
+        s = '{'
+        sep = ''
+        keys.sort.each do |k|
+          s.concat "#{sep}#{k.to_json}:"
+          sep = ','
+          s.concat self[k].to_json
+        end
+        s.concat '}'
+        return s
+      end
+    end
+  end
+end
+Hash.include TweakHash
+
+module TweakArray
+  def self.included base
+    base.class_eval do
+      def to_json
+        s = '['
+        sep = ''
+        each do |v|
+          s.concat sep
+          sep = ','
+          s.concat v.to_json
+        end
+        s.concat ']'
+        return s
+      end
+    end
+  end
+end
+Array.include TweakArray
+
+$stdin.readlines.each do |line|
+  begin
+    j = JSON.parse(line)
+    puts j.to_json
+  rescue JSON::ParserError => e
+    $stderr.puts "Not JSON: " + line
+    exit 1
+  end
+end

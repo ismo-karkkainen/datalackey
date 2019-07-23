@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -ne 1 ]; then
     echo "Usage: $(basename $0) datalackey-executable"
@@ -10,27 +10,23 @@ OUT="${B}_out.txt"
 EXP="${B}_expected.txt"
 
 cat > _script.sh << EOF
-#!/usr/bin/python
+#!/usr/bin/env ruby
 
-from __future__ import print_function
-import json
-import sys
-import os
+require 'json'
 
-raw = sys.stdin.read()
-try:
-    data = json.loads(raw)
-except ValueError, e:
-    print(str(e), file=sys.stderr)
-    print(raw, file=sys.stderr)
-    sys.exit(1)
-print(json.dumps(dict(os.environ)), file=sys.stderr)
-print(json.dumps(sys.argv), file=sys.stderr)
+raw = \$stdin.read
+begin
+  data = JSON.parse(raw)
+rescue JSON::ParserError => e
+  \$stderr.puts e.to_s
+  \$stderr.puts raw
+  exit 1
+end
+\$stderr.puts JSON.generate(ARGV)
 dada = {}
-for d in data:
-    dada[d + "-out"] = data[d]
-print(json.dumps(dada), file=sys.stdout)
-sys.exit(0)
+data.each_pair { |k, v| dada[k + '-out'] = v }
+puts JSON.generate(dada)
+exit 0
 EOF
 chmod a+x _script.sh
 

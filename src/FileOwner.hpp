@@ -14,6 +14,7 @@
 #include <string>
 #include <set>
 #include <mutex>
+#include <sys/types.h>
 
 
 class FileOwner : public DataOwner {

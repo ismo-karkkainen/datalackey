@@ -347,5 +347,3 @@ new_test(version_crash version_repeat.sh)
 #
 add_exe(stress overwrite.sh)
 new_test_arg3(overwrite overwrite.sh 5 5 5)
-add_exe(stress parallel_overwrite.sh)
-new_test_arg3(parallel_overwrite parallel_overwrite.sh 10 10 10)

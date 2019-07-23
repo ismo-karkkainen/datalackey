@@ -32,7 +32,7 @@ static std::string absolute(const std::string& Name, struct stat& info) {
     char* buffer = new char[MAXPATHLEN + 1];
 #if defined(__APPLE__)
     if (-1 != fcntl(fd, F_GETPATH, buffer))
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__FreeBSD__)
     if (buffer == realpath(Name.c_str(), buffer))
 #endif
         abs = std::string(buffer);

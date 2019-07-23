@@ -23,16 +23,20 @@ files.
 
 # Requirements
 
-The https://github.com/nlohmann/json is required.
+The https://github.com/nlohmann/json version 3.6 or newer is required.
+You need cmake and a C++ compiler that supports C++14.
 
 On macOS with Homebrew (https://docs.brew.sh):
 
     brew tap nlohmann/json
     brew install nlohmann-json
+    brew install cmake
 
-On Linux distributions you can probably find it via package manager. You may
-have to install cmake and the json from sources, depending on the versions
-that are available.
+On Linux you may need to install git to clone a sufficiently new version of
+json library. Otherwise standard packages should be ok.
+
+    git clone --depth 1 https://github.com/nlohmann/json
+    cd json && cmake . && make && sudo make install
 
 # Building
 
@@ -56,6 +60,9 @@ To build, assuming Unix Makefiles:
     sudo make install
 
 # Notes
+
+As the source code indicates in places, various BSD variants have been tried
+but even though the source code compiles, tests fail.
 
 This is supposed to be able to handle other formats than JSON in the
 future. Currently only JSON is supported. Hence options that have just one
