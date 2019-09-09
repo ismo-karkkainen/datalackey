@@ -21,6 +21,11 @@ simple tools that use datalackey. Including a pair of ruby scripts that
 construct a JSON object out of file contents and split JSON object into
 files.
 
+If you think of Redis or Memcached, the use of datalackey is to run
+programs it starts, gather key/value pairs into one JSON object, pass it
+to the program and then split the results and store the key/value pairs.
+You could use datalackey as a data store but whether you should is debatable.
+
 # Requirements
 
 The https://github.com/nlohmann/json version 3.6 or newer is required.
