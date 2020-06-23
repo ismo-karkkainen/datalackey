@@ -10,7 +10,6 @@
 #ifndef InputChannel_hpp
 #define InputChannel_hpp
 
-#include <ios>
 #include "RawData.hpp"
 
 

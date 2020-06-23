@@ -104,128 +104,91 @@ void Output::clear_buffers() {
         inputs.pop();
 }
 
-void Output::feeder() {
-    std::shared_ptr<ProcessInput> input;
-    std::shared_ptr<const RawData> rd;
-    std::shared_ptr<OutputItemBuffer> outbuf = nullptr;
-    const RawData* data = nullptr;
-    RawData deco;
+void Output::feed_data(const RawData* Data) noexcept(false) {
     size_t written = 0;
-    size_t slice_size = 32768; // Get from OutputChannel.
-    bool in_input = false;
+    const size_t slice_size = 65536; // Get from OutputChannel.
+    while (written < Data->Size()) {
+        size_t left = Data->Size() - written;
+        if (slice_size < left)
+            left = slice_size;
+        RawData::ConstIterator start = Data->CBegin() + written;
+        RawData::ConstIterator end = Data->CBegin() + written + left;
+        written += channel.Write(start, end);
+        if (channel.Failed())
+            throw false;
+    }
+}
+
+void Output::feed_key_value(std::shared_ptr<ProcessInput> KeyValue,
+    Encoder* E, RawData& Deco) noexcept(false)
+{
+    E->Encode(Deco, ValueRef<std::string>(KeyValue->Name()->String()));
+    E->Encode(Deco, RawItem);
+    feed_data(&Deco);
+    Deco.Clear();
+    while (true) {
+        std::shared_ptr<const RawData> rd = KeyValue->Data()->Read(1048576);
+        if (rd) {
+            feed_data(rd.get());
+            continue;
+        }
+        if (KeyValue->Data()->Error()) {
+            DataNotifiedOutputs.Notify([&KeyValue](Output* Out) {
+                ntf_data_error.Send(*Out,
+                    KeyValue->Label()->String().c_str(), 0);
+            });
+            throw true;
+        }
+        return; // Read all data and are done with the value.
+    }
+}
+
+void Output::feed_object(Batch& B) noexcept(false) {
+    RawData deco;
+    std::unique_ptr<Encoder> e(encoder.Clone());
+    e->Encode(deco, Dictionary);
+    for (auto& kv : B.items)
+        feed_key_value(kv, e.get(), deco);
+    e->Encode(deco, Structure::End);
+    feed_data(&deco);
+}
+
+void Output::feed_messages(std::unique_lock<std::mutex>& Lock) noexcept(false) {
+    Lock.lock();
+    while (!ended_buffers.empty()) { // Has queued messages to send.
+        std::shared_ptr<OutputItemBuffer> outbuf = ended_buffers.front();
+        ended_buffers.pop();
+        Lock.unlock();
+        feed_data(outbuf->Buffer());
+        Lock.lock();
+    }
+    Lock.unlock();
+}
+
+void Output::feeder() {
     std::unique_lock<std::mutex> lock(input_sets_mutex, std::defer_lock);
     while (true) {
-        if (data != nullptr) { // Keep writing data we have.
-            size_t left = data->Size() - written;
-            if (slice_size < left)
-                left = slice_size;
-            RawData::ConstIterator start = data->CBegin() + written;
-            RawData::ConstIterator end = data->CBegin() + written + left;
-            written += channel.Write(start, end);
-            if (channel.Failed()) {
-                failed = true;
-                this->end(false);
-                written = data->Size();
-                break;
-            }
-            if (written == data->Size()) {
-                if (outbuf != nullptr && data == outbuf->Buffer()) {
-                    outbuf = nullptr;
-                } else if (data == rd.get()) {
-                    rd = nullptr;
-                } else
-                    deco.Clear();
-                data = nullptr;
-                written = 0;
-            }
-            // Write bookkeeping happens here.
-            continue;
-        }
-        if (input) { // Need new block to write.
-            rd = input->Data()->Read(1048576); // Should depend on slice_size.
-            if (rd) {
-                data = rd.get();
-            } else {
-                if (input->Data()->Error()) {
-                    DataNotifiedOutputs.Notify([&input](Output* Out) {
-                        ntf_data_error.Send(*Out,
-                            input->Label()->String().c_str(), 0);
-                    });
-                    failed = true;
-                    break;
-                }
-                input = nullptr; // Finished this one.
-            }
-            continue;
-        }
-        if (in_input) { // Get next input from queue.
+        try {
+            feed_messages(lock); // Give priority to notifications.
             lock.lock();
-            input = inputs.front();
-            inputs.pop();
-            lock.unlock();
-            if (input) {
-                // Buffer has to have separator and then name.
-                Encoder* e = encoder.Clone();
-                e->Encode(deco, Dictionary);
-                e->Encode(deco, ValueRef<std::string>(input->Name()->String()));
-                e->Encode(deco, RawItem);
-                deco.Clear();
-                // Now separator, name, separator for value.
-                e->Encode(deco, ValueRef<std::string>(input->Name()->String()));
-                e->Encode(deco, RawItem);
-                data = deco.Size() ? &deco : nullptr;
-                delete e;
+            if (inputs.empty()) {
+                if (Closed())
+                    break;
+                // We had nothing to write. Wait for something to arrive.
+                channel.Flush();
+                output_added.wait(lock);
+                lock.unlock();
                 continue;
             }
-            // We got nullptr, finish the dictionary.
-            in_input = false;
-            Encoder* e = encoder.Clone();
-            e->Encode(deco, Dictionary);
-            e->Encode(deco, ValueRef<std::string>(std::string("")));
-            e->Encode(deco, RawItem);
-            deco.Clear();
-            e->Encode(deco, Structure::End);
-            data = deco.Size() ? &deco : nullptr;
-            delete e;
-            continue;
-        }
-        lock.lock();
-        if (!ended_buffers.empty()) { // Has a queued message to send.
-            outbuf = ended_buffers.front();
-            ended_buffers.pop();
-            lock.unlock();
-            data = outbuf->Buffer();
-            continue;
-        }
-        if (!inputs.empty()) { // Has next batch of inputs to process.
-            input = inputs.front();
+            Batch b = inputs.front();
             inputs.pop();
             lock.unlock();
-            if (input == nullptr) { // Empty object.
-                Encoder* e = encoder.Clone();
-                e->Encode(deco, Dictionary);
-                e->Encode(deco, Structure::End);
-                data = &deco;
-                delete e;
-                continue;
-            }
-            if (input->Name() == nullptr) {
-                input = nullptr; // Just a marker, nothing to output.
-                break;
-            }
-            in_input = true;
-            Encoder* e = encoder.Clone();
-            e->Encode(deco, Dictionary);
-            e->Encode(deco, ValueRef<std::string>(input->Name()->String()));
-            e->Encode(deco, RawItem);
-            data = &deco;
-            delete e;
-            continue;
+            feed_object(b);
         }
-        // We had nothing to write. Wait for something (unfinished) to arrive.
-        channel.Flush();
-        output_added.wait(lock);
-        lock.unlock();
+        catch (bool failure) {
+            this->end(false);
+            break;
+        }
     }
     channel.Close();
     // On failure we may have references to data in input queue.
@@ -239,9 +202,7 @@ void Output::end(bool FromOutside) {
         eof = true;
         if (!FromOutside)
             return;
-        std::shared_ptr<ProcessInput> marker(new ProcessInput());
         std::unique_lock<std::mutex> lock(input_sets_mutex);
-        inputs.push(marker);
         orphan_buffers();
         lock.unlock();
         output_added.notify_one();
@@ -294,11 +255,10 @@ OutputItem* Output::Writable(bool Discarder) {
 void Output::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
     if (eof)
         return;
+    Batch batch;
+    batch.items = Inputs;
     std::unique_lock<std::mutex> lock(input_sets_mutex);
-    for (auto& input : Inputs)
-        inputs.push(input);
-    // This indicates that the input group ended.
-    inputs.push(std::shared_ptr<ProcessInput>());
+    inputs.push(batch);
     lock.unlock();
     output_added.notify_one();
 }

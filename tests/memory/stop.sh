@@ -13,7 +13,7 @@ PID="${B}_pid.txt"
 cat > _script.sh << EOF
 #!/bin/sh
 echo \$\$ > $PID
-sleep 1
+sleep 2
 EOF
 chmod a+x _script.sh
 

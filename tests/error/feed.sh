@@ -53,7 +53,9 @@ cat > "$EXP" << EOF
 [null,"process","started","sub","pid"]
 [null,"data","stored","item",1]
 [null,"data","stored","item2",2]
+subset
 [null,"process","ended","sub","pid"]
+end
 [2,"feed","error","not-found"]
 [2,"done",""]
 [5,"error","unknown",5,"feed","1","invalid"]
@@ -74,7 +76,8 @@ cat > "$EXP" << EOF
 [12,"done",""]
 [null,"data","stored","name",3]
 [3,"done",""]
-set
+subset
+[null,"process","ended","sub","pid"]
 ["1","run","input","closed"]
 [4,"feed","error","closed"]
 [4,"done",""]
@@ -88,7 +91,7 @@ EOF
 cat > "$EXP_SCR" << EOF
 ["sub","run","running","pid"]
 ["sub","run","input","closed"]
-set
+subset
 [null,"data","stored","item",1]
 [null,"data","stored","item2",2]
 ["sub","run","exit",0]

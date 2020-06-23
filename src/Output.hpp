@@ -84,6 +84,10 @@ public:
 
 class Output {
 private:
+    class Batch {
+    public:
+        std::vector<std::shared_ptr<ProcessInput>> items;
+    };
     // Lock input_sets_mutex first, then this if you need both.
     mutable std::mutex mutex;
     const Encoder& encoder;
@@ -92,7 +96,7 @@ private:
     OutputChannel& channel;
     std::thread* channel_feeder;
     std::condition_variable output_added;
-    std::queue<std::shared_ptr<ProcessInput>> inputs;
+    std::queue<Batch> inputs;
     std::queue<std::shared_ptr<OutputItemBuffer>> ended_buffers;
     bool eof;
     mutable std::mutex input_sets_mutex;
@@ -101,6 +105,11 @@ private:
 
     void orphan_buffers(); // Locks nothing. Lock as needed.
     void clear_buffers();
+    void feed_data(const RawData* Data) noexcept(false);
+    void feed_key_value(std::shared_ptr<ProcessInput> KeyValue,
+        Encoder* E, RawData& Deco) noexcept(false);
+    void feed_object(Batch& B) noexcept(false);
+    void feed_messages(std::unique_lock<std::mutex>& Lock) noexcept(false);
     void feeder();
     void end(bool FromOutside);
 
