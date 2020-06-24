@@ -11,6 +11,9 @@ shift
 while test $COUNT -gt 0
 do
     $*
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
     COUNT=$(expr $COUNT - 1)
     echo "$COUNT repeats remaining."
 done

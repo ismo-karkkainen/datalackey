@@ -13,6 +13,7 @@
 #include "Structure.hpp"
 #include "Messages.hpp"
 #include <cassert>
+#include <chrono>
 
 
 OutputItemBuffer::OutputItemBuffer(Output& Master)
@@ -153,30 +154,24 @@ void Output::feed_object(Batch& B) noexcept(false) {
     feed_data(&deco);
 }
 
-void Output::feed_messages(std::unique_lock<std::mutex>& Lock) noexcept(false) {
-    Lock.lock();
-    while (!ended_buffers.empty()) { // Has queued messages to send.
-        std::shared_ptr<OutputItemBuffer> outbuf = ended_buffers.front();
-        ended_buffers.pop();
-        Lock.unlock();
-        feed_data(outbuf->Buffer());
-        Lock.lock();
-    }
-    Lock.unlock();
-}
-
 void Output::feeder() {
-    std::unique_lock<std::mutex> lock(input_sets_mutex, std::defer_lock);
-    while (true) {
-        try {
-            feed_messages(lock); // Give priority to notifications.
+    try {
+        std::unique_lock<std::mutex> lock(input_sets_mutex, std::defer_lock);
+        while (!channel.Closed() && !channel.Failed()) {
             lock.lock();
+            if (!ended_buffers.empty()) {
+                std::shared_ptr<OutputItemBuffer> outbuf(ended_buffers.front());
+                ended_buffers.pop();
+                lock.unlock();
+                feed_data(outbuf->Buffer());
+                continue;
+            }
             if (inputs.empty()) {
                 if (Closed())
-                    break;
-                // We had nothing to write. Wait for something to arrive.
+                    break; // Nothing will be added anymore.
                 channel.Flush();
-                output_added.wait(lock);
+                // We had nothing to write. Wait for something to arrive.
+                output_added.wait_for(lock, std::chrono::seconds(1));
                 lock.unlock();
                 continue;
             }
@@ -185,28 +180,26 @@ void Output::feeder() {
             lock.unlock();
             feed_object(b);
         }
-        catch (bool failure) {
-            this->end(false);
-            break;
-        }
+    }
+    catch (bool failure) {
+        failed = true;
+        this->end(false);
     }
     channel.Close();
     // On failure we may have references to data in input queue.
-    if (lock)
-        lock.unlock();
     clear_buffers();
 }
 
 void Output::end(bool FromOutside) {
-    if (!eof) {
-        eof = true;
-        if (!FromOutside)
-            return;
-        std::unique_lock<std::mutex> lock(input_sets_mutex);
-        orphan_buffers();
-        lock.unlock();
-        output_added.notify_one();
-    }
+    if (eof)
+        return;
+    eof = true;
+    if (!FromOutside)
+        return;
+    std::unique_lock<std::mutex> lock(input_sets_mutex);
+    orphan_buffers();
+    lock.unlock();
+    output_added.notify_one();
 }
 
 Output::Output(const Encoder& E, OutputChannel& Main, bool DataNotify,

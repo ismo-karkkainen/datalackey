@@ -109,7 +109,6 @@ private:
     void feed_key_value(std::shared_ptr<ProcessInput> KeyValue,
         Encoder* E, RawData& Deco) noexcept(false);
     void feed_object(Batch& B) noexcept(false);
-    void feed_messages(std::unique_lock<std::mutex>& Lock) noexcept(false);
     void feeder();
     void end(bool FromOutside);
 
