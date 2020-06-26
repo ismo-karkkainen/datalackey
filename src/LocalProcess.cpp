@@ -111,28 +111,21 @@ void LocalProcess::real_runner() {
             uses_stdin = true;
     }
     for (int k = 0; k < 2; ++k) {
-        int p[2];
-        if (-1 == pipe(p)) {
+        if (!FileDescriptor::Pipe(stdouterr_child[k][0], stdouterr_child[k][1])) {
             pm_run_error_pipe.Send(out, *id);
             return;
         }
-        stdouterr_child[k][0].reset(new FileDescriptor(p[0]));
-        stdouterr_child[k][1].reset(new FileDescriptor(p[1]));
     }
     if (uses_stdin) {
-        errno = 0;
-        int p[2];
-        if (-1 == pipe(p)) {
+        if (!FileDescriptor::Pipe(stdin_child[0], stdin_child[1])) {
             pm_run_error_pipe.Send(out, *id);
             return;
         }
-        stdin_child[0].reset(new FileDescriptor(p[0]));
-        stdin_child[1].reset(new FileDescriptor(p[1]));
 #if defined(__APPLE__)
-        fcntl(p[1], F_SETNOSIGPIPE);
+        fcntl(stdin_child[1]->Descriptor(), F_SETNOSIGPIPE);
 #endif
-        int flags = fcntl(p[1], F_GETFL);
-        fcntl(p[1], F_SETFL, flags | O_NONBLOCK);
+        int flags = fcntl(stdin_child[1]->Descriptor(), F_GETFL);
+        fcntl(stdin_child[1]->Descriptor(), F_SETFL, flags | O_NONBLOCK);
         child_input = new FileDescriptorOutput(stdin_child[1]);
     } else {
         stdin_child[0].reset(new FileDescriptor());
@@ -369,15 +362,6 @@ bool LocalProcess::Run() {
         child_start_lock.lock();
         worker = new std::thread(&LocalProcess::runner, this);
         std::this_thread::yield();
-        // Sleeping for 900 ms here seems to help with odd hangs when processes
-        // are started quickly one after another. Problem is they appear to
-        // continue to sleep despite having gotten input and having produced 
-        // output. Assumedly.
-        // Child runs for a short while and then does nothing.
-        // It could be that output stalls but why is that dependent on launch
-        // order? Also input has been closed so that should not matter.
-        // Maybe Output thread exits while there is still something in?
-        // Child should detect closed pipe and exit.
     }
     catch (const std::system_error& e) {
         child_start_lock.unlock();

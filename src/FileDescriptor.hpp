@@ -10,10 +10,14 @@
 #ifndef FileDescriptor_hpp
 #define FileDescriptor_hpp
 
+#include <memory>
+
 
 class FileDescriptor {
 private:
     int fd;
+
+    FileDescriptor(int FD, bool); // For use by Pipe.
 
 public:
     FileDescriptor(int FD = -1);
@@ -24,6 +28,9 @@ public:
     void Close();
     inline bool Closed() const { return fd == -1; }
     inline int Descriptor() const { return fd; }
+
+    static bool Pipe(std::shared_ptr<FileDescriptor>& Read,
+        std::shared_ptr<FileDescriptor>& Write);
 };
 
 #endif
