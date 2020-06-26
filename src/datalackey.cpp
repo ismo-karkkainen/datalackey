@@ -8,6 +8,7 @@
 // Licensed under Universal Permissive License. See License.txt.
 
 #include "JSONEncoder.hpp"
+#include "FileDescriptor.hpp"
 #include "FileDescriptorOutput.hpp"
 #include "Output.hpp"
 #include "FileDescriptorInput.hpp"
@@ -27,8 +28,10 @@
 #include <ctime>
 #include <limits>
 #include <iostream>
+#include <memory>
 #include <cassert>
 #include <signal.h>
+
 
 static const char* inputs[1] = { "stdin" };
 static const char* outputs[2] = { "stdout", "stderr" };
@@ -125,11 +128,13 @@ int main(int argc, char** argv) {
 
     OutputChannel* out_channel = nullptr;
     std::string choice = opt::String("command-out", 1);
-    if (choice == "stdout")
-        out_channel = new FileDescriptorOutput(1);
-    else if (choice == "stderr")
-        out_channel = new FileDescriptorOutput(2);
-    else
+    if (choice == "stdout") {
+        std::shared_ptr<FileDescriptor> fd_out(new FileDescriptor(1));
+        out_channel = new FileDescriptorOutput(fd_out);
+    } else if (choice == "stderr") {
+        std::shared_ptr<FileDescriptor> fd_err(new FileDescriptor(2));
+        out_channel = new FileDescriptorOutput(fd_err);
+    } else
         return 2;
     assert(out_channel != nullptr);
 
@@ -144,9 +149,10 @@ int main(int argc, char** argv) {
     Output* out = new Output(*enc, *out_channel);
     choice = opt::String("command-in", 1);
     InputChannel* in_channel = nullptr;
-    if (choice == "stdin")
-        in_channel = new FileDescriptorInput();
-    else
+    if (choice == "stdin") {
+        std::shared_ptr<FileDescriptor> fd_in(new FileDescriptor(0));
+        in_channel = new FileDescriptorInput(fd_in);
+    } else
         return 4;
     assert(in_channel != nullptr);
 

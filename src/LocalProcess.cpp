@@ -9,6 +9,7 @@
 
 #include "LocalProcess.hpp"
 #include "LocalProcesses.hpp"
+#include "FileDescriptor.hpp"
 #include "FileDescriptorInput.hpp"
 #include "FileDescriptorOutput.hpp"
 #include "Time.hpp"
@@ -30,7 +31,9 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <spawn.h>
 #include <cassert>
+#include <iostream>
 
 
 LocalProcess::ChildOutput::ChildOutput(InputChannel* IC, MessageHandler* MH,
@@ -108,24 +111,32 @@ void LocalProcess::real_runner() {
             uses_stdin = true;
     }
     for (int k = 0; k < 2; ++k) {
-        if (-1 == pipe(stdouterr_child[k])) {
+        int p[2];
+        if (-1 == pipe(p)) {
             pm_run_error_pipe.Send(out, *id);
             return;
         }
+        stdouterr_child[k][0].reset(new FileDescriptor(p[0]));
+        stdouterr_child[k][1].reset(new FileDescriptor(p[1]));
     }
     if (uses_stdin) {
         errno = 0;
-        if (-1 == pipe(stdin_child)) {
+        int p[2];
+        if (-1 == pipe(p)) {
             pm_run_error_pipe.Send(out, *id);
             return;
         }
+        stdin_child[0].reset(new FileDescriptor(p[0]));
+        stdin_child[1].reset(new FileDescriptor(p[1]));
 #if defined(__APPLE__)
-        fcntl(stdin_child[1], F_SETNOSIGPIPE);
+        fcntl(p[1], F_SETNOSIGPIPE);
 #endif
-        int flags = fcntl(stdin_child[1], F_GETFL);
-        fcntl(stdin_child[1], F_SETFL, flags | O_NONBLOCK);
+        int flags = fcntl(p[1], F_GETFL);
+        fcntl(p[1], F_SETFL, flags | O_NONBLOCK);
         child_input = new FileDescriptorOutput(stdin_child[1]);
     } else {
+        stdin_child[0].reset(new FileDescriptor());
+        stdin_child[1].reset(new FileDescriptor());
         child_input = new NullOutput();
     }
     child_feed = new Output(*child_input_enc, *child_input,
@@ -135,12 +146,14 @@ void LocalProcess::real_runner() {
     bool used_std[2] = { false, false };
     for (auto& settings : outputs_info) {
         InputChannel* ic = nullptr;
-        if (settings[1] == "stdout") {
-            ic = new FileDescriptorInput(stdouterr_child[0][0]);
-            used_std[0] = true;
-        } else if (settings[1] == "stderr") {
-            ic = new FileDescriptorInput(stdouterr_child[1][0]);
-            used_std[1] = true;
+        int fd_index = -1;
+        if (settings[1] == "stdout")
+            fd_index = 0;
+        else if (settings[1] == "stderr")
+            fd_index = 1;
+        if (fd_index != -1) {
+            ic = new FileDescriptorInput(stdouterr_child[fd_index][0]);
+            used_std[fd_index] = true;
         }
         // Output response of raw data goes to output of launcher.
         MessageHandler* mh = MakeMessageHandler(settings[0].c_str(),
@@ -166,9 +179,9 @@ void LocalProcess::real_runner() {
             new ChildOutput(ic, mh, sds, is)));
     }
     child_start_lock.unlock();
-    // Take program_name, args, and env and turn to what execve needs.
+    // Take program_name, args, and env and turn to what posix_spawn needs.
     const char** argv_ptrs = new const char*[2 + args.size()];
-    argv_ptrs[0] = program_name.c_str();
+    argv_ptrs[0] = program_name.c_str(); // Should be just name, no path.
     for (size_t k = 0; k < args.size(); ++k)
         argv_ptrs[k + 1] = args[k].c_str();
     argv_ptrs[1 + args.size()] = nullptr;
@@ -177,72 +190,65 @@ void LocalProcess::real_runner() {
         env_ptrs[k] = env[k].c_str();
     env_ptrs[env.size()] = nullptr;
     errno = 0;
-    if ((pid = fork())) {
-        // In parent.
-        int err = errno;
-        if (pid == -1) {
-            if (err == EAGAIN)
-                pm_run_error_no_processes.Send(out, *id);
-            else if (err == ENOMEM)
-                pm_run_error_no_memory.Send(out, *id);
-            return;
-        }
-        if (stdin_child[0] != -1)
-            close(stdin_child[0]);
-        close(stdouterr_child[0][1]);
-        close(stdouterr_child[1][1]);
-        stdin_child[0] = stdouterr_child[0][1] = stdouterr_child[1][1] = -1;
-        delete[] argv_ptrs;
-        delete[] env_ptrs;
-        args.clear();
-        env.clear();
-    } else {
-        // In child process.
-        // The ends we do not need.
-        if (stdin_child[1] != -1)
-            close(stdin_child[1]);
-        close(stdouterr_child[0][0]);
-        close(stdouterr_child[1][0]);
-        // Connect pipe ends to standard I/O and close original pipe ends.
-        int addrs[3] = {
-            stdin_child[0], stdouterr_child[0][1], stdouterr_child[1][1] };
-        for (int k = 0; k < 3; ++k) {
-            if (addrs[k] != -1) {
-                close(k);
-                int fd = dup2(addrs[k], k);
-                if (fd == -1)
-                    exit(57 + k);
-                close(addrs[k]);
-            }
-        }
-        // Change directory.
-        if (!directory.empty() && -1 == chdir(directory.c_str()))
-            exit(53);
-        // Start the desired process.
-        errno = 0;
-        execve(program_name.c_str(), (char *const *)argv_ptrs,
-            (char *const *)env_ptrs);
-        // The call above failed if we reach this point.
-        int err = errno;
+    // Use file actions to close pipes in child.
+    posix_spawn_file_actions_t actions;
+    posix_spawn_file_actions_init(&actions);
+    if (stdin_child[1]->Descriptor() != -1)
+        posix_spawn_file_actions_addclose(&actions, stdin_child[1]->Descriptor());
+    posix_spawn_file_actions_addclose(&actions, stdouterr_child[0][0]->Descriptor());
+    posix_spawn_file_actions_addclose(&actions, stdouterr_child[1][0]->Descriptor());
+    posix_spawn_file_actions_addclose(&actions, 0);
+    posix_spawn_file_actions_addclose(&actions, 1);
+    posix_spawn_file_actions_addclose(&actions, 2);
+    if (stdin_child[0]->Descriptor() != -1)
+        posix_spawn_file_actions_adddup2(&actions, stdin_child[0]->Descriptor(), 0);
+    posix_spawn_file_actions_adddup2(&actions, stdouterr_child[0][1]->Descriptor(), 1);
+    posix_spawn_file_actions_adddup2(&actions, stdouterr_child[1][1]->Descriptor(), 2);
+    if (stdin_child[0]->Descriptor() != -1)
+        posix_spawn_file_actions_addclose(&actions, stdin_child[0]->Descriptor());
+    posix_spawn_file_actions_addclose(&actions, stdouterr_child[0][1]->Descriptor());
+    posix_spawn_file_actions_addclose(&actions, stdouterr_child[1][1]->Descriptor());
+    if (!directory.empty())
+        posix_spawn_file_actions_addchdir_np(&actions, directory.c_str());
+    int err = posix_spawn(&pid, program_name.c_str(), &actions, nullptr,
+        (char *const *)argv_ptrs, (char *const *)env_ptrs);
+    posix_spawn_file_actions_destroy(&actions);
+    delete[] argv_ptrs;
+    delete[] env_ptrs;
+    if (err) {
         switch (err) {
-        case E2BIG:
-        case EACCES:
-        case ELOOP:
-        case ENAMETOOLONG:
-            exit(56);
-        case ENOENT:
-            exit(57); // Could be a script with interpreter that is not found.
-        case ENOEXEC:
-        case ENOTDIR:
-        case ETXTBSY:
-            exit(56); // Something parameter-related.
-        case EFAULT:
-        case EIO:
+        case EAGAIN:
+            pm_run_error_no_processes.Send(out, *id);
+            break;
+        case EINVAL: // Internal error.
+            assert(false);
+            break;
+        case E2BIG: // Too long argument list.
+        case EACCES: // Can not execute, reach, etc.
+        case ELOOP: // Too many symbolic links in path.
+        case ENAMETOOLONG: // Name is too long.
+        case ENOENT: // Executable does not exist.
+        case ENOEXEC: // Not an executable.
+        case ENOTDIR: // Component in path is not a directory.
+        case ETXTBSY: // Shared text file open for reading or writing by process.
+        case EFAULT: // Executable problem.
+        case EIO: // IO error while reading from file system.
         case ENOMEM:
-            exit(55); // Something system-related.
+            pm_run_error_no_memory.Send(out, *id);
+            break;
+        case EBADARCH: // No architecture for current system.
+        default:
+            assert(false);
+            break;
         }
-        exit(54); // Something else.
+        return;
     }
+    stdin_child[0]->Close();
+    stdouterr_child[0][1]->Close();
+    stdouterr_child[1][1]->Close();
+    //std::cerr << id->String() << ' ' << stdin_child[1]->Descriptor() << ' ' << stdouterr_child[0][0]->Descriptor() << ' ' << stdouterr_child[1][0]->Descriptor() << "\n";
+    args.clear();
+    env.clear();
     pm_run_running.Send(out, *id, pid); // Not necessarily notified.
     if (notify_data) {
         std::vector<std::pair<std::string, long long int>> ls = storage.List();
@@ -289,9 +295,6 @@ void LocalProcess::real_runner() {
 }
 
 void LocalProcess::runner() {
-    stdin_child[0] = stdin_child[1] = -1;
-    stdouterr_child[0][0] = stdouterr_child[0][1] =
-        stdouterr_child[1][0] = stdouterr_child[1][1] = -1;
     running = true;
     real_runner();
     child_feed->NoGlobalMessages();
@@ -301,11 +304,9 @@ void LocalProcess::runner() {
     delete child_feed;
     delete child_input;
     for (size_t k = 0; k < 2; ++k) {
-        if (stdin_child[k] != -1)
-            close(stdin_child[k]);
+        stdin_child[k]->Close();
         for (size_t n = 0; n < 2; ++n)
-            if (stdouterr_child[k][n] != -1)
-                close(stdouterr_child[k][n]);
+            stdouterr_child[k][n]->Close();
     }
     if (terminate)
         pm_run_terminated.Send(out, *id);
@@ -368,6 +369,15 @@ bool LocalProcess::Run() {
         child_start_lock.lock();
         worker = new std::thread(&LocalProcess::runner, this);
         std::this_thread::yield();
+        // Sleeping for 900 ms here seems to help with odd hangs when processes
+        // are started quickly one after another. Problem is they appear to
+        // continue to sleep despite having gotten input and having produced 
+        // output. Assumedly.
+        // Child runs for a short while and then does nothing.
+        // It could be that output stalls but why is that dependent on launch
+        // order? Also input has been closed so that should not matter.
+        // Maybe Output thread exits while there is still something in?
+        // Child should detect closed pipe and exit.
     }
     catch (const std::system_error& e) {
         child_start_lock.unlock();

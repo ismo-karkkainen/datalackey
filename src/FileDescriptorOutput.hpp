@@ -11,15 +11,17 @@
 #define FileDescriptorOutput_hpp
 
 #include "OutputChannel.hpp"
+#include "FileDescriptor.hpp"
+#include <memory>
 
 
 class FileDescriptorOutput : public OutputChannel {
 private:
+    std::shared_ptr<FileDescriptor> fd;
     bool failed;
-    int fd;
 
 public:
-    FileDescriptorOutput(int FileDescriptor);
+    FileDescriptorOutput(std::shared_ptr<FileDescriptor>& FD);
     ~FileDescriptorOutput();
 
     size_t Write(RawData::ConstIterator& Start, RawData::ConstIterator& End);

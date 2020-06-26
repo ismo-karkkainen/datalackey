@@ -22,6 +22,7 @@
 #include "Storage.hpp"
 #include "StringValueMapperSimple.hpp"
 #include "ProcessInput.hpp"
+#include "FileDescriptor.hpp"
 #include <vector>
 #include <string>
 #include <unistd.h>
@@ -50,8 +51,8 @@ private:
     std::vector<std::shared_ptr<ChildOutput>> child_output;
     class Encoder* child_input_enc;
     OutputChannel* child_input;
-    int stdin_child[2];
-    int stdouterr_child[2][2];
+    std::shared_ptr<FileDescriptor> stdin_child[2];
+    std::shared_ptr<FileDescriptor> stdouterr_child[2][2];
     Output* child_feed;
     OutputItem* child_writer;
     mutable std::mutex child_start_mutex;

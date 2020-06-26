@@ -11,8 +11,8 @@
 #include <unistd.h>
 #include <cerrno>
 
-FileDescriptorOutput::FileDescriptorOutput(int FileDescriptor)
-    : failed(false), fd(FileDescriptor)
+FileDescriptorOutput::FileDescriptorOutput(std::shared_ptr<FileDescriptor>& FD)
+    : fd(FD), failed(false)
 { }
 
 FileDescriptorOutput::~FileDescriptorOutput() { }
@@ -22,16 +22,13 @@ size_t FileDescriptorOutput::Write(
 {
     if (!failed && Start != End) {
         errno = 0;
-        ssize_t result = write(fd, &(*Start), End - Start);
+        ssize_t result = write(fd->Descriptor(), &(*Start), End - Start);
         int err = errno;
         if (result == -1) {
             switch (err) {
             case EAGAIN:
                 break; // No space, ok.
-            case EBADF:
-                failed = true;
-                fd = -1;
-                break;
+            case EBADF: // Fall through.
             default:
                 failed = true;
                 Close(); // Output is messed up now.
@@ -46,14 +43,11 @@ size_t FileDescriptorOutput::Write(
 
 void FileDescriptorOutput::Flush() {
     if (!failed)
-        fsync(fd);
+        fsync(fd->Descriptor());
 }
 
 void FileDescriptorOutput::Close() {
-    // It was claimed we do not own fd but here we act as if we do.
-    if (fd != -1)
-        close(fd);
-    fd = -1;
+    fd->Close();
 }
 
 bool FileDescriptorOutput::Failed() const {
@@ -61,5 +55,5 @@ bool FileDescriptorOutput::Failed() const {
 }
 
 bool FileDescriptorOutput::Closed() const {
-    return fd == -1;
+    return fd->Closed();
 }

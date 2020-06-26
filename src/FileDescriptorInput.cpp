@@ -18,12 +18,11 @@
 static const int ReadBlockSize = 65536;
 
 
-FileDescriptorInput::FileDescriptorInput(int FileDescriptor)
-    : eof(false), fd(FileDescriptor)
+FileDescriptorInput::FileDescriptorInput(std::shared_ptr<FileDescriptor>& FD)
+    : fd(FD)
 { }
 
-FileDescriptorInput::~FileDescriptorInput() {
-}
+FileDescriptorInput::~FileDescriptorInput() { }
 
 int FileDescriptorInput::Read(RawData& Buffer) {
     struct timespec ts;
@@ -33,18 +32,20 @@ int FileDescriptorInput::Read(RawData& Buffer) {
         ts.tv_sec = 0;
         ts.tv_nsec = 0;
         FD_ZERO(&std_in);
-        FD_SET(fd, &std_in);
+        FD_SET(fd->Descriptor(), &std_in);
         errno = 0;
-        int avail = pselect(fd + 1, &std_in, nullptr, nullptr, &ts, nullptr);
+        int avail = pselect(fd->Descriptor() + 1, &std_in, nullptr, nullptr, &ts, nullptr);
         if (avail <= 0) {
-            eof = avail < 0 && errno == EBADF;
+            if (avail < 0 && errno == EBADF)
+                fd->Close();
             return 0;
         }
         char* buf = Buffer.Get(ReadBlockSize);
         errno = 0;
-        int got = read(fd, buf, ReadBlockSize);
+        int got = read(fd->Descriptor(), buf, ReadBlockSize);
         if (got <= 0) {
-            eof = got == 0 || (got < 0 && !(errno == EAGAIN || errno == EINTR));
+            if (got == 0 || (got < 0 && !(errno == EAGAIN || errno == EINTR)))
+                fd->Close();
             got = 0;
         }
         total += got;
@@ -57,5 +58,5 @@ int FileDescriptorInput::Read(RawData& Buffer) {
 }
 
 bool FileDescriptorInput::Ended() {
-    return eof;
+    return fd->Closed();
 }

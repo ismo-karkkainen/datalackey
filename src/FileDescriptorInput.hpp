@@ -12,15 +12,16 @@
 
 #include "InputChannel.hpp"
 #include "RawData.hpp"
+#include "FileDescriptor.hpp"
+#include <memory>
 
 
 class FileDescriptorInput : public InputChannel {
 private:
-    bool eof;
-    int fd;
+    std::shared_ptr<FileDescriptor> fd;
 
 public:
-    FileDescriptorInput(int FileDescriptor = 0);
+    FileDescriptorInput(std::shared_ptr<FileDescriptor>& FD);
     ~FileDescriptorInput();
     int Read(RawData& Buffer);
     bool Ended();

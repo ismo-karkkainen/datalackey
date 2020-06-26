@@ -64,6 +64,7 @@ list(APPEND Sources src/MessageReporter.cpp)
 list(APPEND Sources src/CommandDescription.cpp)
 list(APPEND Sources src/CommandDescriptions.cpp)
 list(APPEND Sources src/CommandReporter.cpp)
+list(APPEND Sources src/FileDescriptor.cpp)
 list(APPEND Sources src/FileDescriptorOutput.cpp)
 list(APPEND Sources src/MessageHandler.cpp)
 list(APPEND Sources src/StorageDataSink.cpp)
@@ -133,6 +134,7 @@ list(REMOVE_ITEM AlwaysSmall src/DataGroup.cpp)
 #list(REMOVE_ITEM AlwaysSmall src/OutputItem.cpp) # Base
 list(REMOVE_ITEM AlwaysSmall src/Output.cpp)
 #list(REMOVE_ITEM AlwaysSmall src/Messages.cpp) # Simple
+#list(REMOVE_ITEM AlwaysSmall src/FileDescriptor.cpp) # File descriptor.
 #list(REMOVE_ITEM AlwaysSmall src/FileDescriptorOutput.cpp) # File I/O
 #list(REMOVE_ITEM AlwaysSmall src/MessageHandler.cpp) # Base
 #list(REMOVE_ITEM AlwaysSmall src/StorageDataSink.cpp) # Base
