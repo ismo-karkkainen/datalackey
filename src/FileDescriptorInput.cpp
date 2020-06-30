@@ -8,7 +8,7 @@
 // Licensed under Universal Permissive License. See License.txt.
 
 #include "FileDescriptorInput.hpp"
-#include <sys/select.h>
+#include <poll.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
@@ -25,18 +25,16 @@ FileDescriptorInput::FileDescriptorInput(std::shared_ptr<FileDescriptor>& FD)
 FileDescriptorInput::~FileDescriptorInput() { }
 
 int FileDescriptorInput::Read(RawData& Buffer) {
-    struct timespec ts;
-    fd_set std_in;
     int total = 0;
     while (true) {
-        ts.tv_sec = 0;
-        ts.tv_nsec = 0;
-        FD_ZERO(&std_in);
-        FD_SET(fd->Descriptor(), &std_in);
+        struct pollfd pfd;
+        pfd.fd = fd->Descriptor();
+        pfd.events = POLLIN;
+        pfd.revents = 0;
         errno = 0;
-        int avail = pselect(fd->Descriptor() + 1, &std_in, nullptr, nullptr, &ts, nullptr);
+        int avail = poll(&pfd, 1, 0);
         if (avail <= 0) {
-            if (avail < 0 && errno == EBADF)
+            if (avail < 0 && (errno == EFAULT || errno == EINVAL))
                 fd->Close();
             return 0;
         }
