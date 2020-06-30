@@ -11,6 +11,7 @@
 #include "FileOwner.hpp"
 #include "Messages.hpp"
 #include "OutputCollection.hpp"
+#include "FileDescriptor.hpp"
 #include <nlohmann/json.hpp>
 #include <dirent.h>
 #include <fcntl.h>
@@ -20,6 +21,7 @@
 #include <algorithm>
 #include <utility>
 #include <cassert>
+
 
 using json = nlohmann::json;
 
@@ -161,9 +163,8 @@ DirectoryStorage::DirectoryStorage(
     // See if there is a catalog to be loaded. May be new storage.
     std::string catalog = root;
     catalog += Catalog;
-    errno = 0;
-    int fd = open(catalog.c_str(), O_RDONLY | O_CLOEXEC);
-    if (fd == -1) {
+    std::unique_ptr<FileDescriptor> fd(FileDescriptor::Open(catalog.c_str()));
+    if (fd == nullptr) {
         switch (errno) {
         case EACCES:
         case ELOOP:
@@ -181,15 +182,14 @@ DirectoryStorage::DirectoryStorage(
     }
     // fd is valid so read the catalog into label2data.
     struct stat info;
-    if (-1 == fstat(fd, &info)) {
-        close(fd);
+    if (-1 == fstat(fd->Descriptor(), &info)) {
         root.clear();
         return;
     }
     std::unique_ptr<char[]> buffer(new char[info.st_size + 1]);
     errno = 0;
-    ssize_t r = read(fd, buffer.get(), info.st_size);
-    close(fd);
+    ssize_t r = read(fd->Descriptor(), buffer.get(), info.st_size);
+    fd->Close();
     if (r != info.st_size) {
         root.clear();
         return;

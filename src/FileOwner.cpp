@@ -35,10 +35,9 @@ bool FileOwner::make_dirs(const std::string& Root, const std::string& dir) {
     while (pos != std::string::npos) {
         existing += std::string(todo, 0, pos);
         todo = std::string(todo, pos + 1);
-        errno = 0;
-        int fd = open(existing.c_str(), O_RDONLY | O_CLOEXEC);
-        int err = errno;
-        if (fd == -1) {
+        std::unique_ptr<FileDescriptor> fd(FileDescriptor::Open(existing.c_str()));
+        if (fd == nullptr) {
+            int err = errno;
             // Does not exist, make a directory unless other error.
             switch (err) {
             case EACCES:
@@ -53,8 +52,7 @@ bool FileOwner::make_dirs(const std::string& Root, const std::string& dir) {
         } else {
             // Exists, check that it is a directory.
             struct stat info;
-            err = fstat(fd, &info);
-            close(fd);
+            int err = fstat(fd->Descriptor(), &info);
             if (err == -1)
                 return false;
             if ((info.st_mode & S_IFDIR) != S_IFDIR)
@@ -91,13 +89,13 @@ bool FileOwner::append(RawData::ConstIterator From, RawData::ConstIterator To) {
         if (!make_dirs(full, name))
             return false;
         full += name;
-        errno = 0;
-        fd = open(full.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, mode);
-        if (fd == -1)
+        fd.reset(
+            FileDescriptor::Open(full.c_str(), O_WRONLY | O_CREAT | O_EXCL, mode));
+        if (fd == nullptr)
             return false;
         present = true;
     }
-    ssize_t written = write(fd, &(*From), To - From);
+    ssize_t written = write(fd->Descriptor(), &(*From), To - From);
     if (written >= 0)
         length += written;
     return written != -1;
@@ -105,22 +103,21 @@ bool FileOwner::append(RawData::ConstIterator From, RawData::ConstIterator To) {
 
 FileOwner::FileOwner(const std::string& Root, size_t Index)
     : owner(false), present(true), finished(true), in_error(false),
-    index(Index), full(Root), fd(-1), length(0), mode(0)
+    index(Index), full(Root), length(0), mode(0)
 {
     std::unique_lock<std::mutex> lock(FileOwner::index_mutex);
     assert(FileOwner::used.insert(index).second);
     lock.unlock();
     full += make_name();
     // File exists so we need to get the length.
-    fd = open(full.c_str(), O_RDONLY | O_CLOEXEC);
-    if (fd == -1) {
+    fd.reset(FileDescriptor::Open(full.c_str()));
+    if (fd == nullptr) {
         in_error = true;
         return;
     }
     struct stat info;
-    if (-1 == fstat(fd, &info)) {
-        close(fd);
-        fd = -1;
+    if (-1 == fstat(fd->Descriptor(), &info)) {
+        fd->Close();
         in_error = true;
         return;
     }
@@ -129,7 +126,7 @@ FileOwner::FileOwner(const std::string& Root, size_t Index)
 
 FileOwner::FileOwner(const std::string& Root, mode_t FileMode)
     : owner(true), present(false), finished(false), in_error(false),
-    index(0), full(Root), fd(-1), length(0), mode(FileMode)
+    index(0), full(Root), length(0), mode(FileMode)
 {
     std::lock_guard<std::mutex> lock(FileOwner::index_mutex);
     if (FileOwner::freed.empty()) {
@@ -154,8 +151,8 @@ FileOwner::FileOwner(const std::string& Root, mode_t FileMode)
 }
 
 FileOwner::~FileOwner() {
-    if (fd != -1)
-        close(fd);
+    if (fd)
+        fd->Close();
     if (owner && present)
         unlink(full.c_str());
     std::lock_guard<std::mutex> lock(FileOwner::index_mutex);
@@ -168,7 +165,7 @@ bool FileOwner::Owner() const {
 }
 
 void FileOwner::Own(bool OwnFile) {
-    assert(fd == -1);
+    assert(fd == nullptr || fd->Closed());
     owner = OwnFile;
 }
 
@@ -200,9 +197,8 @@ bool FileOwner::Append(RawData::ConstIterator From, RawData::ConstIterator To) {
 void FileOwner::Finish() {
     assert(owner);
     assert(!finished);
-    if (fd != -1)
-        close(fd);
-    fd = -1;
+    if (fd)
+        fd->Close();
     finished = true;
     // File may be empty because input contains bad data before first write.
 }

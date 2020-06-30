@@ -32,6 +32,7 @@ chmod a+x _script.sh
 (
 echo '["1","run","in","JSON","stdin","out","JSON","stdout","notify","data","program","./_script.sh"]'
 nap
+nap
 echo '[2,"feed",0]'
 echo '[5,"feed","1","invalid"]'
 echo '[6,"feed","1","input"]'
@@ -53,9 +54,7 @@ cat > "$EXP" << EOF
 [null,"process","started","sub","pid"]
 [null,"data","stored","item",1]
 [null,"data","stored","item2",2]
-subset
-[null,"process","ended","sub","pid"]
-end
+optional:[null,"process","ended","sub","pid"]
 [2,"feed","error","not-found"]
 [2,"done",""]
 [5,"error","unknown",5,"feed","1","invalid"]

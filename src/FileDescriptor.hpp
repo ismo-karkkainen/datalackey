@@ -11,6 +11,7 @@
 #define FileDescriptor_hpp
 
 #include <memory>
+#include <fcntl.h>
 
 
 class FileDescriptor {
@@ -29,8 +30,13 @@ public:
     inline bool Closed() const { return fd == -1; }
     inline int Descriptor() const { return fd; }
 
+    // These clear errno.
+
     static bool Pipe(std::shared_ptr<FileDescriptor>& Read,
         std::shared_ptr<FileDescriptor>& Write);
+    // Check errno if return value is nullptr. Always adds O_CLOEXEC to Flags.
+    static FileDescriptor* Open(
+        const char* Filename, int Flags = O_RDONLY, mode_t Mode = 0);
 };
 
 #endif

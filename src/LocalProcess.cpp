@@ -182,7 +182,6 @@ void LocalProcess::real_runner() {
     for (size_t k = 0; k < env.size(); ++k)
         env_ptrs[k] = env[k].c_str();
     env_ptrs[env.size()] = nullptr;
-    errno = 0;
     // Use file actions to close pipes in child.
     posix_spawn_file_actions_t actions;
     posix_spawn_file_actions_init(&actions);

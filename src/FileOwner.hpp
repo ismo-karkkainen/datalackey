@@ -11,9 +11,11 @@
 #define FileOwner_hpp
 
 #include "DataOwner.hpp"
+#include "FileDescriptor.hpp"
 #include <string>
 #include <set>
 #include <mutex>
+#include <memory>
 #include <sys/types.h>
 
 
@@ -22,7 +24,7 @@ private:
     bool owner, present, finished, in_error;
     size_t index;
     std::string full;
-    mutable int fd;
+    mutable std::unique_ptr<FileDescriptor> fd;
     size_t length;
     mode_t mode;
 

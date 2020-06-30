@@ -8,12 +8,14 @@
 // Licensed under Universal Permissive License. See License.txt.
 
 #include "File.hpp"
+#include "FileDescriptor.hpp"
 #include <dirent.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <cerrno>
+#include <memory>
 
 #if defined(__linux__)
 #include <limits.h>
@@ -24,22 +26,18 @@
 const char Separator = '/';
 
 static std::string absolute(const std::string& Name, struct stat& info) {
-    errno = 0;
-    int fd = open(Name.c_str(), O_RDONLY | O_CLOEXEC);
-    if (fd == -1)
+    std::unique_ptr<FileDescriptor> fd(FileDescriptor::Open(Name.c_str()));
+    if (fd == nullptr)
         return std::string();
     std::string abs;
-    char* buffer = new char[MAXPATHLEN + 1];
+    std::unique_ptr<char> buffer(new char[MAXPATHLEN + 1]);
 #if defined(__APPLE__)
-    if (-1 != fcntl(fd, F_GETPATH, buffer))
+    if (-1 != fcntl(fd->Descriptor(), F_GETPATH, buffer.get()))
 #elif defined(__linux__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__FreeBSD__)
-    if (buffer == realpath(Name.c_str(), buffer))
+    if (buffer.get() == realpath(Name.c_str(), buffer.get()))
 #endif
-        abs = std::string(buffer);
-    delete[] buffer;
-    int res = fstat(fd, &info);
-    close(fd);
-    if (res == -1)
+        abs = std::string(buffer.get());
+    if (-1 == fstat(fd->Descriptor(), &info))
         return std::string();
     return abs;
 }

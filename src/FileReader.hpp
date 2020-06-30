@@ -12,13 +12,15 @@
 
 #include "DataReader.hpp"
 #include "DataOwner.hpp"
+#include "FileDescriptor.hpp"
 #include <string>
+#include <memory>
 
 
 class FileReader : public DataReader {
 private:
     std::string name;
-    mutable int fd;
+    mutable std::unique_ptr<FileDescriptor> fd;
     bool in_error;
     size_t total_read;
 

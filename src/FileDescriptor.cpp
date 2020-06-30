@@ -11,6 +11,7 @@
 #include <mutex>
 #include <map>
 #include <unistd.h>
+#include <fcntl.h>
 #include <iostream>
 
 
@@ -52,9 +53,20 @@ bool FileDescriptor::Pipe(std::shared_ptr<FileDescriptor>& Read,
 {
     int p[2];
     std::lock_guard<std::mutex> lock(owners_mutex);
+    errno = 0;
     if (-1 == pipe(p))
         return false;
     Read.reset(new FileDescriptor(p[0], false));
     Write.reset(new FileDescriptor(p[1], false));
     return true;
+}
+
+FileDescriptor* FileDescriptor::Open(const char* Filename, int Flags, mode_t Mode)
+{
+    std::lock_guard<std::mutex> lock(owners_mutex);
+    errno = 0;
+    int fd = open(Filename, Flags | O_CLOEXEC, Mode);
+    if (fd == -1)
+        return nullptr;
+    return new FileDescriptor(fd, false);
 }
