@@ -58,7 +58,7 @@ To specify the compiler, set for example:
     CXX=clang++
     CXX=g++
 
-To build, assuming Unix Makefiles:
+To build, test, and install, assuming Unix Makefiles:
 
     make
     make test
