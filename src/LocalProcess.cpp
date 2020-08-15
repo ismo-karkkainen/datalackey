@@ -228,7 +228,9 @@ void LocalProcess::real_runner() {
         case ENOMEM:
             pm_run_error_no_memory.Send(out, *id);
             break;
+#if defined(EBADARCH)
         case EBADARCH: // No architecture for current system.
+#endif
         default:
             assert(false);
             break;

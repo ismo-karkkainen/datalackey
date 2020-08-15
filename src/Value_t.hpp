@@ -32,7 +32,11 @@ template<typename T>
 bool ValueRef<T>::IsChar() const {
     return
         (typeid(T) == typeid(signed char)) || (typeid(T) == typeid(unsigned char)) ||
+#if !defined(__GNUC__)
         (typeid(T) == typeid(signed wchar_t)) || (typeid(T) == typeid(unsigned wchar_t)) ||
+#else
+        (typeid(T) == typeid(wchar_t)) ||
+#endif
         (typeid(T) == typeid(char16_t)) ||
         (typeid(T) == typeid(char32_t));
 }
@@ -41,7 +45,11 @@ template<typename T>
 bool ValueRef<T>::IsString() const {
     return (typeid(T) == typeid(std::string)) ||
         (typeid(T) == typeid(signed char*)) || (typeid(T) == typeid(unsigned char*)) ||
+#if !defined(__GNUC__)
         (typeid(T) == typeid(signed wchar_t*)) || (typeid(T) == typeid(unsigned wchar_t*)) ||
+#else
+        (typeid(T) == typeid(wchar_t*)) ||
+#endif
         (typeid(T) == typeid(char16_t*)) ||
         (typeid(T) == typeid(char32_t*));
 }
