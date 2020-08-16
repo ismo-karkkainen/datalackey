@@ -328,8 +328,6 @@ RunDescription::RunDescription(const char* const Name)
     choices->Add("process");
     group->Add(choices);
     subs.push_back(std::unique_ptr<SubCommand>(group));
-    group = new SubCmdTuple("end-feed");
-    subs.push_back(std::unique_ptr<SubCommand>(group));
     group = new SubCmdTuple("change-directory");
     group->Add(new SubString("directory"));
     subs.push_back(std::unique_ptr<SubCommand>(group));

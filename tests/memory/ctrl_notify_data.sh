@@ -40,9 +40,7 @@ cat > $EXP <<EOF
 set
 [null,"process","ended","a","pid"]
 [null,"data","stored","label",1]
-end
 [2,"done",""]
-set
 [1,"run","exit",0]
 [1,"run","input","closed"]
 end

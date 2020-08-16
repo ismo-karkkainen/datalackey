@@ -19,7 +19,8 @@ chmod a+x _subscript.sh
 
 cat > _script.sh << EOF
 #!/bin/sh
-echo '["sub","run","end-feed","out","JSON","stdout","program","./_subscript.sh"]'
+echo '["sub","run","out","JSON","stdout","program","./_subscript.sh"]'
+echo '[null,"end-feed","sub"]'
 rm -f $OUT_SCR
 while read L
 do

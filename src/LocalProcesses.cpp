@@ -158,7 +158,6 @@ bool LocalProcesses::Run(Output& Out, const SimpleValue& Id,
 
     // Temporary storage.
     bool clear_env = false;
-    bool end_feed = false;
     std::string prefix, postfix;
     std::vector<std::pair<StringValue,std::shared_ptr<SimpleValue>>> name_label;
 
@@ -243,9 +242,6 @@ bool LocalProcesses::Run(Output& Out, const SimpleValue& Id,
             else
                 assert(false);
             k += 2;
-        } else if (command == "end-feed") {
-            end_feed = true;
-            k += 1;
         } else if (command == "change-directory") {
             directory = Parameters[k + 1]->String();
             k += 2;
@@ -351,8 +347,6 @@ bool LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     }
     if (!inputs.second.empty())
         p->Feed(inputs.second); // Valid, pass directly.
-    if (end_feed) // Ignore possible lack of channel in.
-        p->EndFeed();
     processes.insert(std::pair<SimpleValue*,Process*>(Id.Clone(), p));
     return true;
 }

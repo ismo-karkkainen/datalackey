@@ -23,7 +23,7 @@ EOF
 chmod a+x _controller.sh
 
 (
-echo '["1","run","out","JSON","stdout","end-feed","program","./_controller.sh"]'
+echo '["1","run","out","JSON","stdout","program","./_controller.sh"]'
 sleep 1
 echo '[2,"get","label"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
