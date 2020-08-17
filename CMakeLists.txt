@@ -183,7 +183,7 @@ function(add_exe SUBDIR PREFIX)
         set(BASE_NAME ${PREFIX})
     endif()
     add_executable(${FULL} IMPORTED)
-    set_property(TARGET ${FULL} PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/tests/${SUBDIR}/${BASE_NAME})
+    set_property(TARGET ${FULL} PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/test/${SUBDIR}/${BASE_NAME})
 endfunction()
 
 function(new_test TEST_NAME EXE)

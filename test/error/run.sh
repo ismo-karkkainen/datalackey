@@ -39,7 +39,6 @@ echo '["13","run","notify","invalid"]'
 echo '["14","run","notify","data","program","./_script.sh"]'
 echo '["15","run","change-directory","/invld","program","./_script.sh"]'
 echo '["16","run","output","data","label","output","data",null,"program","./_script.sh"]'
-echo '["17","run","input","label","data","program","./_script.sh"]'
 echo '["18","run","output","data","label","program","./_script.sh"]'
 echo '["19","run","program","./invld"]'
 echo '["20","run","out","JSON","stdout","out","JSON","stdout"]'
@@ -90,8 +89,6 @@ end
 ["15","done",""]
 ["16","run","error","output","duplicate","data"]
 ["16","done",""]
-["17","run","error","in","missing"]
-["17","done",""]
 ["18","run","error","out","missing"]
 ["18","done",""]
 subset

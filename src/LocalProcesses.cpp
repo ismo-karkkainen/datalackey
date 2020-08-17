@@ -85,8 +85,7 @@ bool LocalProcesses::Terminate(const SimpleValue& Id) {
 
 std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
     Output& Out, const SimpleValue& Id,
-    std::vector<std::shared_ptr<SimpleValue>>& Parameters, Encoder* E,
-    bool FromFeed)
+    std::vector<std::shared_ptr<SimpleValue>>& Parameters, Encoder* E)
 {
     std::unique_ptr<Encoder> enc(E);
     std::vector<std::shared_ptr<ProcessInput>> input_values;
@@ -108,12 +107,8 @@ std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
             assert(false);
         auto result = seen_names.insert(input_values.back()->Name()->String());
         if (!result.second) {
-            if (FromFeed)
-                pm_feed_error_cmd_duplicate.Send(Out, Id, command.c_str(),
-                    input_values.back()->Name()->String().c_str());
-            else
-                pm_run_error_cmd_duplicate.Send(Out, Id, command.c_str(),
-                    input_values.back()->Name()->String().c_str());
+            pm_feed_error_cmd_duplicate.Send(Out, Id, command.c_str(),
+                input_values.back()->Name()->String().c_str());
             return std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>>(false,std::vector<std::shared_ptr<ProcessInput>>());;
         }
     }
@@ -123,12 +118,8 @@ std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>> LocalProcesses::feed(
     for (auto input : input_values)
         if (!input->Data())
             missing.push_back(input->SharedLabel());
-    if (!missing.empty()) {
-        if (FromFeed)
-            pm_feed_error_missing.Send(Out, Id, missing);
-        else
-            pm_run_error_missing.Send(Out, Id, missing);
-    }
+    if (!missing.empty())
+        pm_feed_error_missing.Send(Out, Id, missing);
     return std::pair<bool,std::vector<std::shared_ptr<ProcessInput>>>(
         missing.empty(), input_values);
 }
@@ -161,10 +152,6 @@ bool LocalProcesses::Run(Output& Out, const SimpleValue& Id,
     std::string prefix, postfix;
     std::vector<std::pair<StringValue,std::shared_ptr<SimpleValue>>> name_label;
 
-    // Input for feed command covered by run.
-    std::vector<std::shared_ptr<SimpleValue>> feed_params;
-    feed_params.push_back(std::shared_ptr<SimpleValue>(Id.Clone()));
-
     size_t k = 0;
     while (k < Parameters.size()) {
         std::string command = Parameters[k]->String();
@@ -185,16 +172,6 @@ bool LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         } else if (command == "env-clear") {
             clear_env = true;
             k += 1;
-        } else if (command == "input") {
-            feed_params.push_back(Parameters[k]);
-            feed_params.push_back(Parameters[k + 1]);
-            feed_params.push_back(Parameters[k + 2]);
-            k += 3;
-        } else if (command == "direct") {
-            feed_params.push_back(Parameters[k]);
-            feed_params.push_back(Parameters[k + 1]);
-            feed_params.push_back(Parameters[k + 2]);
-            k += 3;
         } else if (command == "output") {
             // output name label|null
             name_label.push_back(
@@ -282,13 +259,6 @@ bool LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         }
     }
 
-    if (feed_params.size() > 1) {
-        if (input.empty()) {
-            pm_run_error_in_missing.Send(Out, Id);
-            return false;
-        }
-    }
-
     if (outputs.empty() &&
         !(name_label.empty() && prefix.empty() && postfix.empty()))
     {
@@ -337,17 +307,10 @@ bool LocalProcesses::Run(Output& Out, const SimpleValue& Id,
         storage, Id, program_name, program_args, env2value, directory,
         input, outputs, renamer.release());
 
-    // Checks if feed inputs are valid.
-    auto inputs = feed(Out, Id, feed_params, p->EncoderClone(), false);
-
-    if (!inputs.first || !p->Run()) {
-        // Error has been reported.
-        delete p;
-        return true; // The done message is sent by p destructor.
-    }
-    if (!inputs.second.empty())
-        p->Feed(inputs.second); // Valid, pass directly.
-    processes.insert(std::pair<SimpleValue*,Process*>(Id.Clone(), p));
+    if (p->Run())
+        processes.insert(std::pair<SimpleValue*,Process*>(Id.Clone(), p));
+    else // Error has been reported.
+        delete p; // The done message is sent by p destructor.
     return true;
 }
 
@@ -365,8 +328,7 @@ void LocalProcesses::Feed(Output& Out, const SimpleValue& Id,
         pm_feed_error_closed.Send(Out, Id);
         return;
     }
-    auto inputs =
-        feed(Out, Id, Parameters, proc->second->EncoderClone(), true);
+    auto inputs = feed(Out, Id, Parameters, proc->second->EncoderClone());
     if (inputs.first)
         proc->second->Feed(inputs.second);
 }

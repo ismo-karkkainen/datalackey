@@ -32,6 +32,7 @@ protected:
     bool error(Sth2Opt2List& Msg, Output& Out, const SimpleValue& Id,
         const std::vector<std::shared_ptr<SimpleValue>>& Arguments,
         size_t PastLastIndex);
+    std::string angle(const char* const Str) const;
 
     virtual bool validate(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Arguments) = 0;

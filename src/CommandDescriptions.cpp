@@ -189,11 +189,7 @@ std::pair<ValidateResult,size_t> SubAny::Validate(const SimpleValue& Id,
 }
 
 
-std::string FeedDescription::angle(const char* const Str) const {
-    return std::string("<") + Str + ">";
-}
-
-void FeedDescription::report_subcommands(OutputItem* Writer,
+void SubDescription::report_subcommands(OutputItem* Writer,
     const std::string& subcommand, const std::string& subcommands) const
 {
     std::string angled;
@@ -222,7 +218,7 @@ void FeedDescription::report_subcommands(OutputItem* Writer,
 }
 
 FeedDescription::FeedDescription(const char* const Name)
-    : CommandDescription(Name)
+    : SubDescription(Name)
 {
     SubCmdTuple* group = new SubCmdTuple("input");
     group->Add(new SubString("source-label"));
@@ -286,7 +282,7 @@ bool FeedDescription::validate(Output& Out, const SimpleValue& Id,
 
 
 RunDescription::RunDescription(const char* const Name)
-    : FeedDescription(Name)
+    : SubDescription(Name)
 {
     SubCmdTuple* group = new SubCmdTuple("env");
     group->Add(new SubString("variable-name"));

@@ -32,7 +32,8 @@ chmod a+x _script.sh
 
 (
 echo '{"label":123}'
-echo '["1","run","in","JSON","stdin","out","JSON","stdout","input","label","foo","output-prefix","fed-","program","./_script.sh"]'
+echo '["1","run","in","JSON","stdin","out","JSON","stdout","output-prefix","fed-","program","./_script.sh"]'
+echo '[null,"feed","1","input","label","foo"]'
 echo '[null,"end-feed","1"]'
 ) | $DL -m -i stdin JSON -o stdout JSON |
 replace-pid > $OUT

@@ -138,14 +138,20 @@ public:
 };
 
 
-
-class FeedDescription : public CommandDescription {
+// Commonalities for feed and run descriptions.
+class SubDescription : public CommandDescription {
 protected:
     std::vector<std::unique_ptr<SubCommand>> subs;
 
-    std::string angle(const char* const Str) const;
     void report_subcommands(OutputItem* Writer,
         const std::string& subcommand, const std::string& subcommands) const;
+
+public:
+    SubDescription(const char* const Name) : CommandDescription(Name) { }
+};
+
+class FeedDescription : public SubDescription {
+protected:
     bool validate(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Arguments);
 
@@ -155,7 +161,7 @@ public:
 };
 
 
-class RunDescription : public FeedDescription {
+class RunDescription : public SubDescription {
 protected:
     bool validate(Output& Out, const SimpleValue& Id,
         std::vector<std::shared_ptr<SimpleValue>>& Arguments);

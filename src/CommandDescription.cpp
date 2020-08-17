@@ -54,6 +54,10 @@ bool CommandDescription::error(Sth2Opt2List& Msg,
     return false;
 }
 
+std::string CommandDescription::angle(const char* const Str) const {
+    return std::string("<") + Str + ">";
+}
+
 CommandDescription::CommandDescription(const char* const Name)
     : name(Name)
 {

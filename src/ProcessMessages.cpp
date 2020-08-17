@@ -109,7 +109,6 @@ void RunErrorSthArg2::Send(Output& Out, const SimpleValue& Id,
 
 Sth2Opt2List pm_end_feed_missing("end-feed", "missing");
 Sth2Opt2List pm_end_feed_not_open("end-feed", "not-open");
-Sth2Opt2List pm_run_error_missing("run", "error", "missing");
 Sth2Opt2List pm_feed_error_missing("feed", "error", "missing");
 
 NullNtfSthIdInt pm_process_started("process", "started");
@@ -133,7 +132,6 @@ Sth2Opt3 pm_run_error_exception("run", "error", "exception");
 Sth2Opt3 pm_run_error_identifier_in_use("run", "error", "identifier", "in-use");
 Sth2Opt3 pm_run_error_in_multiple("run", "error", "in", "multiple");
 Sth2Opt3 pm_run_error_notify_no_input("run", "error", "notify", "no-input");
-Sth2Opt3 pm_run_error_in_missing("run", "error", "in", "missing");
 Sth2Opt3 pm_run_error_out_missing("run", "error", "out", "missing");
 Sth2Opt3 pm_feed_error_not_found("feed", "error", "not-found");
 Sth2Opt3 pm_feed_error_closed("feed", "error", "closed");
@@ -141,7 +139,6 @@ Sth2Opt3 pm_feed_error_closed("feed", "error", "closed");
 CmdErrorArgArgumentSth pm_run_error_cmd_argument_unknown("run", "unknown");
 CmdErrorArgArgumentSth pm_feed_error_cmd_argument_unknown("feed", "unknown");
 
-CmdErrorArgDuplicateArg pm_run_error_cmd_duplicate("run");
 CmdErrorArgDuplicateArg pm_feed_error_cmd_duplicate("feed");
 
 RunErrorSth2OptArg pm_run_error_env_invalid("env", "argument", "invalid");

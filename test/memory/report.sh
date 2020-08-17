@@ -45,17 +45,14 @@ cat > $EXP <<EOF
 ["id","rename","missing","..."]
 ["id","run","continued"]
 ["id","run","error","?","argument","unknown"]
-["id","run","error","?","duplicate","?"]
 ["id","run","error","change-directory","?","?"]
 ["id","run","error","env","argument","duplicate","?"]
 ["id","run","error","env","argument","invalid","?"]
 ["id","run","error","exception"]
 ["id","run","error","format"]
 ["id","run","error","identifier","in-use"]
-["id","run","error","in","missing"]
 ["id","run","error","in","multiple"]
 ["id","run","error","input","failed"]
-["id","run","error","missing","..."]
 ["id","run","error","no-memory"]
 ["id","run","error","no-processes"]
 ["id","run","error","no-thread"]
@@ -87,7 +84,7 @@ cat > $EXP <<EOF
 EOF
 else
 cat > $EXP <<EOF
-{"delete":["id","delete","string,..."],"end-feed":["id","end-feed","string|integer|null,..."],"feed":{"<direct>":["direct","value-string|integer|null","target-name"],"<feed-subcommand>":["<input>","<direct>"],"<feed-subcommands>":[["<feed-subcommand>","<feed-subcommands>"],["<feed-subcommand>"]],"<feed>":["id","feed","string-id","<feed-subcommands>"],"<input>":["input","source-label","target-name"]},"get":["id","get","string,..."],"no-op":["id","no-op"],"rename":["id","rename","string,string,..."],"run":{"<change-directory>":["change-directory","directory"],"<direct>":["direct","value-string|integer|null","target-name"],"<env-clear>":["env-clear"],"<env>":["env","variable-name","value-string|integer|null"],"<in>":["in","JSON","stdin"],"<input>":["input","source-label","target-name"],"<notify>":["notify","data|process"],"<out>":["out","JSON|bytes","stdout|stderr"],"<output-postfix>":["output-postfix","unmapped-result-name-postfix"],"<output-prefix>":["output-prefix","prefix-for-unmapped-result-name"],"<output>":["output","result-name","label|null"],"<program>":["program","executable"],"<run-subcommand>":["<input>","<direct>","<env>","<env-clear>","<output>","<output-prefix>","<output-postfix>","<in>","<out>","<notify>","<change-directory>","<program>"],"<run-subcommands>":[["<run-subcommand>","<run-subcommands>"],["<run-subcommand>"]],"<run>":["id","run","<run-subcommands>"]},"storage-info":["id","storage-info"],"terminate":["id","terminate","string|integer|null,..."],"version":["id","version"]}
+{"delete":["id","delete","string,..."],"end-feed":["id","end-feed","string|integer|null,..."],"feed":{"<direct>":["direct","value-string|integer|null","target-name"],"<feed-subcommand>":["<input>","<direct>"],"<feed-subcommands>":[["<feed-subcommand>","<feed-subcommands>"],["<feed-subcommand>"]],"<feed>":["id","feed","string-id","<feed-subcommands>"],"<input>":["input","source-label","target-name"]},"get":["id","get","string,..."],"no-op":["id","no-op"],"rename":["id","rename","string,string,..."],"run":{"<change-directory>":["change-directory","directory"],"<env-clear>":["env-clear"],"<env>":["env","variable-name","value-string|integer|null"],"<in>":["in","JSON","stdin"],"<notify>":["notify","data|process"],"<out>":["out","JSON|bytes","stdout|stderr"],"<output-postfix>":["output-postfix","unmapped-result-name-postfix"],"<output-prefix>":["output-prefix","prefix-for-unmapped-result-name"],"<output>":["output","result-name","label|null"],"<program>":["program","executable"],"<run-subcommand>":["<env>","<env-clear>","<output>","<output-prefix>","<output-postfix>","<in>","<out>","<notify>","<change-directory>","<program>"],"<run-subcommands>":[["<run-subcommand>","<run-subcommands>"],["<run-subcommand>"]],"<run>":["id","run","<run-subcommands>"]},"storage-info":["id","storage-info"],"terminate":["id","terminate","string|integer|null,..."],"version":["id","version"]}
 EOF
 fi
 

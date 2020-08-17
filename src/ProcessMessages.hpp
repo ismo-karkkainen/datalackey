@@ -17,7 +17,6 @@
 
 extern Sth2Opt2List pm_end_feed_missing;
 extern Sth2Opt2List pm_end_feed_not_open;
-extern Sth2Opt2List pm_run_error_missing;
 extern Sth2Opt2List pm_feed_error_missing;
 
 class NullNtfSthIdInt : public Message {
@@ -66,7 +65,6 @@ extern Sth2Opt3 pm_run_error_exception;
 extern Sth2Opt3 pm_run_error_identifier_in_use;
 extern Sth2Opt3 pm_run_error_in_multiple;
 extern Sth2Opt3 pm_run_error_notify_no_input;
-extern Sth2Opt3 pm_run_error_in_missing;
 extern Sth2Opt3 pm_run_error_out_missing;
 extern Sth2Opt3 pm_feed_error_not_found;
 extern Sth2Opt3 pm_feed_error_closed;
@@ -99,7 +97,6 @@ public:
         const char* const Arg, const char* const Arg2) const;
 };
 
-extern CmdErrorArgDuplicateArg pm_run_error_cmd_duplicate;
 extern CmdErrorArgDuplicateArg pm_feed_error_cmd_duplicate;
 
 class RunErrorSth2OptArg : public Message {
