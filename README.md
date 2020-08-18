@@ -49,8 +49,8 @@ You need cmake and compiler for C++14. Currently clang on macOS, and clang
 and gcc on Ubuntu have been tried. Assuming a build directory parallel to
 main datalackey directory, you can use:
 
-    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=DEBUG ../datalackey
-    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../datalackey
+    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../datalackey
+    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ../datalackey
     cmake -G Xcode
 
 To specify the compiler, set for example:

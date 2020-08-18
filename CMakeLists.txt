@@ -2,20 +2,17 @@ cmake_minimum_required(VERSION 3.10)
 project(datalackey CXX)
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(GenericOptions -Wall)
-    set(ReleaseOptions -O2)
-    set(AlwaysSmallOptions -Os)
+    set(CMAKE_CXX_FLAGS_RELEASE "-Os -DNDEBUG -Wall")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Os -g -DNDEBUG -Wall")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(GenericOptions -Wall)
-    set(ReleaseOptions -O2)
-    set(AlwaysSmallOptions -Os)
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -Wall")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG -Wall")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
 #elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 #  # using Intel C++
 #elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 #  # using Visual Studio C++
-else()
-    set(GenericOptions "")
-    set(ReleaseOptions "")
 endif()
 
 find_package(nlohmann_json 3.4.0 REQUIRED)
@@ -107,67 +104,12 @@ list(APPEND Sources src/datalackey.cpp)
 
 add_executable( datalackey ${Sources} )
 target_compile_features(datalackey PRIVATE cxx_std_14)
-target_include_directories(datalackey PRIVATE src )
-target_link_libraries(datalackey PRIVATE nlohmann_json::nlohmann_json )
-
-target_compile_options(datalackey PRIVATE ${GenericOptions} )
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
-    target_compile_options(datalackey PRIVATE ${ReleaseOptions} )
-endif()
+target_include_directories(datalackey PRIVATE src)
+target_link_libraries(datalackey PRIVATE nlohmann_json::nlohmann_json)
 
 if (UNIX AND NOT APPLE)
     target_link_libraries(datalackey PRIVATE Threads::Threads)
 endif()
-
-list(APPEND AlwaysSmall ${Sources})
-list(REMOVE_ITEM AlwaysSmall src/RawData.cpp)
-#list(REMOVE_ITEM AlwaysSmall src/FileOwner.cpp) # File I/O
-list(REMOVE_ITEM AlwaysSmall src/DataGroup.cpp)
-#list(REMOVE_ITEM AlwaysSmall src/Storage.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/StorageDataSink.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/Literal.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/ValueReference.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/Encoder.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/NullEncoder.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/OutputChannel.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/NullOutput.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/OutputItem.cpp) # Base
-list(REMOVE_ITEM AlwaysSmall src/Output.cpp)
-#list(REMOVE_ITEM AlwaysSmall src/Messages.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/FileDescriptor.cpp) # File descriptor.
-#list(REMOVE_ITEM AlwaysSmall src/FileDescriptorOutput.cpp) # File I/O
-#list(REMOVE_ITEM AlwaysSmall src/MessageHandler.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/StorageDataSink.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/InputChannel.cpp) # Base
-list(REMOVE_ITEM AlwaysSmall src/InputScanner.cpp)
-#list(REMOVE_ITEM AlwaysSmall src/InputScannerRawMessage.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/InputScannerDiscard.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/FileDescriptorInput.cpp) # File I/O
-#list(REMOVE_ITEM AlwaysSmall src/StringValueMapper.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/StringValueMapperSimple.cpp) # Simple
-list(REMOVE_ITEM AlwaysSmall src/JSONEncoder.cpp)
-list(REMOVE_ITEM AlwaysSmall src/StorageDataSinkJSON.cpp)
-list(REMOVE_ITEM AlwaysSmall src/InputScannerJSON.cpp)
-list(REMOVE_ITEM AlwaysSmall src/MessageRawJSON.cpp)
-#list(REMOVE_ITEM AlwaysSmall src/Command.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/CommandHandler.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/ListCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/StorageInfoCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/GetCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/DeleteCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/RenameCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/VersionCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/NoOperationCommand.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/ProcessInput.cpp) # Simple
-#list(REMOVE_ITEM AlwaysSmall src/Process.cpp) # Base
-#list(REMOVE_ITEM AlwaysSmall src/Processes.cpp) # Base
-list(REMOVE_ITEM AlwaysSmall src/LocalProcess.cpp)
-list(REMOVE_ITEM AlwaysSmall src/CommandHandlerJSON.cpp)
-#list(REMOVE_ITEM AlwaysSmall src/Factories.cpp) # Simple
-list(REMOVE_ITEM AlwaysSmall src/LocalProcesses.cpp)
-#message(${AlwaysSmall})
-
-#set_source_files_properties(${AlwaysSmall} PROPERTIES COMPILE_FLAGS ${AlwaysSmallOptions})
 
 install(TARGETS datalackey RUNTIME DESTINATION libexec)
 

@@ -19,7 +19,8 @@ void Storage::NotifyDelete(const std::string& Label, long long int Serial,
 {
     if (Out == nullptr)
         DataNotifiedOutputs.Notify([&Label, Serial](Output* Out) {
-            ntf_data_deleted.Send(*Out, Label.c_str(), Serial); });
+            ntf_data_deleted.Send(*Out, Label.c_str(), Serial);
+        });
     else
         ntf_data_deleted.Send(*Out, Label.c_str(), Serial);
 }

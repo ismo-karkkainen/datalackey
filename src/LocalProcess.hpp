@@ -53,7 +53,7 @@ private:
     OutputChannel* child_input;
     std::shared_ptr<FileDescriptor> stdin_child[2];
     std::shared_ptr<FileDescriptor> stdouterr_child[2][2];
-    Output* child_feed;
+    Output* to_child;
     OutputItem* child_writer;
     mutable std::mutex child_start_mutex;
     std::unique_lock<std::mutex> child_start_lock;

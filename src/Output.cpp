@@ -194,11 +194,12 @@ void Output::end(bool FromOutside) {
     if (eof)
         return;
     eof = true;
-    if (!FromOutside)
-        return;
-    std::unique_lock<std::mutex> lock(input_sets_mutex);
-    orphan_buffers();
-    lock.unlock();
+    NoGlobalMessages();
+    if (!FromOutside) {
+        std::unique_lock<std::mutex> lock(input_sets_mutex);
+        orphan_buffers();
+        lock.unlock();
+    }
     output_added.notify_one();
 }
 

@@ -132,7 +132,7 @@ void LocalProcess::real_runner() {
         stdin_child[1].reset(new FileDescriptor());
         child_input = new NullOutput();
     }
-    child_feed = new Output(*child_input_enc, *child_input,
+    to_child = new Output(*child_input_enc, *child_input,
         notify_data, notify_process);
     // Create output handling objects for each output.
     child_output.reserve(outputs_info.size() < 2 ? 2 : outputs_info.size());
@@ -150,11 +150,11 @@ void LocalProcess::real_runner() {
         }
         // Output response of raw data goes to output of launcher.
         MessageHandler* mh = MakeMessageHandler(settings[0].c_str(),
-            (settings[0] == "bytes") ? out : *child_feed, storage, *owner, id);
+            (settings[0] == "bytes") ? out : *to_child, storage, *owner, id);
         StorageDataSink* sds = MakeStorageDataSink(
-            settings[0].c_str(), storage, renamer, *child_feed, id);
+            settings[0].c_str(), storage, renamer, *to_child, id);
         InputScanner* is = MakeInputScanner(
-            settings[0].c_str(), *ic, *mh, *sds, *child_feed, id);
+            settings[0].c_str(), *ic, *mh, *sds, *to_child, id);
         child_output.push_back(std::shared_ptr<ChildOutput>(
             new ChildOutput(ic, mh, sds, is)));
     }
@@ -171,7 +171,6 @@ void LocalProcess::real_runner() {
         child_output.push_back(std::shared_ptr<ChildOutput>(
             new ChildOutput(ic, mh, sds, is)));
     }
-    child_start_lock.unlock();
     // Take program_name, args, and env and turn to what posix_spawn needs.
     const char** argv_ptrs = new const char*[2 + args.size()];
     argv_ptrs[0] = program_name.c_str(); // Should be just name, no path.
@@ -204,6 +203,7 @@ void LocalProcess::real_runner() {
         posix_spawn_file_actions_addchdir_np(&actions, directory.c_str());
     int err = posix_spawn(&pid, program_name.c_str(), &actions, nullptr,
         (char *const *)argv_ptrs, (char *const *)env_ptrs);
+    child_start_lock.unlock();
     posix_spawn_file_actions_destroy(&actions);
     delete[] argv_ptrs;
     delete[] env_ptrs;
@@ -232,6 +232,7 @@ void LocalProcess::real_runner() {
         case EBADARCH: // No architecture for current system.
 #endif
         default:
+            std::cerr << "Unexpected posix_spawn err: " << err << std::endl;
             assert(false);
             break;
         }
@@ -247,24 +248,28 @@ void LocalProcess::real_runner() {
     if (notify_data) {
         std::vector<std::pair<std::string, long long int>> ls = storage.List();
         for (auto& iter : ls)
-            storage.NotifyStore(iter.first, iter.second, child_feed);
+            storage.NotifyStore(iter.first, iter.second, to_child);
     }
     if (notify_process) {
         std::vector<std::pair<std::unique_ptr<SimpleValue>,pid_t>> ip =
             owner->List();
         for (auto& iter : ip)
-            owner->NotifyStart(*iter.first, iter.second, child_feed);
+            owner->NotifyStart(*iter.first, iter.second, to_child);
     }
     owner->NotifyStart(*id, pid);
+    // Keeping track of child state and inputs could be moved to LocalProcesses
+    // and that can deal with it in a single thread, or multiple if several
+    // processes are running simultaneously.
     ChildState child_state = Running;
-    bool scanning = !child_output.empty();
-    bool feed_open = !child_feed->Failed();
+    bool scanning = true;
+    bool feed_open = true;
     while (child_state != None || scanning) {
         ChildState prev = child_state;
         child_state = get_child_state(child_state);
         if (prev != child_state && child_state == None)
-            child_feed->NoGlobalMessages(); // Child not reading anymore.
+            to_child->NoGlobalMessages(); // Child not reading anymore.
         // Scan for child output.
+        bool had_data = false;
         scanning = false;
         for (auto& output : child_output) {
             if (!output)
@@ -273,16 +278,17 @@ void LocalProcess::real_runner() {
                 output = nullptr;
                 continue;
             }
-            if (output->scanner->Scan() > 0)
-                scanning = true;
+            scanning = true;
+            if (output->scanner->Scan())
+                had_data = true;
         }
-        if (feed_open && child_feed->Closed()) {
-            if (child_feed->Failed())
+        if (feed_open && to_child->Closed()) {
+            if (to_child->Failed())
                 pm_run_error_input_failed.Send(out, *id);
             pm_run_input_closed.Send(out, *id);
             feed_open = false;
         }
-        if (!scanning)
+        if (!had_data)
             Nap(20000000); // 20 ms.
     }
     owner->NotifyEnd(*id, pid);
@@ -291,11 +297,11 @@ void LocalProcess::real_runner() {
 void LocalProcess::runner() {
     running = true;
     real_runner();
-    child_feed->NoGlobalMessages();
+    to_child->NoGlobalMessages();
     running = false;
     child_output.clear();
     delete child_writer;
-    delete child_feed;
+    delete to_child;
     delete child_input;
     for (size_t k = 0; k < 2; ++k) {
         stdin_child[k]->Close();
@@ -320,7 +326,7 @@ LocalProcess::LocalProcess(Processes* Owner,
     const std::vector<std::string>& InputInfo,
     const std::vector<std::vector<std::string>>& OutputsInfo,
     StringValueMapper* Renamer)
-    : child_input_enc(nullptr), child_input(nullptr), child_feed(nullptr),
+    : child_input_enc(nullptr), child_input(nullptr), to_child(nullptr),
     child_writer(nullptr), child_start_lock(child_start_mutex, std::defer_lock),
     owner(Owner), out(StatusOut), notify_data(NotifyData),
     notify_process(NotifyProcess), storage(S),
@@ -381,19 +387,19 @@ bool LocalProcess::Run() {
 
 void LocalProcess::Feed(std::vector<std::shared_ptr<ProcessInput>>& Inputs) {
     std::lock_guard<std::mutex> lock(child_start_mutex);
-    if (child_feed != nullptr)
-        child_feed->Feed(Inputs);
+    if (to_child != nullptr)
+        to_child->Feed(Inputs);
 }
 
 void LocalProcess::EndFeed() {
     std::lock_guard<std::mutex> lock(child_start_mutex);
-    if (child_feed != nullptr)
-        child_feed->End();
+    if (to_child != nullptr)
+        to_child->End();
 }
 
 bool LocalProcess::Closed() {
     std::lock_guard<std::mutex> lock(child_start_mutex);
-    return child_feed == nullptr || child_feed->Closed();
+    return to_child == nullptr || to_child->Closed();
 }
 
 bool LocalProcess::Terminate() {
