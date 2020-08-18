@@ -7,6 +7,6 @@ cmake .
 make
 sudo make install
 cd ..
-cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=DEBUG $1
+cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release $1
 make -j 3
 make test
