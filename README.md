@@ -8,7 +8,7 @@ and each value is the data itself.
 You are not supposed to run datalackey manually, instead it is meant to be
 used by other programs. Hence default install location is /usr/local/libexec.
 
-See datalackeyshell repository located where this repository is, for some
+See datalackeyshell repository, parallel to this repository, for some
 simple tools that use datalackey. Including a pair of ruby scripts that
 construct a JSON object out of file contents and split JSON object into
 files. For simple cases they are fully adequate for managing the data.
@@ -90,8 +90,9 @@ enough for current purposes in the current context.
 
 # Running
 
-You are not supposed to run datalackey manually. Look for datalackeyshell
-repository in the same place where you found this repository.
+In case you missed it, you are not supposed to run datalackey manually.
+Look for datalackeyshell repository in the same place where you found this
+repository.
 
 For the hard-core, passing an array is considered a command. A JSON object
 is considered to contain data to store. First see the output of
