@@ -56,8 +56,8 @@ json library. Otherwise standard packages should be ok.
 
 # Building
 
-You need cmake and compiler for C++14. Currently clang on macOS, and clang
-and gcc on Ubuntu have been tried. Assuming a build directory parallel to
+You need cmake and compiler for C++14. Currently clang and gcc have been
+tried and they work. Assuming a build directory parallel to
 main datalackey directory, you can use:
 
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../datalackey
@@ -74,6 +74,8 @@ To build, test, and install, assuming Unix Makefiles:
     make -j 10
     make test
     sudo make install
+
+Test build logs can be found in [ismo-kärkkäinen.fi/datalackey](https://xn--ismo-krkkinen-gfbd.fi/datalackey/index.html).
 
 # Notes
 
@@ -126,6 +128,6 @@ datalackeyshell.
 
 # License
 
-Copyright (C) 2019, 2020 Ismo Kärkkäinen
+Copyright © 2019, 2020 Ismo Kärkkäinen
 
 Licensed under Universal Permissive License. See License.txt.
