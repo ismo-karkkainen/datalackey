@@ -8,7 +8,7 @@ and each value is the data itself.
 You are not supposed to run datalackey manually, instead it is meant to be
 used by other programs. Hence default install location is /usr/local/libexec.
 
-See datalackeyshell repository, parallel to this repository, for some
+See datalackeytools repository, parallel to this repository, for some
 simple tools that use datalackey. Including a pair of ruby scripts that
 construct a JSON object out of file contents and split JSON object into
 files. For simple cases they are fully adequate for managing the data.
@@ -93,7 +93,7 @@ enough for current purposes in the current context.
 # Running
 
 In case you missed it, you are not supposed to run datalackey manually.
-Look for datalackeyshell repository in the same place where you found this
+Look for datalackeytools repository in the same place where you found this
 repository.
 
 For the hard-core, passing an array is considered a command. A JSON object
@@ -114,7 +114,7 @@ The commands you can use are output via:
 
 Either figure out the syntax (at the moment lacks things such as count
 information for parts that can only be input once) or see note about
-datalackeyshell above.
+datalackeytools above.
 
 To pass data in, just pass a JSON object and it will be split up. Each JSON
 object is treated as atomic. Either all items are stored or none are. Hence
@@ -124,7 +124,7 @@ so that proper JSON can be set after the zero byte. White-space outside
 strings is ignored, and removed for stored data.
 
 To figure out actual usage, I suggest you look at the test scripts. Also,
-datalackeyshell.
+datalackeytools.
 
 # License
 
