@@ -11,6 +11,7 @@
 #define OPTIONS_HPP
 
 #include <iostream>
+#include <cstddef>
 
 
 /* These functions are used to pass information about the allowed contents of

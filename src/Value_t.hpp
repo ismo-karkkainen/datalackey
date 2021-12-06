@@ -13,6 +13,8 @@
 #include "Output.hpp"
 #include <sstream>
 #include <typeinfo>
+#include <cstddef>
+
 
 template<typename T>
 class ValueRef : public ValueReference {

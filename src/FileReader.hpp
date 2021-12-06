@@ -15,6 +15,7 @@
 #include "FileDescriptor.hpp"
 #include <string>
 #include <memory>
+#include <cstddef>
 
 
 class FileReader : public DataReader {

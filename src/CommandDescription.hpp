@@ -13,6 +13,7 @@
 
 #include "OutputItem.hpp"
 #include "Messages.hpp"
+#include <cstddef>
 
 
 class CommandDescription {

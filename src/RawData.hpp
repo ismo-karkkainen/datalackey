@@ -11,6 +11,7 @@
 #define RawData_hpp
 
 #include <vector>
+#include <cstddef>
 
 
 class RawData {

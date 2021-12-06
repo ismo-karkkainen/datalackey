@@ -12,6 +12,7 @@
 
 #include "RawData.hpp"
 #include <vector>
+#include <cstddef>
 
 
 // Base class for output channels.

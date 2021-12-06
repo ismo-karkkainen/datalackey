@@ -13,6 +13,7 @@
 #include "OutputChannel.hpp"
 #include "FileDescriptor.hpp"
 #include <memory>
+#include <cstddef>
 
 
 class FileDescriptorOutput : public OutputChannel {

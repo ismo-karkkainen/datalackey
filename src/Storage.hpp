@@ -17,6 +17,7 @@
 #include <memory>
 #include <vector>
 #include <utility>
+#include <cstddef>
 
 
 // Base class for Storage classes.

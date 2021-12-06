@@ -11,6 +11,7 @@
 #define ValueReference_hpp
 
 #include <string>
+#include <cstddef>
 
 
 class ValueReference {

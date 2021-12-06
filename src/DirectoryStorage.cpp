@@ -315,7 +315,7 @@ std::vector<std::tuple<StringValue, std::string, size_t, long long int>>
     for (auto& iter : label2data) {
         std::lock_guard<std::mutex> value_lock(iter.second->Mutex());
         const auto avail = iter.second->Values();
-        for (const auto format_data : avail) {
+        for (const auto& format_data : avail) {
             results.push_back(std::make_tuple(
                 iter.first, format_data.first, format_data.second->Size(),
                 iter.second->Serial()));

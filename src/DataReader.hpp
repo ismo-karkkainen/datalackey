@@ -12,6 +12,7 @@
 
 #include "RawData.hpp"
 #include <memory>
+#include <cstddef>
 
 
 // Base class for data owning classes.

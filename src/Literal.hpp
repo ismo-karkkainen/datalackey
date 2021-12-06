@@ -11,6 +11,7 @@
 #define Literal_hpp
 
 #include "ValueReference.hpp"
+#include <cstddef>
 
 
 class Literal : public ValueReference {
