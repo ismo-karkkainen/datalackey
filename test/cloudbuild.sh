@@ -29,7 +29,21 @@ do
             make -j 2
             make test
         )
-        echo "Build and test exit code: $?"
-    ) 2>&1 | tee -a "$R/_logs/$D-$X.txt"
+        E=$?
+        echo "Build and test exit code: $E"
+        if [ "$E" != "0" ]; then
+            cd build
+            for E in *_expected.txt
+            do
+                B="$(basename $E _expected.txt)_out.txt"
+                test -f "$B" || continue
+                for F in $E $B
+                do
+                    echo $F
+                    cat $F
+                done
+            done
+        fi
+    ) 2>&1 | tee -a "$R/_logs/$D-$X.log"
     rm -rf build
 done

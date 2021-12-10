@@ -43,8 +43,8 @@ cat > $EXP <<EOF
 [null,"data","stored","fed-in1",2]
 [3,"done",""]
 [null,"data","stored","fed-in2",3]
-[4,"done",""]
 set
+[4,"done",""]
 ["1","run","input","closed"]
 ["1","run","exit",0]
 [null,"process","ended","1","pid"]

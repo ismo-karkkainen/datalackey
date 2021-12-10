@@ -31,8 +31,10 @@ replace-pid > $OUT
 cat > $EXP <<EOF
 ["1","run","running","pid"]
 [null,"process","started","1","pid"]
+set
 ["1","run","input","closed"]
 [null,"data","stored","mapped",1]
+end
 ["1","run","exit",0]
 [null,"process","ended","1","pid"]
 ["1","run","finished"]

@@ -20,7 +20,7 @@ echo '["1","run","out","JSON","stdout","program","./_script.sh"]'
 replace-pid > $OUT
 
 cat > $EXP <<EOF
-["1","run","error","program","./_script.sh"]
+["1","run","error","program","./_script.sh"...
 ["1","done",""]
 EOF
 

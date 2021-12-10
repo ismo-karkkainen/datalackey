@@ -7,6 +7,7 @@ if ARGV.length != 2
   puts(%q(Usage: compare-output output target
 Allowed target contents:
   line-used-as-is
+  line-ending-with-... to match only the part before ...
   optional:line (marks line as optional)
   set (begins a set of lines in arbitrary order, no nested sets)
   subset (like set but all optional and at least one required)
@@ -23,6 +24,7 @@ class Target
     @optional = []
     @subset = false
     @max_optional_length = 0
+    @prefix = false
   end
 
   def subset
@@ -30,6 +32,7 @@ class Target
   end
 
   def add(target, optional)
+    @prefix = true if target.end_with? '...'
     if optional || @subset
       @optional.push(target)
       @max_optional_length = @optional.length
@@ -49,7 +52,19 @@ class Target
       lst.delete_at idx
       return true
     end
-    return false
+    return false unless @prefix
+    [ @compulsory, @optional ].each do |lst|
+      (0...lst.size).each do |idx|
+        exp = lst[idx]
+        next unless exp.end_with? '...'
+        p = exp[0...-3]
+        if output.start_with? p
+          lst.delete_at idx
+          return true
+        end
+      end
+    end
+    false
   end
 
   def remains

@@ -183,19 +183,38 @@ void LocalProcess::real_runner() {
     env_ptrs[env.size()] = nullptr;
     // Use file actions to close pipes in child.
     posix_spawn_file_actions_t actions;
+#if defined(__APPLE__)
+    /*
+    If program feeding commands to datalackey closes, executable is release
+    build, OS is macOS 11.6 (at least that), then there is a failure in
+    posix_spawn_file_actions_addclose for file descriptor 0. Hence the
+    conditional close. The case is unlikely to happen in real use but this
+    will enable the child to start on the retry. Otherwise the code run
+    is the same as earlier.
+
+    It might be closing 0 unless stdin_child[0] is closed is a bug and only
+    manifests on macOS but I'm not spending more time on a fringe case.
+    Fix limited to the platform this has manifested on.
+    */
+    bool close0 = true;
+retry:
+#endif
     posix_spawn_file_actions_init(&actions);
-    if (stdin_child[1]->Descriptor() != -1)
+    if (!stdin_child[1]->Closed())
         posix_spawn_file_actions_addclose(&actions, stdin_child[1]->Descriptor());
     posix_spawn_file_actions_addclose(&actions, stdouterr_child[0][0]->Descriptor());
     posix_spawn_file_actions_addclose(&actions, stdouterr_child[1][0]->Descriptor());
+#if defined(__APPLE__)
+    if (close0)
+#endif
     posix_spawn_file_actions_addclose(&actions, 0);
     posix_spawn_file_actions_addclose(&actions, 1);
     posix_spawn_file_actions_addclose(&actions, 2);
-    if (stdin_child[0]->Descriptor() != -1)
+    if (!stdin_child[0]->Closed())
         posix_spawn_file_actions_adddup2(&actions, stdin_child[0]->Descriptor(), 0);
     posix_spawn_file_actions_adddup2(&actions, stdouterr_child[0][1]->Descriptor(), 1);
     posix_spawn_file_actions_adddup2(&actions, stdouterr_child[1][1]->Descriptor(), 2);
-    if (stdin_child[0]->Descriptor() != -1)
+    if (!stdin_child[0]->Closed())
         posix_spawn_file_actions_addclose(&actions, stdin_child[0]->Descriptor());
     posix_spawn_file_actions_addclose(&actions, stdouterr_child[0][1]->Descriptor());
     posix_spawn_file_actions_addclose(&actions, stdouterr_child[1][1]->Descriptor());
@@ -203,8 +222,14 @@ void LocalProcess::real_runner() {
         posix_spawn_file_actions_addchdir_np(&actions, directory.c_str());
     int err = posix_spawn(&pid, program_name.c_str(), &actions, nullptr,
         (char *const *)argv_ptrs, (char *const *)env_ptrs);
-    child_start_lock.unlock();
     posix_spawn_file_actions_destroy(&actions);
+#if defined(__APPLE__)
+    if (err == EBADF && close0) { // Oddball case described above happened.
+        close0 = false;
+        goto retry;
+    }
+#endif
+    child_start_lock.unlock();
     delete[] argv_ptrs;
     delete[] env_ptrs;
     if (err) {

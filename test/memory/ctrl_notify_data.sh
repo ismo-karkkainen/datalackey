@@ -53,9 +53,11 @@ EOF
 
 cat > $CTEXP <<EOF
 ["a","run","running","pid"]
+set
 ["a","run","input","closed"]
 ["a","run","exit",0]
 [null,"data","stored","label",1]
+end
 ["a","run","finished"]
 ["a","done",""]
 EOF
