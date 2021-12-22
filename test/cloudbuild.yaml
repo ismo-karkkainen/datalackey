@@ -4,7 +4,7 @@ steps:
   args:
   - "-c"
   - "mkdir _logs && cp README.md _logs && cd _logs && git log -1 --format='%H' > commit.txt && git log -1 --format='%H %cI %s' > info.txt"
-- name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+- name: "gcr.io/google.com/cloudsdktool/cloud-sdk" # Keep just before Fedora.
   entrypoint: "git"
   args: [ "clone", "--branch", "master", "--depth", "1", "https://github.com/nlohmann/json.git" ]
 - name: "$_REPO/fedora:latest"

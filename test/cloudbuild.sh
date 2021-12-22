@@ -4,17 +4,29 @@ set -u
 export D=$1
 R=$2
 
-cd $R
-rm -rf json_build
+(
+case "$D" in
+Fedora)
+    set -e
+    cd $R/json
+    cmake .
+    make -j 2 install
+    cd ..
+    rm -rf json
+    set +e
+    ;;
+openSUSE*)
+    zypper refresh
+    zypper install -y nlohmann_json-devel
+    ;;
+Debian|Ubuntu)
+    apt-get update
+    apt-get install -y nlohmann-json3-dev
+    ;;
+esac
+) >/dev/null
 
-set -e
-mkdir json_build
-cd json_build
-cmake ../json >/dev/null
-make -j 2 install
-cd ..
-rm -rf json_build
-set +e
+cd $R
 
 for X in clang++ g++
 do

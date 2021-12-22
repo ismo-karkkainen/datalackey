@@ -48,8 +48,8 @@ On macOS with Homebrew (https://docs.brew.sh):
     brew install nlohmann-json
     brew install cmake
 
-On Linux you may need to install git to clone a sufficiently new version of
-json library. Otherwise standard packages should be ok.
+On Linux readily available packages should be ok. Otherwise you may need to
+install git to clone a sufficiently new version of json library.
 
     git clone --depth 1 https://github.com/nlohmann/json
     cd json && cmake . && make && sudo make install
